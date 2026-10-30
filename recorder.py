@@ -1,0 +1,558 @@
+# 競艇・オートレース 締切前オッズ記録ツール（GitHub Actions 用）
+# お金は賭けない。締切前（3分前・1分半前・40秒前・15秒前・5秒前）と締切のオッズ、結果を記録する。
+import os, re, json, gzip, time, math, datetime, subprocess, traceback, threading
+import urllib.request, urllib.parse, http.cookiejar
+from concurrent.futures import ThreadPoolExecutor
+
+JST = datetime.timezone(datetime.timedelta(hours=9))
+ROOT = os.path.dirname(os.path.abspath(__file__))
+CFG = json.load(open(os.path.join(ROOT, 'config.json'), encoding='utf-8'))
+RUN_MIN = float(os.environ.get('RUN_MINUTES', CFG.get('run_minutes', 335)))
+TOPIC = os.environ.get('NTFY_TOPIC', '').strip()
+SN = [200, 95, 42, 17, 7]
+LAB = ['', '3分前', '1分半前', '40秒前・最終判定', '15秒前', '5秒前']
+T0 = time.time()
+LOCK = threading.Lock()
+
+
+def now():
+    return datetime.datetime.now(JST)
+
+
+TODAY = now()
+# 0時〜4時に動いているときは前日の開催として扱う（ミッドナイト対策）
+if TODAY.hour < 4:
+    TODAY = TODAY - datetime.timedelta(days=1)
+HD = TODAY.strftime('%Y%m%d')
+YMD = TODAY.strftime('%Y-%m-%d')
+DDIR = os.path.join(ROOT, 'data', HD)
+os.makedirs(DDIR, exist_ok=True)
+
+
+def log(msg):
+    line = f'[{now():%H:%M:%S}] {msg}'
+    print(line, flush=True)
+    with LOCK:
+        with open(os.path.join(DDIR, 'run_log.txt'), 'a', encoding='utf-8') as f:
+            f.write(line + '\n')
+
+
+def append_csv(name, header, rows):
+    p = os.path.join(DDIR, name)
+    with LOCK:
+        new = not os.path.exists(p)
+        with open(p, 'a', encoding='utf-8') as f:
+            if new:
+                f.write(header + '\n')
+            for r in rows:
+                f.write(','.join('' if v is None else str(v) for v in r) + '\n')
+
+
+def read_csv(name):
+    p = os.path.join(DDIR, name)
+    if not os.path.exists(p):
+        return []
+    with LOCK:
+        lines = open(p, encoding='utf-8').read().splitlines()
+    if not lines:
+        return []
+    h = lines[0].split(',')
+    return [dict(zip(h, l.split(','))) for l in lines[1:] if l]
+
+
+def notify(title, body, high=False):
+    if not TOPIC:
+        return
+    try:
+        rq = urllib.request.Request('https://ntfy.sh/' + TOPIC, data=(title + '\n' + body).encode('utf-8'),
+                                    headers={'Priority': 'high' if high else 'default'})
+        urllib.request.urlopen(rq, timeout=15).read()
+    except Exception as e:
+        log('通知NG ' + repr(e))
+
+
+class Web:
+    def __init__(self):
+        self.cj = http.cookiejar.CookieJar()
+        self.op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cj))
+
+    def req(self, url, headers=None, data=None, timeout=20):
+        h = {'User-Agent': 'Mozilla/5.0', 'Accept-Encoding': 'gzip'}
+        h.update(headers or {})
+        rq = urllib.request.Request(url, data=data, headers=h)
+        try:
+            with self.op.open(rq, timeout=timeout) as r:
+                b = r.read()
+                if r.headers.get('Content-Encoding') == 'gzip':
+                    b = gzip.decompress(b)
+                return r.status, b.decode('utf-8', 'replace')
+        except urllib.error.HTTPError as e:
+            return e.code, ''
+        except Exception:
+            return 0, ''
+
+
+def num(s):
+    try:
+        return float(re.sub(r'[^\d.]', '', s))
+    except Exception:
+        return 0.0
+
+
+def strategy_a(odds, p3, prm):
+    """戦略A：予想締切オッズ = exp(W1*ln(今の単勝)+W2*ln(3連単換算)+C)。予想期待値 = p3*予想締切"""
+    if p3 <= 0 or odds <= 0:
+        return 9999.0, 0.0, 0.0, 0
+    fo = 1.0 / p3
+    pc = math.exp(prm['w1'] * math.log(odds) + prm['w2'] * math.log(fo) + prm['c'])
+    ev = p3 * pc
+    buy = int(ev >= prm['th'] and fo <= prm['fomax'])
+    return fo, pc, ev, buy
+
+
+def git_save(msg):
+    if os.environ.get('NO_GIT'):
+        return
+    with LOCK:
+        try:
+            subprocess.run(['git', 'add', 'data'], cwd=ROOT, check=False)
+            r = subprocess.run(['git', 'commit', '-qm', msg], cwd=ROOT, capture_output=True, text=True)
+            if 'nothing to commit' in (r.stdout + r.stderr):
+                return
+            for _ in range(3):
+                subprocess.run(['git', 'pull', '-q', '--rebase', '-X', 'theirs', 'origin', 'main'], cwd=ROOT, check=False)
+                if subprocess.run(['git', 'push', '-q', 'origin', 'HEAD:main'], cwd=ROOT).returncode == 0:
+                    return
+                time.sleep(5)
+        except Exception as e:
+            print('git NG', e)
+
+
+# ======================= 競艇 =======================
+KB = 'https://www.boatrace.jp/owpc/pc/race/'
+KNAME = {'01': '桐生', '02': '戸田', '03': '江戸川', '04': '平和島', '05': '多摩川', '06': '浜名湖', '07': '蒲郡', '08': '常滑',
+         '09': '津', '10': '三国', '11': 'びわこ', '12': '住之江', '13': '尼崎', '14': '鳴門', '15': '丸亀', '16': '児島',
+         '17': '宮島', '18': '徳山', '19': '下関', '20': '若松', '21': '芦屋', '22': '福岡', '23': '唐津', '24': '大村'}
+KLOG_H = 'snap,time,jcd,R,deadline,boat,odds,p3,fo,pred,evA,buyA,votes,upd'
+KCLS_H = 'jcd,R,boat,winner,payout,odds_close,p3_close,' + ','.join(f'odds{i},p3_{i},buyA{i}' for i in range(1, 6))
+
+
+def k_deadlines(html):
+    i = html.find('締切予定時刻')
+    if i < 0:
+        return []
+    seg = html[i:i + 2500]
+    return re.findall(r'<td class="[^"]*">\s*(\d{1,2}:\d\d)\s*</td>', seg)[:12]
+
+
+def k_odds(html):
+    ms = re.findall(r'is-boatColor(\d)">\d</td>.*?oddsPoint[^>]*>([^<]*)<', html, re.S)
+    if len(ms) < 6:
+        return None
+    return {k + 1: num(ms[k][1]) for k in range(6)}
+
+
+def k_odds3(html):
+    ms = re.findall(r'oddsPoint[^>]*>([^<]*)<', html)
+    if len(ms) != 120:
+        return None
+    inv = {b: 0.0 for b in range(1, 7)}
+    for i, v in enumerate(ms):
+        v = num(v)
+        if v > 0:
+            inv[i % 6 + 1] += 1 / v
+    return inv
+
+
+def k_upd(html):
+    m = re.search(r'tab4_time">(.*?)</p>', html, re.S)
+    if not m:
+        m = re.search(r'(\d{1,2}:\d\d)\s*時点', html)
+        return m.group(1) if m else ''
+    return re.sub(r'[,\s]+', ' ', re.sub('<[^>]+>', ' ', m.group(1))).strip()
+
+
+def k_result(html):
+    m = re.search(r'単勝</td>.*?numberSet1_number[^>]*>(\d)</span>.*?is-payout1">&yen;([\d,]+)', html, re.S)
+    return (int(m.group(1)), int(m.group(2).replace(',', ''))) if m else None
+
+
+def p3_of(inv, act):
+    s = sum(inv[b] for b in act)
+    return {b: (inv[b] / s if s > 0 else 0.0) for b in act}
+
+
+def kyotei_main():
+    prm = CFG['kyotei_A']
+    w = Web()
+    st, idx = w.req(KB + 'index?hd=' + HD)
+    jcds = sorted(set(re.findall(r'jcd=(\d\d)', idx)))
+    races = []
+    for j in jcds:
+        st, h = w.req(f'{KB}racelist?rno=1&jcd={j}&hd={HD}')
+        for r, t in enumerate(k_deadlines(h), 1):
+            hh, mm = map(int, t.split(':'))
+            dl = TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=hh, minutes=mm)
+            races.append({'jcd': j, 'R': r, 'dl': dl, 'snap': 0, 'st': 'wait'})
+        time.sleep(0.3)
+    done_snaps = {}
+    for row in read_csv('kyotei_log.csv'):
+        k = (row['jcd'], int(row['R']))
+        done_snaps[k] = max(done_snaps.get(k, 0), int(row['snap']))
+    for x in races:
+        x['snap'] = done_snaps.get((x['jcd'], x['R']), 0)
+        if x['dl'] < now() + datetime.timedelta(seconds=10) or x['snap'] >= len(SN):
+            x['st'] = 'past'
+    left = sum(1 for x in races if x['st'] == 'wait')
+    log(f'競艇: 開催{len(jcds)}場 / これから締切 {left}レース')
+    debug_saved = os.path.exists(os.path.join(DDIR, 'kyotei_oddstf_sample.html'))
+    pool = ThreadPoolExecutor(8)
+    while time.time() - T0 < RUN_MIN * 60:
+        n = now()
+        busy = False
+        for x in races:
+            if x['st'] != 'wait':
+                continue
+            sec = (x['dl'] - n).total_seconds()
+            if sec < 2:
+                x['st'] = 'past'
+                continue
+            if x['snap'] >= len(SN) or sec > SN[x['snap']]:
+                if x['snap'] < len(SN) and sec - SN[x['snap']] < 7:
+                    busy = True
+                continue
+            q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
+            f1 = pool.submit(w.req, KB + 'oddstf' + q)
+            f2 = pool.submit(w.req, KB + 'odds3t' + q)
+            f3 = pool.submit(w.req, KB + 'racelist' + q) if x['snap'] < 3 else None
+            (s1, h1), (s2, h2) = f1.result(), f2.result()
+            if f3:
+                s3, h3 = f3.result()
+                ts = k_deadlines(h3)
+                if len(ts) >= x['R']:
+                    hh, mm = map(int, ts[x['R'] - 1].split(':'))
+                    nd = TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=hh, minutes=mm)
+                    if nd > x['dl']:
+                        x['dl'] = nd
+                        log(f"競艇 {KNAME[x['jcd']]}{x['R']}R 締切変更 → {nd:%H:%M}")
+                        continue
+            od = k_odds(h1) if s1 == 200 else None
+            inv = k_odds3(h2) if s2 == 200 else None
+            if not od or not inv:
+                continue
+            act = [b for b in range(1, 7) if od[b] > 0]
+            if len(act) < 3:
+                continue
+            x['snap'] += 1
+            p3 = p3_of(inv, act)
+            upd = k_upd(h1)
+            if not debug_saved and x['snap'] >= 3:
+                open(os.path.join(DDIR, 'kyotei_oddstf_sample.html'), 'w', encoding='utf-8').write(h1)
+                debug_saved = True
+            rows, buys = [], []
+            for b in act:
+                fo, pc, ev, by = strategy_a(od[b], p3[b], prm)
+                rows.append([x['snap'], f'{now():%H:%M:%S}', x['jcd'], x['R'], f"{x['dl']:%H:%M}", b, od[b], f'{p3[b]:.4f}',
+                             f'{fo:.2f}', f'{pc:.2f}', f'{ev:.3f}', by, '', upd.replace(',', ' ')])
+                if by:
+                    buys.append(f'{b}号艇 今{od[b]:.1f}倍→予想締切{pc:.1f}倍（予想期待値{ev:.2f}）')
+            append_csv('kyotei_log.csv', KLOG_H, rows)
+            tag = f"{KNAME[x['jcd']]} {x['R']}R 締切{x['dl']:%H:%M}"
+            if x['snap'] <= 3 and prm.get('notify', True):
+                if buys:
+                    t = ('【A】★最終判定 買い ' if x['snap'] == 3 else '【A】買い候補 ') + tag + ('' if x['snap'] == 3 else f'（{LAB[x["snap"]]}）')
+                    pool.submit(notify, t, '\n'.join(buys), x['snap'] == 3)
+                    x['ntf'] = 1
+                elif x['snap'] == 3 and x.get('ntf'):
+                    pool.submit(notify, '【A】最終判定 見送り ' + tag, '直前で条件から外れたよ（買わない）')
+            if x['snap'] >= len(SN):
+                x['st'] = 'past'
+        time.sleep(0.5 if busy else 3)
+        if not any(x['st'] == 'wait' for x in races):
+            break
+    log('競艇: 監視おわり')
+
+
+def kyotei_settle():
+    """締切から8分以上たったレースの結果と締切オッズを取って、close ファイルに書く"""
+    w = Web()
+    logrows = read_csv('kyotei_log.csv')
+    done = {(r['jcd'], r['R']) for r in read_csv('kyotei_close.csv')}
+    byrace = {}
+    for r in logrows:
+        byrace.setdefault((r['jcd'], r['R']), []).append(r)
+    for k, rs in byrace.items():
+        if k in done:
+            continue
+        hh, mm = map(int, rs[0]['deadline'].split(':'))
+        dl = TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=hh, minutes=mm)
+        if now() < dl + datetime.timedelta(minutes=8):
+            continue
+        q = f'?rno={k[1]}&jcd={k[0]}&hd={HD}'
+        s, h = w.req(KB + 'raceresult' + q)
+        res = k_result(h) if s == 200 else None
+        if not res:
+            if now() > dl + datetime.timedelta(minutes=90):
+                res = (0, 0)  # 中止など
+            else:
+                continue
+        s1, h1 = w.req(KB + 'oddstf' + q)
+        s2, h2 = w.req(KB + 'odds3t' + q)
+        od = k_odds(h1) or {}
+        inv = k_odds3(h2)
+        boats = sorted({int(r['boat']) for r in rs})
+        p3c = p3_of(inv, boats) if inv else {}
+        out = []
+        for b in boats:
+            snaps = {int(r['snap']): r for r in rs if int(r['boat']) == b}
+            row = [k[0], k[1], b, res[0], res[1] if res[0] == b else 0, od.get(b, ''), f'{p3c[b]:.4f}' if b in p3c else '']
+            for i in range(1, 6):
+                r = snaps.get(i)
+                row += [r['odds'], r['p3'], r['buyA']] if r else ['', '', '']
+            out.append(row)
+        append_csv('kyotei_close.csv', KCLS_H, out)
+        time.sleep(0.3)
+
+
+# ======================= オート =======================
+AB = 'https://autorace.jp'
+APL = {2: '川口', 3: '伊勢崎', 4: '浜松', 5: '飯塚', 6: '山陽'}
+ALOG_H = 'snap,time,pc,R,deadline,car,odds,p3,fo,pred,evA,buyA,votes,upd'
+ACLS_H = 'pc,R,car,winner,payout,odds_close,p3_close,votes_close,' + ','.join(f'odds{i},p3_{i},buyA{i},votes{i}' for i in range(1, 6))
+
+
+class Auto:
+    def __init__(self):
+        self.w = Web()
+        self.tok = ''
+        self.xs = ''
+        self.tt = 0
+
+    def token(self):
+        s, pg = self.w.req(AB + '/race_info/RaceResult/kawaguchi/2026-10-18_1')
+        m = re.search(r'<meta name="csrf-token" content="([^"]+)"', pg)
+        self.tok = m.group(1) if m else ''
+        for c in self.w.cj:
+            if c.name == 'XSRF-TOKEN':
+                self.xs = urllib.parse.unquote(c.value)
+        self.tt = time.time()
+
+    def H(self):
+        return {'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': self.tok, 'X-XSRF-TOKEN': self.xs,
+                'Content-Type': 'application/json', 'Accept': 'application/json', 'Referer': AB + '/race_info/'}
+
+    def post(self, api, pc, rn):
+        if time.time() - self.tt > 1800:
+            self.token()
+        for _ in range(2):
+            s, t = self.w.req(AB + '/race_info/' + api, headers=self.H(),
+                              data=json.dumps({'placeCode': pc, 'raceDate': YMD, 'raceNo': rn}).encode())
+            if s in (401, 403, 419):
+                self.token()
+                continue
+            if s == 200 and '"result":"Success"' in t:
+                return json.loads(t)['body']
+            return None
+        return None
+
+    def today(self):
+        s, t = self.w.req(AB + '/race_info/XML/Hold/Today', headers=self.H())
+        try:
+            return json.loads(t)['body']['today']
+        except Exception:
+            return []
+
+
+def to_time(s):
+    m = re.search(r'(\d{1,2}):(\d\d)', str(s or ''))
+    if not m:
+        return None
+    return TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=int(m.group(1)), minutes=int(m.group(2)))
+
+
+def a_calc(bd):
+    od = {a: num(str(bd.get('tnsOddsList', {}).get(str(a), 0))) for a in range(1, 9)}
+    act = [a for a in od if od[a] > 0]
+    r3 = bd.get('rt3OddsList', {}) or {}
+    inv = {}
+    for a in act:
+        s = 0.0
+        for b in act:
+            if b == a:
+                continue
+            for c in act:
+                if c in (a, b):
+                    continue
+                try:
+                    v = num(str(r3[str(a)][str(b)][str(c)]))
+                except Exception:
+                    v = 0
+                if v > 0:
+                    s += 1 / v
+        inv[a] = s
+    tot = sum(inv.values())
+    p3 = {a: (inv[a] / tot if tot > 0 else 0.0) for a in act}
+    si = bd.get('salesInfo', {}) or {}
+    return od, act, p3, str((si.get('tns') or {}).get('salesCount', '')), str(si.get('updateDate', ''))
+
+
+def auto_main():
+    prm = CFG['auto_A']
+    A = Auto()
+    A.token()
+    plist = [(int(t['placeCode']), max(1, int(t.get('nowRaceNo') or 1))) for t in A.today()] or [(p, 1) for p in range(2, 7)]
+    races = []
+    for pc, r0 in plist:
+        inf = A.post('OtherRaceInfo', pc, r0)
+        if not inf:
+            continue
+        fin = int(inf.get('finalRaceNo') or 12)
+        for rn in range(r0, fin + 1):
+            ri = inf if rn == r0 else A.post('OtherRaceInfo', pc, rn)
+            dl = to_time(ri.get('telvoteTime')) if ri else None
+            if dl and dl > now() + datetime.timedelta(seconds=10):
+                races.append({'pc': pc, 'R': rn, 'dl': dl, 'snap': 0, 'st': 'wait'})
+    done_snaps = {}
+    for row in read_csv('auto_log.csv'):
+        k = (int(row['pc']), int(row['R']))
+        done_snaps[k] = max(done_snaps.get(k, 0), int(row['snap']))
+    for x in races:
+        x['snap'] = done_snaps.get((x['pc'], x['R']), 0)
+        if x['snap'] >= len(SN):
+            x['st'] = 'past'
+    log(f"オート: 開催 {'・'.join(sorted({APL[x['pc']] for x in races}))} / これから締切 {len(races)}レース")
+    while time.time() - T0 < RUN_MIN * 60:
+        n = now()
+        busy = False
+        for x in races:
+            if x['st'] != 'wait':
+                continue
+            sec = (x['dl'] - n).total_seconds()
+            if sec < 2:
+                x['st'] = 'past'
+                continue
+            if x['snap'] >= len(SN) or sec > SN[x['snap']]:
+                if x['snap'] < len(SN) and sec - SN[x['snap']] < 7:
+                    busy = True
+                continue
+            if x['snap'] < 3:
+                ri = A.post('OtherRaceInfo', x['pc'], x['R'])
+                nd = to_time(ri.get('telvoteTime')) if ri else None
+                if nd and nd > x['dl']:
+                    x['dl'] = nd
+                    log(f"オート {APL[x['pc']]}{x['R']}R 締切変更 → {nd:%H:%M}")
+                    continue
+            bd = A.post('Odds', x['pc'], x['R'])
+            if not bd:
+                continue
+            od, act, p3, votes, upd = a_calc(bd)
+            if len(act) < 3:
+                continue
+            x['snap'] += 1
+            rows, buys = [], []
+            for a in act:
+                fo, pc_, ev, by = strategy_a(od[a], p3[a], prm)
+                rows.append([x['snap'], f'{now():%H:%M:%S}', x['pc'], x['R'], f"{x['dl']:%H:%M}", a, od[a], f'{p3[a]:.4f}',
+                             f'{fo:.2f}', f'{pc_:.2f}', f'{ev:.3f}', by, votes, upd.replace(',', ' ')])
+                if by:
+                    buys.append(f'{a}号車 今{od[a]:.1f}倍→予想締切{pc_:.1f}倍（予想期待値{ev:.2f}）')
+            append_csv('auto_log.csv', ALOG_H, rows)
+            tag = f"{APL[x['pc']]} {x['R']}R 締切{x['dl']:%H:%M}"
+            if x['snap'] <= 3 and prm.get('notify', False) and buys:
+                notify(('【オートA】★最終判定 買い ' if x['snap'] == 3 else '【オートA】買い候補 ') + tag, '\n'.join(buys), x['snap'] == 3)
+            if x['snap'] >= len(SN):
+                x['st'] = 'past'
+        time.sleep(0.5 if busy else 3)
+        if not any(x['st'] == 'wait' for x in races):
+            break
+    log('オート: 監視おわり')
+
+
+def auto_settle():
+    A = Auto()
+    A.token()
+    logrows = read_csv('auto_log.csv')
+    done = {(r['pc'], r['R']) for r in read_csv('auto_close.csv')}
+    byrace = {}
+    for r in logrows:
+        byrace.setdefault((r['pc'], r['R']), []).append(r)
+    for k, rs in byrace.items():
+        if k in done:
+            continue
+        dl = to_time(rs[0]['deadline'])
+        if now() < dl + datetime.timedelta(minutes=10):
+            continue
+        br = A.post('RaceResult', int(k[0]), int(k[1]))
+        pays = {}
+        if br:
+            for y in ((br.get('refundInfo') or {}).get('tns') or {}).get('list') or []:
+                if y.get('carNo') is not None:
+                    pays[int(y['carNo'])] = int(y.get('refund') or 0)
+        if not pays:
+            if now() > dl + datetime.timedelta(minutes=90):
+                pays = {0: 0}
+            else:
+                continue
+        bc = A.post('Odds', int(k[0]), int(k[1]))
+        od, act, p3, votes, upd = a_calc(bc) if bc else ({}, [], {}, '', '')
+        cars = sorted({int(r['car']) for r in rs})
+        win = '|'.join(str(c) for c in sorted(pays))
+        out = []
+        for a in cars:
+            snaps = {int(r['snap']): r for r in rs if int(r['car']) == a}
+            row = [k[0], k[1], a, win, pays.get(a, 0), od.get(a, ''), f'{p3[a]:.4f}' if a in p3 else '', votes]
+            for i in range(1, 6):
+                r = snaps.get(i)
+                row += [r['odds'], r['p3'], r['buyA'], r['votes']] if r else ['', '', '', '']
+            out.append(row)
+        append_csv('auto_close.csv', ACLS_H, out)
+
+
+def settle_loop(stop):
+    last_git = time.time()
+    while not stop.is_set():
+        for f in (kyotei_settle, auto_settle):
+            try:
+                f()
+            except Exception:
+                log('結果取得NG ' + traceback.format_exc().splitlines()[-1])
+        if time.time() - last_git > 20 * 60:
+            git_save(f'記録 {now():%m/%d %H:%M}')
+            last_git = time.time()
+        stop.wait(60)
+
+
+def guard(fn):
+    def run():
+        try:
+            fn()
+        except Exception:
+            log(fn.__name__ + ' NG\n' + traceback.format_exc())
+    return run
+
+
+if __name__ == '__main__':
+    log(f'開始（{RUN_MIN:.0f}分まで動く）')
+    if os.environ.get('START_NOTIFY') == '1':
+        notify('記録ツール 起動', f'{now():%H:%M} から記録を始めるよ')
+    stop = threading.Event()
+    th = [threading.Thread(target=guard(kyotei_main)), threading.Thread(target=guard(auto_main))]
+    for t in th:
+        t.start()
+    st = threading.Thread(target=settle_loop, args=(stop,))
+    st.start()
+    for t in th:
+        t.join()
+    # 監視が終わっても、結果がそろうまで最大15分待つ（時間内なら）
+    end = time.time() + 15 * 60
+    while time.time() < end and time.time() - T0 < RUN_MIN * 60 + 10 * 60:
+        time.sleep(60)
+    stop.set()
+    st.join()
+    for f in (kyotei_settle, auto_settle):
+        try:
+            f()
+        except Exception:
+            pass
+    log('終了')
+    git_save(f'記録 {now():%m/%d %H:%M}（終了）')

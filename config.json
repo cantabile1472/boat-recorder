@@ -1,0 +1,5 @@
+{
+  "run_minutes": 330,
+  "kyotei_A": {"w1": 0.21, "w2": 0.66, "c": 0.0, "th": 0.95, "fomax": 10, "notify": true},
+  "auto_A":   {"w1": 0.33, "w2": 0.57, "c": -0.04, "th": 0.95, "fomax": 10, "notify": false}
+}

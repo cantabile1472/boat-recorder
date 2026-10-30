@@ -1,0 +1,39 @@
+name: 締切前オッズの記録
+on:
+  schedule:
+    - cron: '5 23 * * *'    # 日本時間 8:05
+    - cron: '45 4 * * *'    # 日本時間 13:45
+    - cron: '20 10 * * *'   # 日本時間 19:20
+  push:
+    paths: ['recorder.py', 'config.json', '.github/workflows/record.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: recorder
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: git の設定
+        run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+      - name: 記録する
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          START_NOTIFY: '1'
+        run: python recorder.py
+      - name: 最後に保存
+        if: always()
+        run: |
+          git add data || true
+          git commit -qm "記録（最終保存）" || true
+          git pull -q --rebase -X theirs origin main || true
+          git push -q origin HEAD:main || true
