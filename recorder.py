@@ -183,6 +183,9 @@ def k_odds3(html):
 
 
 def k_upd(html):
+    m = re.search(r'オッズ更新時間\s*(\d{1,2}:\d\d)', html)
+    if m:
+        return m.group(1)
     m = re.search(r'tab4_time">(.*?)</p>', html, re.S)
     if not m:
         m = re.search(r'(\d{1,2}:\d\d)\s*時点', html)
