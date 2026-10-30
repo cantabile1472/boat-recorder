@@ -13,6 +13,24 @@ SN = [200, 95, 42, 17, 7]
 LAB = ['', '3分前', '1分半前', '40秒前・最終判定', '15秒前', '5秒前']
 T0 = time.time()
 LOCK = threading.Lock()
+_CFG_T = [time.time()]
+
+
+def cfg():
+    """設定（config.json）を5分おきに GitHub から読み直す。書き換えたら動いている途中でも反映される"""
+    global CFG
+    if time.time() - _CFG_T[0] > 300 and not os.environ.get('NO_GIT'):
+        _CFG_T[0] = time.time()
+        try:
+            subprocess.run(['git', 'fetch', '-q', 'origin', 'main'], cwd=ROOT, timeout=60)
+            t = subprocess.run(['git', 'show', 'origin/main:config.json'], cwd=ROOT, capture_output=True, text=True, timeout=30).stdout
+            new = json.loads(t)
+            if new != CFG:
+                CFG = new
+                print('設定を読み直した', flush=True)
+        except Exception as e:
+            print('設定の読み直しNG', e, flush=True)
+    return CFG
 
 
 def now():
@@ -245,6 +263,7 @@ def kyotei_main():
                 continue
             x['snap'] += 1
             p3 = p3_of(inv, act)
+            prm = cfg()['kyotei_A']
             upd = k_upd(h1)
             if not debug_saved and x['snap'] >= 3:
                 open(os.path.join(DDIR, 'kyotei_oddstf_sample.html'), 'w', encoding='utf-8').write(h1)
@@ -259,7 +278,7 @@ def kyotei_main():
             append_csv('kyotei_log.csv', KLOG_H, rows)
             tag = f"{KNAME[x['jcd']]} {x['R']}R 締切{x['dl']:%H:%M}"
             if x['snap'] <= 3 and prm.get('notify', True):
-                if buys:
+                if buys and (x['snap'] == 3 or not prm.get('final_only', False)):
                     t = ('【A】★最終判定 買い ' if x['snap'] == 3 else '【A】買い候補 ') + tag + ('' if x['snap'] == 3 else f'（{LAB[x["snap"]]}）')
                     pool.submit(notify, t, '\n'.join(buys), x['snap'] == 3)
                     x['ntf'] = 1
@@ -448,6 +467,7 @@ def auto_main():
             od, act, p3, votes, upd = a_calc(bd)
             if len(act) < 3:
                 continue
+            prm = cfg()['auto_A']
             x['snap'] += 1
             rows, buys = [], []
             for a in act:
