@@ -280,6 +280,11 @@ def kyotei_main():
                     buys.append(f'{b}号艇 今{od[b]:.1f}倍→予想締切{pc:.1f}倍（予想期待値{ev:.2f}）')
             append_csv('kyotei_log.csv', KLOG_H, rows)
             tag = f"{KNAME[x['jcd']]} {x['R']}R 締切{x['dl']:%H:%M}"
+            lines = [f"[{now():%H:%M:%S}] 競艇 {tag}（{LAB[x['snap']]}）オッズ更新{upd or '?'}  【戦略A】{'買い目あり' if buys else '買い目なし'}"]
+            for r_ in rows:
+                mark = '  ← 買い' if r_[11] else ''
+                lines.append(f"    {r_[5]}号艇 今{float(r_[6]):6.1f}倍  3連単換算{float(r_[8]):6.1f}倍  予想締切{float(r_[9]):6.1f}倍  予想期待値{float(r_[10]):.2f}{mark}")
+            print('\n'.join(lines), flush=True)
             if x['snap'] <= 3 and prm.get('notify', True):
                 if buys and (x['snap'] == 3 or not prm.get('final_only', False)):
                     t = ('【A】★最終判定 買い ' if x['snap'] == 3 else '【A】買い候補 ') + tag + ('' if x['snap'] == 3 else f'（{LAB[x["snap"]]}）')
@@ -333,6 +338,10 @@ def kyotei_settle():
                 row += [r['odds'], r['p3'], r['buyA']] if r else ['', '', '']
             out.append(row)
         append_csv('kyotei_close.csv', KCLS_H, out)
+        ab = [r_[2] for r_ in out if r_[7 + 3 * 2 + 2] == '1']
+        if ab:
+            hit = res[0] in ab
+            print(f"[{now():%H:%M:%S}] 結果 競艇 {KNAME.get(k[0], k[0])}{k[1]}R  1着{res[0]}号艇 単勝{res[1]}円  戦略Aの買い目{ab} → {'的中！' if hit else 'はずれ'}", flush=True)
         time.sleep(0.3)
 
 
@@ -531,6 +540,39 @@ def auto_settle():
         append_csv('auto_close.csv', ACLS_H, out)
 
 
+def write_status():
+    def summ(rows, key, idcol):
+        n = h = ret = 0
+        lst = []
+        for r_ in rows:
+            if r_.get(key) == '1':
+                n += 1
+                p = int(float(r_.get('payout') or 0))
+                ret += p
+                h += 1 if p > 0 else 0
+                lst.append((r_, p))
+        return n, h, ret, lst
+    L = [f'# 今日のまとめ（{YMD}）', '', f'最終更新：{now():%H:%M}（10分おきに更新）', '']
+    kc = read_csv('kyotei_close.csv')
+    nr = len({(r_['jcd'], r_['R']) for r_ in kc})
+    L += ['## 競艇・戦略A', '', f'結果が出たレース：{nr}', '', '| 判定した時点 | 点数 | 的中 | 投資 | 払戻 | 回収率 |', '|---|---|---|---|---|---|']
+    for i, nm in [(3, '40秒前（最終判定）'), (4, '15秒前'), (5, '5秒前')]:
+        n, h, ret, _ = summ(kc, f'buyA{i}', 'boat')
+        L.append(f'| {nm} | {n} | {h} | {n*100}円 | {ret}円 | {ret/max(1,n):.0f}% |')
+    n, h, ret, lst = summ(kc, 'buyA3', 'boat')
+    L += ['', '### 40秒前の買い目と結果', '', '| レース | 艇 | 40秒前 | 締切 | 結果 |', '|---|---|---|---|---|']
+    for r_, p in lst[::-1]:
+        L.append(f"| {KNAME.get(r_['jcd'].zfill(2), r_['jcd'])}{r_['R']}R | {r_['boat']}号艇 | {r_['odds3']}倍 | {r_['odds_close']}倍 | {'的中 '+str(p)+'円' if p else 'はずれ'} |")
+    ac = read_csv('auto_close.csv')
+    L += ['', '## オート（記録のみ）', '', f"結果が出たレース：{len({(r_['pc'], r_['R']) for r_ in ac})}"]
+    n, h, ret, _ = summ(ac, 'buyA3', 'car')
+    L.append(f'（参考）競艇と同じ式で判定した場合：{n}点 的中{h} 投資{n*100}円 払戻{ret}円 回収率{ret/max(1,n):.0f}%')
+    txt = '\n'.join(L) + '\n'
+    with LOCK:
+        open(os.path.join(DDIR, 'まとめ.md'), 'w', encoding='utf-8').write(txt)
+        open(os.path.join(ROOT, 'data', '今日のまとめ.md'), 'w', encoding='utf-8').write(txt)
+
+
 def settle_loop(stop):
     last_git = time.time()
     while not stop.is_set():
@@ -539,7 +581,11 @@ def settle_loop(stop):
                 f()
             except Exception:
                 log('結果取得NG ' + traceback.format_exc().splitlines()[-1])
-        if time.time() - last_git > 20 * 60:
+        if time.time() - last_git > 10 * 60:
+            try:
+                write_status()
+            except Exception:
+                log('まとめNG ' + traceback.format_exc().splitlines()[-1])
             git_save(f'記録 {now():%m/%d %H:%M}')
             last_git = time.time()
         stop.wait(60)
@@ -577,5 +623,9 @@ if __name__ == '__main__':
             f()
         except Exception:
             pass
+    try:
+        write_status()
+    except Exception:
+        pass
     log('終了')
     git_save(f'記録 {now():%m/%d %H:%M}（終了）')

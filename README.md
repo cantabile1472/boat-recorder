@@ -7,5 +7,6 @@
 - 記録は `data/日付/` に保存
   - `kyotei_log.csv` / `kyotei_close.csv`（競艇）
   - `auto_log.csv` / `auto_close.csv`（オート）
+- **今日の途中経過は `data/今日のまとめ.md`**（10分おきに更新）
 - 戦略Aの設定は `config.json`
 - スマホ通知は、リポジトリの Secrets に `NTFY_TOPIC` を入れると届く
