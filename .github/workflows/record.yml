@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -25,6 +27,8 @@ jobs:
         run: |
           git config user.name "recorder-bot"
           git config user.email "recorder-bot@users.noreply.github.com"
+      - name: 最新のデータを取ってくる
+        run: git pull -q origin main
       - name: 記録する
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
