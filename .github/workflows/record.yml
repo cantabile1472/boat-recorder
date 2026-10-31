@@ -1,9 +1,7 @@
 name: 締切前オッズの記録
 on:
   schedule:
-    - cron: '5 23 * * *'    # 日本時間 8:05
-    - cron: '45 4 * * *'    # 日本時間 13:45
-    - cron: '20 10 * * *'   # 日本時間 19:20
+    - cron: '*/30 23,0-14 * * *'   # 日本時間 8:00〜23:30 に30分おき（動いている間は待機して、止まっていたら起動する）
   push:
     paths: ['recorder.py', '.github/workflows/record.yml']
   workflow_dispatch:

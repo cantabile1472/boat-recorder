@@ -124,7 +124,12 @@ def strategy_a(odds, p3, prm):
     fo = 1.0 / p3
     pc = math.exp(prm['w1'] * math.log(odds) + prm['w2'] * math.log(fo) + prm['c'])
     ev = p3 * pc
-    buy = int(ev >= prm['th'] and fo <= prm['fomax'])
+    bands = prm.get('fo_bands')
+    if bands:
+        ok = any(lo < fo <= hi for lo, hi in bands)
+    else:
+        ok = fo <= prm['fomax']
+    buy = int(ev >= prm['th'] and ok)
     return fo, pc, ev, buy
 
 
