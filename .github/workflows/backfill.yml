@@ -1,0 +1,26 @@
+name: 出走表と直前情報の取得（過去日）
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '日付（YYYYMMDD をスペース区切り）'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: for d in ${{ github.event.inputs.days }}; do python tools/backfill_info.py $d; done
+      - run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+          git add data
+          git commit -qm "出走表・直前情報を取得" || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
