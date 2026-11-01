@@ -133,6 +133,33 @@ def strategy_a(odds, p3, prm):
     return fo, pc, ev, buy
 
 
+def strategy_b(od, p3, s1, R_, prm):
+    """戦略B：締切で「期待値1.2以上・20倍以下」になりそうな確率を、締切前の流れから予想する"""
+    act = list(od)
+    if len(act) < 3:
+        return {}
+    c = prm['coef']
+    fav = min(od.values())
+    over = sum(1 / od[b] for b in act)
+    rk = {b: i + 1 for i, b in enumerate(sorted(act, key=lambda b: (od[b], -p3[b])))}
+    pr = {b: i + 1 for i, b in enumerate(sorted(act, key=lambda b: -p3[b]))}
+    out = {}
+    for b in act:
+        o, p = od[b], p3[b]
+        if o <= 0 or p <= 0:
+            continue
+        lo, lf = math.log(o), math.log(1 / p)
+        o1, p1 = s1.get(b, (o, p))
+        tr13 = math.log(o / o1) if o1 > 0 else 0.0
+        p3tr = math.log(p / p1) if p1 > 0 else 0.0
+        z = (c['intercept'] + c['lo3'] * lo + c['lfo'] * lf + c['lfo2'] * lf * lf + c['lgap'] * (lo - lf)
+             + c['tr13'] * tr13 + c['p3tr'] * p3tr + c['rgap'] * (rk[b] - pr[b]) + c['R'] * R_
+             + c['lfav'] * math.log(fav) + c['over'] * over + c.get(f'b{b}', 0))
+        q = 1 / (1 + math.exp(-z))
+        out[b] = (q, int(q >= prm['th'] and o <= prm.get('omax', 30)))
+    return out
+
+
 def git_save(msg):
     if os.environ.get('NO_GIT'):
         return
@@ -222,11 +249,15 @@ def kyotei_main():
             races.append({'jcd': j, 'R': r, 'dl': dl, 'snap': 0, 'st': 'wait'})
         time.sleep(0.3)
     done_snaps = {}
+    s1map = {}
     for row in read_csv('kyotei_log.csv'):
         k = (row['jcd'], int(row['R']))
         done_snaps[k] = max(done_snaps.get(k, 0), int(row['snap']))
+        if row['snap'] == '1':
+            s1map.setdefault(k, {})[int(row['boat'])] = (float(row['odds']), float(row['p3']))
     for x in races:
         x['snap'] = done_snaps.get((x['jcd'], x['R']), 0)
+        x['s1'] = s1map.get((x['jcd'], x['R']), {})
         if x['dl'] < now() + datetime.timedelta(seconds=10) or x['snap'] >= len(SN):
             x['st'] = 'past'
     left = sum(1 for x in races if x['st'] == 'wait')
@@ -284,12 +315,25 @@ def kyotei_main():
                 if by:
                     buys.append(f'{b}号艇 今{od[b]:.1f}倍→予想締切{pc:.1f}倍（予想期待値{ev:.2f}）')
             append_csv('kyotei_log.csv', KLOG_H, rows)
+            if x['snap'] == 1:
+                x['s1'] = {b: (od[b], p3[b]) for b in act}
+            prmB = cfg().get('kyotei_B')
+            resB = strategy_b({b: od[b] for b in act}, p3, x.get('s1', {}), x['R'], prmB) if prmB else {}
+            buysB = [b for b in resB if resB[b][1]]
+            if resB:
+                append_csv('kyotei_B.csv', 'snap,time,jcd,R,boat,odds,qB,buyB',
+                           [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], x['R'], b, od[b], f'{resB[b][0]:.3f}', resB[b][1]] for b in resB])
             tag = f"{KNAME[x['jcd']]} {x['R']}R 締切{x['dl']:%H:%M}"
             lines = [f"[{now():%H:%M:%S}] 競艇 {tag}（{LAB[x['snap']]}）オッズ更新{upd or '?'}  【戦略A】{'買い目あり' if buys else '買い目なし'}"]
             for r_ in rows:
                 mark = '  ← 買い' if r_[11] else ''
                 lines.append(f"    {r_[5]}号艇 今{float(r_[6]):6.1f}倍  3連単換算{float(r_[8]):6.1f}倍  予想締切{float(r_[9]):6.1f}倍  予想期待値{float(r_[10]):.2f}{mark}")
+            if resB:
+                lines.append('    【戦略B】' + '  '.join(f"{b}号艇{resB[b][0]*100:.0f}%{'←買い' if resB[b][1] else ''}" for b in resB))
             print('\n'.join(lines), flush=True)
+            if prmB and prmB.get('notify') and x['snap'] == 3:
+                if buysB:
+                    pool.submit(notify, '【B】★買い ' + tag, '\n'.join(f"{b}号艇 今{od[b]:.1f}倍（締切でお得になる確率 {resB[b][0]*100:.0f}%）" for b in buysB), True)
             if x['snap'] <= 3 and prm.get('notify', True):
                 if buys and (x['snap'] == 3 or not prm.get('final_only', False)):
                     t = ('【A】★最終判定 買い ' if x['snap'] == 3 else '【A】買い候補 ') + tag + ('' if x['snap'] == 3 else f'（{LAB[x["snap"]]}）')
@@ -568,6 +612,22 @@ def write_status():
     L += ['', '### 40秒前の買い目と結果', '', '| レース | 艇 | 40秒前 | 締切 | 結果 |', '|---|---|---|---|---|']
     for r_, p in lst[::-1]:
         L.append(f"| {KNAME.get(r_['jcd'].zfill(2), r_['jcd'])}{r_['R']}R | {r_['boat']}号艇 | {r_['odds3']}倍 | {r_['odds_close']}倍 | {'的中 '+str(p)+'円' if p else 'はずれ'} |")
+    bl = [r_ for r_ in read_csv('kyotei_B.csv') if r_['snap'] == '3' and r_['buyB'] == '1']
+    res = {}
+    for r_ in kc:
+        res[(r_['jcd'], r_['R'], r_['boat'])] = r_
+    nB = hB = retB = 0
+    rowsB = []
+    for r_ in bl:
+        c_ = res.get((r_['jcd'], r_['R'], r_['boat']))
+        if not c_:
+            continue
+        p = int(float(c_.get('payout') or 0))
+        nB += 1; retB += p; hB += 1 if p > 0 else 0
+        rowsB.append((r_, c_, p))
+    L = L[:4] + ['## 競艇・戦略B（通知している戦略）', '', '| 点数 | 的中 | 投資 | 払戻 | 回収率 |', '|---|---|---|---|---|',
+                 f'| {nB} | {hB} | {nB*100}円 | {retB}円 | {retB/max(1,nB):.0f}% |', '', '| レース | 艇 | 40秒前 | 締切 | 確率 | 結果 |', '|---|---|---|---|---|---|'] + \
+        [f"| {KNAME.get(r_['jcd'].zfill(2), r_['jcd'])}{r_['R']}R | {r_['boat']}号艇 | {r_['odds']}倍 | {c_['odds_close']}倍 | {float(r_['qB'])*100:.0f}% | {'的中 '+str(p)+'円' if p else 'はずれ'} |" for r_, c_, p in rowsB[::-1]] + [''] + L[4:]
     ac = read_csv('auto_close.csv')
     L += ['', '## オート（記録のみ）', '', f"結果が出たレース：{len({(r_['pc'], r_['R']) for r_ in ac})}"]
     n, h, ret, _ = summ(ac, 'buyA3', 'car')
