@@ -40,10 +40,9 @@ jobs:
           git commit -qm "記録（最終保存）" || true
           git pull -q --rebase -X theirs origin main || true
           git push -q origin HEAD:main || true
-      - name: 時間内なら次の回をすぐ予約（すき間をなくす）
+      - name: 次の回をすぐ予約（24時間つなげて、すき間をなくす）
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          H=$(TZ=Asia/Tokyo date +%H)
-          if [ "$H" -ge 7 ] && [ "$H" -lt 23 ]; then gh workflow run record.yml --ref main || true; fi
+          gh workflow run record.yml --ref main || true

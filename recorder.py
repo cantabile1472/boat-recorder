@@ -666,6 +666,16 @@ def guard(fn):
 
 
 if __name__ == '__main__':
+    _n = now()
+    if _n.hour >= 23 or _n.hour < 7 or (_n.hour == 7 and _n.minute < 30):
+        # 夜中はレースがないので、朝7:30（またはこの回の時間切れ）まで待ってから終わる。終わったら次の回が予約される
+        wake = _n.replace(hour=7, minute=30, second=0, microsecond=0)
+        if _n.hour >= 23:
+            wake += datetime.timedelta(days=1)
+        sec = min((wake - _n).total_seconds(), RUN_MIN * 60)
+        print(f'夜なので {sec/60:.0f}分 待機して終わる', flush=True)
+        time.sleep(max(0, sec))
+        raise SystemExit(0)
     log(f'開始（{RUN_MIN:.0f}分まで動く）')
     if os.environ.get('START_NOTIFY') == '1':
         notify('記録ツール 起動', f'{now():%H:%M} から記録を始めるよ')
