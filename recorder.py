@@ -225,6 +225,47 @@ def k_upd(html):
     return re.sub(r'[,\s]+', ' ', re.sub('<[^>]+>', ' ', m.group(1))).strip()
 
 
+XS = [120, 80, 60, 30, 25, 12]   # 記録だけの細かいチェック（単勝のみ）
+
+
+def k_points(html):
+    return [re.sub(r'\s+', '', v) for v in re.findall(r'oddsPoint[^>]*>([^<]*)<', html)]
+
+
+def k_split_boats(h):
+    parts = re.split(r'is-boatColor(\d) is-fs14" rowspan="4">', h)
+    o = {}
+    for k in range(1, len(parts) - 1, 2):
+        o.setdefault(int(parts[k]), parts[k + 1])
+    return o
+
+
+def k_info(jcd, R_, rl, bi):
+    bl = k_split_boats(rl); bb = k_split_boats(bi)
+    g = lambda p: (re.search(p, bi).group(1) if re.search(p, bi) else '')
+    ws = g(r'風速</span>\s*<span class="weather1_bodyUnitLabelData">\s*(\d+)m')
+    wv = g(r'波高</span>\s*<span class="weather1_bodyUnitLabelData">\s*(\d+)cm')
+    wt = g(r'水温</span>\s*<span class="weather1_bodyUnitLabelData">\s*([\d.]+)')
+    rows = []
+    for b in range(1, 7):
+        t = bl.get(b, '')
+        m = re.search(r'\d{4}\s*/\s*<span class="[^"]*">\s*([AB][12])\s*</span>', t)
+        L = re.findall(r'is-lineH2"\s+rowspan="4">\s*([^<]*)<br\s*/>\s*([^<]*)<br\s*/>\s*([^<]*)</td>', t)
+        tm = re.search(r'<td rowspan="4">\s*(\d\.\d\d)\s*</td>', bb.get(b, ''))
+        rows.append([jcd, R_, b, m.group(1) if m else '', num(L[1][0]) if len(L) > 1 else '', num(L[1][1]) if len(L) > 1 else '',
+                     num(L[3][1]) if len(L) > 3 else '', tm.group(1) if tm else '', ws, wv, wt])
+    return rows
+
+
+def k_fine(w, x):
+    q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
+    s1, h1 = w.req(KB + 'oddstf' + q)
+    od = k_odds(h1) if s1 == 200 else None
+    if od:
+        append_csv('kyotei_fine.csv', 'time,jcd,R,deadline,upd,o1,o2,o3,o4,o5,o6',
+                   [[f'{now():%H:%M:%S}', x['jcd'], x['R'], f"{x['dl']:%H:%M}", k_upd(h1)] + [od[b] for b in range(1, 7)]])
+
+
 def k_result(html):
     m = re.search(r'単勝</td>.*?numberSet1_number[^>]*>(\d)</span>.*?is-payout1">&yen;([\d,]+)', html, re.S)
     return (int(m.group(1)), int(m.group(2).replace(',', ''))) if m else None
@@ -274,15 +315,42 @@ def kyotei_main():
             if sec < 2:
                 x['st'] = 'past'
                 continue
+            xi = x.setdefault('xi', 0)
+            while xi < len(XS) and sec < XS[xi] - 8:
+                xi += 1
+            if xi < len(XS) and sec <= XS[xi]:
+                pool.submit(k_fine, w, dict(x))
+                xi += 1
+            x['xi'] = xi
             if x['snap'] >= len(SN) or sec > SN[x['snap']]:
                 if x['snap'] < len(SN) and sec - SN[x['snap']] < 7:
+                    busy = True
+                if xi < len(XS) and sec - XS[xi] < 7:
                     busy = True
                 continue
             q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
             f1 = pool.submit(w.req, KB + 'oddstf' + q)
             f2 = pool.submit(w.req, KB + 'odds3t' + q)
             f3 = pool.submit(w.req, KB + 'racelist' + q) if x['snap'] < 3 else None
+            f4 = pool.submit(w.req, KB + 'odds2tf' + q)
+            f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if x['snap'] == 2 else None
             (s1, h1), (s2, h2) = f1.result(), f2.result()
+            s4, h4 = f4.result()
+            try:
+                stamp = f'{now():%H:%M:%S}'
+                rowsF = [[x['snap'] + 1, stamp, x['jcd'], x['R'], '3t', ' '.join(k_points(h2))]]
+                if s4 == 200:
+                    rowsF.append([x['snap'] + 1, stamp, x['jcd'], x['R'], '2tf', ' '.join(k_points(h4))])
+                    if not os.path.exists(os.path.join(DDIR, 'kyotei_odds2tf_sample.html')):
+                        open(os.path.join(DDIR, 'kyotei_odds2tf_sample.html'), 'w', encoding='utf-8').write(h4)
+                append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
+                if f5:
+                    s5, h5 = f5.result()
+                    s3x, h3x = f3.result()
+                    if s5 == 200 and s3x == 200:
+                        append_csv('kyotei_info.csv', 'jcd,R,boat,cls,nat,loc,mot,tenji,ws,wv,wtemp', k_info(x['jcd'], x['R'], h3x, h5))
+            except Exception:
+                log('追加記録NG ' + traceback.format_exc().splitlines()[-1])
             if f3:
                 s3, h3 = f3.result()
                 ts = k_deadlines(h3)
@@ -374,6 +442,14 @@ def kyotei_settle():
                 continue
         s1, h1 = w.req(KB + 'oddstf' + q)
         s2, h2 = w.req(KB + 'odds3t' + q)
+        s4, h4 = w.req(KB + 'odds2tf' + q)
+        try:
+            rowsF = [['close', f'{now():%H:%M:%S}', k[0], k[1], '3t', ' '.join(k_points(h2))]]
+            if s4 == 200:
+                rowsF.append(['close', f'{now():%H:%M:%S}', k[0], k[1], '2tf', ' '.join(k_points(h4))])
+            append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
+        except Exception:
+            pass
         od = k_odds(h1) or {}
         inv = k_odds3(h2)
         boats = sorted({int(r['boat']) for r in rs})
