@@ -30,7 +30,7 @@
   "kyotei_B": {
     "th": 0.2,
     "omax": 30,
-    "notify": true,
+    "notify": false,
     "coef": {
       "lo3": 0.4657,
       "lfo": 1.101,
