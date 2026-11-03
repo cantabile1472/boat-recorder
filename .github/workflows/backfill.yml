@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: for d in ${{ github.event.inputs.days }}; do python tools/backfill_info.py $d; done
+      - run: for d in ${{ github.event.inputs.days }}; do python tools/fetch_results.py $d; [ -f data/$d/kyotei_info.csv ] || python tools/backfill_info.py $d; done
       - run: |
           git config user.name "recorder-bot"
           git config user.email "recorder-bot@users.noreply.github.com"
