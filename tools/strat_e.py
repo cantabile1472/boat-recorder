@@ -4,7 +4,7 @@ import os, json, time, subprocess, itertools, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEF = {'notify': True, 'd': 0.8, 'th': 1.0, 'lomin': 1.1, 'lomax': 10.0, 'pmin': 0.15,
-       'kinds': ['fuku', 'wide'], 'sports': ['kyotei', 'auto', 'nar'], 'max_per_race': 3}
+       'kinds': ['fuku', 'wide'], 'sports': ['kyotei', 'auto', 'nar', 'keirin'], 'max_per_race': 3}
 _C = {'t': 0, 'v': None}
 
 
@@ -83,7 +83,7 @@ def evaluate(fuku, wide, tri, nfuku, P=None):
     return out
 
 
-SPORT_OF = {'号艇': 'kyotei', '号車': 'auto', '番': 'nar'}
+SPORT_OF = {'号艇': 'kyotei', '号車': 'auto', '番': 'nar', '番車': 'keirin'}
 
 
 def lines(out, unit):
