@@ -68,6 +68,19 @@
    "auto",
    "nar"
   ],
-  "max_per_race": 3
+  "max_per_race": 3,
+  "notify_kinds": {
+   "kyotei": [
+    "fuku",
+    "wide"
+   ],
+   "auto": [
+    "wide"
+   ],
+   "nar": [
+    "fuku",
+    "wide"
+   ]
+  }
  }
 }

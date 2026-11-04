@@ -83,10 +83,17 @@ def evaluate(fuku, wide, tri, nfuku, P=None):
     return out
 
 
+SPORT_OF = {'号艇': 'kyotei', '号車': 'auto', '番': 'nar'}
+
+
 def lines(out, unit):
+    """通知文。notify_kinds（競技ごとに通知する券種）で絞る。記録は全部残す"""
     P = prm()
+    ok = {'fuku': '複勝', 'wide': 'ワイド'}
+    ks = (P.get('notify_kinds') or {}).get(SPORT_OF.get(unit, ''), P['kinds'])
+    ks = {ok[k] for k in ks if k in ok}
     res = []
-    for r in sorted([r for r in out if r[6]], key=lambda r: -r[5]):
+    for r in sorted([r for r in out if r[6] and r[0] in ks], key=lambda r: -r[5]):
         tgt = f'{r[1]}{unit}' if r[0] == '複勝' else r[1]
         res.append(f"{r[0]} {tgt}  {r[2]:.1f}〜{r[3]:.1f}倍  確率{r[4]*100:.0f}%  期待値{r[5]:.2f}（{int(P['d']*100)}%に下がっても{r[5]*P['d']:.2f}）")
     return res
