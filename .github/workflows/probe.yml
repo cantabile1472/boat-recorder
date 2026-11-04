@@ -1,0 +1,17 @@
+name: probe
+on:
+  workflow_dispatch:
+  push:
+    paths: ['probe_urls.txt']
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/probe.py | tee probe/log.txt
+      - run: |
+          git config user.name bot; git config user.email bot@example.com
+          git add probe; git commit -qm probe || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
