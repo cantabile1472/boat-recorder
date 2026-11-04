@@ -290,7 +290,7 @@ returnKaisaiDate = '20261104';
 		<ul class="site_header_nav">
 			<li class="site_header_nav_list menu" data-ratId="l-ti-sp_header_button_statusOpen" data-ratEvent="click" data-ratParam="all"><a href="javascript:void(0);">メニュー</a></li>
 						<li class="site_header_nav_list bet"><a href="https://keirin.kdreams.jp/console/device_checker/?it=1&l-id=l-ti-cmsi-headermenu_betbtn">投票</a></li>
-						<li class="site_header_nav_list login"><a href="https://in.keirin.kdreams.jp/login/?rrmac=Aomori_Racedetail_1220261103020012_Index">ログイン</a></li>
+						<li class="site_header_nav_list login"><a href="https://in.keirin.kdreams.jp/login/?pageType=odds&kakeshikiType=wide&rrmac=Aomori_Racedetail_1220261103020012_Index">ログイン</a></li>
 					</ul>
 	</div>
 	<div class="header_menu">
@@ -2563,13 +2563,13 @@ $(function() {
 						<dt>賭式</dt>
 						<dd>
 							<ul>
-									<li class="active" id="JS_ODDSNAV_3rentan" ><a href="javascript:void(0);">3連単</a></li>
+									<li class="" id="JS_ODDSNAV_3rentan" ><a href="javascript:void(0);">3連単</a></li>
 									<li class="" id="JS_ODDSNAV_2shatan" ><a href="javascript:void(0);">2車単</a></li>
 									<li class="" id="JS_ODDSNAV_3renhuku" ><a href="javascript:void(0);">3連複</a></li>
 									<li class="" id="JS_ODDSNAV_2shahuku" ><a href="javascript:void(0);">2車複</a></li>
 									<li><span class="disabled">2枠単</span></li>
 									<li><span class="disabled">2枠複</span></li>
-									<li class="" id="JS_ODDSNAV_wide" ><a href="javascript:void(0);">ワイド</a></li>
+									<li class="active" id="JS_ODDSNAV_wide" ><a href="javascript:void(0);">ワイド</a></li>
 							</ul>
 						</dd>
 					</dl>
@@ -5985,8 +5985,8 @@ $(function() {
 <!-- Contents Wrapper End -->
 <script>
 //結果ダイジェスト
-var pageType = "";
-var kakeshikiType = "3rentan";
+var pageType = "odds";
+var kakeshikiType = "wide";
 
 // 投票機能のAPI化に対応したアプリのバージョン
 var isAppBetNativeFlg = "";
