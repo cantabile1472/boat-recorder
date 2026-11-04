@@ -12,11 +12,11 @@ def get(u):
     except Exception as e:
         return 0, repr(e)
 log = []
-st, top = get(B + '/KeibaWeb/TodayRaceInfo/TopToday')
+st, top = get(B + '/KeibaWeb/TodayRaceInfo/TodayRaceInfoTop')
 open('data/nar_pilot/top.html', 'w', encoding='utf-8').write(top); log.append(f'top {st} {len(top)}')
 links = sorted(set(re.findall(r'href="(/KeibaWeb/TodayRaceInfo/[^"]+)"', top)))
 log += links[:80]
-race = [l for l in links if 'RaceList' in l][:1]
+race = [l for l in links if 'RaceList' in l or 'DebaTable' in l or 'k_babaCode' in l][:1]
 if race:
     st, rl = get(B + race[0].replace('&amp;', '&')); open('data/nar_pilot/racelist.html', 'w', encoding='utf-8').write(rl); log.append(f'racelist {st} {len(rl)} {race[0]}')
     l2 = sorted(set(re.findall(r'href="(/KeibaWeb/TodayRaceInfo/[^"]+)"', rl))); log += ['--- racelist links'] + l2[:120]
