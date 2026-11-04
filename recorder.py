@@ -333,6 +333,8 @@ def kyotei_main():
             f2 = pool.submit(w.req, KB + 'odds3t' + q)
             f3 = pool.submit(w.req, KB + 'racelist' + q) if x['snap'] < 3 else None
             f4 = pool.submit(w.req, KB + 'odds2tf' + q)
+            f6 = pool.submit(w.req, KB + 'oddsk' + q)
+            f7 = pool.submit(w.req, KB + 'odds3f' + q)
             f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if x['snap'] == 2 else None
             (s1, h1), (s2, h2) = f1.result(), f2.result()
             s4, h4 = f4.result()
@@ -343,6 +345,15 @@ def kyotei_main():
                     rowsF.append([x['snap'] + 1, stamp, x['jcd'], x['R'], '2tf', ' '.join(k_points(h4))])
                     if not os.path.exists(os.path.join(DDIR, 'kyotei_odds2tf_sample.html')):
                         open(os.path.join(DDIR, 'kyotei_odds2tf_sample.html'), 'w', encoding='utf-8').write(h4)
+                if s1 == 200:
+                    rowsF.append([x['snap'] + 1, stamp, x['jcd'], x['R'], 'tf', ' '.join(k_points(h1))])
+                for kd, fx in [('k', f6), ('3f', f7)]:
+                    sx, hx = fx.result()
+                    if sx == 200:
+                        rowsF.append([x['snap'] + 1, stamp, x['jcd'], x['R'], kd, ' '.join(k_points(hx))])
+                        pth = os.path.join(DDIR, f'kyotei_odds{kd}_sample.html')
+                        if not os.path.exists(pth):
+                            open(pth, 'w', encoding='utf-8').write(hx)
                 append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
                 if f5:
                     s5, h5 = f5.result()
@@ -443,10 +454,18 @@ def kyotei_settle():
         s1, h1 = w.req(KB + 'oddstf' + q)
         s2, h2 = w.req(KB + 'odds3t' + q)
         s4, h4 = w.req(KB + 'odds2tf' + q)
+        s6, h6 = w.req(KB + 'oddsk' + q)
+        s7, h7 = w.req(KB + 'odds3f' + q)
         try:
             rowsF = [['close', f'{now():%H:%M:%S}', k[0], k[1], '3t', ' '.join(k_points(h2))]]
             if s4 == 200:
                 rowsF.append(['close', f'{now():%H:%M:%S}', k[0], k[1], '2tf', ' '.join(k_points(h4))])
+            if s1 == 200:
+                rowsF.append(['close', f'{now():%H:%M:%S}', k[0], k[1], 'tf', ' '.join(k_points(h1))])
+            if s6 == 200:
+                rowsF.append(['close', f'{now():%H:%M:%S}', k[0], k[1], 'k', ' '.join(k_points(h6))])
+            if s7 == 200:
+                rowsF.append(['close', f'{now():%H:%M:%S}', k[0], k[1], '3f', ' '.join(k_points(h7))])
             append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
         except Exception:
             pass
