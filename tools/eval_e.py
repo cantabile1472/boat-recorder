@@ -3,6 +3,8 @@
 import sys, os, re, csv, json, time, gzip, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 HD = sys.argv[1]; D = f'data/{HD}'
+ALL = len(sys.argv) > 2 and sys.argv[2] == 'all'   # all のときは買い目以外の全候補も答え合わせ
+SRC, OUT = ('e_all.csv', 'e_eval_all') if ALL else ('e_picks.csv', 'e_eval')
 KNAME = {'01': '桐生', '02': '戸田', '03': '江戸川', '04': '平和島', '05': '多摩川', '06': '浜名湖', '07': '蒲郡', '08': '常滑',
          '09': '津', '10': '三国', '11': 'びわこ', '12': '住之江', '13': '尼崎', '14': '鳴門', '15': '丸亀', '16': '児島',
          '17': '宮島', '18': '徳山', '19': '下関', '20': '若松', '21': '芦屋', '22': '福岡', '23': '唐津', '24': '大村'}
@@ -76,7 +78,7 @@ def keirin_pay():
     return res
 
 
-rows = list(csv.DictReader(open(f'{D}/e_picks.csv', encoding='utf-8')))
+rows = list(csv.DictReader(open(f'{D}/{SRC}', encoding='utf-8')))
 kt = sorted({(KJ[r['place']], int(r['R'])) for r in rows if r['sport'].startswith('競艇') and r['place'] in KJ})
 with ThreadPoolExecutor(6) as ex:
     KP = dict(zip(kt, ex.map(lambda x: kyotei_pay(*x), kt)))
@@ -97,7 +99,7 @@ for r in rows:
         continue
     pay = pays.get((r['kind'], key(r['sel'])), 0)
     out.append(dict(r, sp=sp, snap=snap, pay=pay))
-with open(f'{D}/e_eval.csv', 'w', encoding='utf-8', newline='') as f:
+with open(f'{D}/{OUT}.csv', 'w', encoding='utf-8', newline='') as f:
     w = csv.DictWriter(f, fieldnames=list(out[0].keys()) if out else ['sp'])
     w.writeheader(); w.writerows(out)
 L = [f'# 戦略E 答え合わせ（{HD}）', '', '1点100円で全部買ったとして計算。「1分前判定」が通知と同じ条件。', '',
@@ -115,5 +117,7 @@ L += ['', '## 的中した買い目（1分前判定）：判定時の下限オ�
 for x in out:
     if x['snap'] == '3' and x['pay'] > 0:
         L.append(f"- {x['sp']} {x['place']}{x['R']}R {x['kind']} {x['sel']}：{float(x['lo']):.1f}〜{float(x['hi']):.1f}倍 → {x['pay']/100:.1f}倍（確率{float(x['p'])*100:.0f}%）")
-open(f'{D}/e_eval.md', 'w', encoding='utf-8').write('\n'.join(L) + '\n')
-print('\n'.join(L))
+if not ALL:
+    open(f'{D}/e_eval.md', 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+    print('\n'.join(L))
+print(OUT, len(out))
