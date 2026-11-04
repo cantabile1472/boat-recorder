@@ -1,2 +1,1 @@
-0 200 239338 https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=odds&kakeshikiType=wide -> https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=odds&kakeshikiType=wide
-1 200 239344 https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=odds&kakeshikiType=3rentan -> https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=odds&kakeshikiType=3rentan
+0 200 239334 https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=showResult -> https://keirin.kdreams.jp/aomori/racedetail/1220261103020012/?pageType=showResult
