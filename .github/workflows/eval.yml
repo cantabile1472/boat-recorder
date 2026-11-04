@@ -1,0 +1,23 @@
+name: 戦略Eの答え合わせ
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: '日付（YYYYMMDD）'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: python tools/eval_e.py ${{ github.event.inputs.day }}
+      - run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+          git add data
+          git commit -qm "戦略Eの答え合わせ" || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
