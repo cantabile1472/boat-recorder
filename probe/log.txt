@@ -1,0 +1,2 @@
+0 200 237333 https://keirin.kdreams.jp/toyohashi/racedetail/4520261102030006/?pageType=odds&kakeshikiType=wide -> https://keirin.kdreams.jp/toyohashi/racedetail/4520261102030006/?pageType=odds&kakeshikiType=wide
+1 200 237299 https://keirin.kdreams.jp/toyohashi/racedetail/4520261102030006/ -> https://keirin.kdreams.jp/toyohashi/racedetail/4520261102030006/
