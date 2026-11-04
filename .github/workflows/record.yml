@@ -32,7 +32,11 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           START_NOTIFY: '1'
-        run: python recorder.py
+        run: |
+          python tools/nar_recorder.py > nar_log.txt 2>&1 &
+          python recorder.py
+          wait
+          tail -20 nar_log.txt || true
       - name: 最後に保存
         if: always()
         run: |
