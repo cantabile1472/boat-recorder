@@ -1,20 +1,26 @@
-<!-- resources/views/home.blade.php -->
-
 <!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="format-detection" content="telephone=no">
-        <title>エラー</title>
+        <title>本日のレース情報｜地方競馬情報サイト</title>
     
     <!-- CSSファイルの読み込み -->
             <link rel="stylesheet" href="/KeibaWeb/resources/css/reset.css?t=20260201_1" type="text/css" media="all" />
             <link rel="stylesheet" href="/KeibaWeb/resources/css/common.css?t=20260201_1" type="text/css" media="all" />
             <link rel="stylesheet" href="/KeibaWeb/resources/css/message.css?t=20260201_1" type="text/css" media="all" />
-            <link rel="stylesheet" href="/KeibaWeb/resources/css/style1.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/raceinfo.css?20260304_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/todayRace.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/DataDownload.css?t=20260201_1" type="text/css" media="all" />
     
     <!-- JSファイルの読み込み -->
+            <script type="text/javascript" src="/KeibaWeb/resources/js/jquery-1.9.1.min.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/common.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/common2.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/monthltconveninfo.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/odd.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/recentButton.js?t=20260130_1"></script>
         <link rel="shortcut icon" href="/KeibaWeb/resources/img/favicon.ico" />
 </head>
 <body>
@@ -124,15 +130,886 @@
 </header>
 <div class="breadCrumb"></div>
  <!-- Head部分の読み込み -->
+            <!-- <div class="pageHeader">
+<h2>開催日程</h2>
+</div> -->
+<div class="subMenu">
+    <ul class="clearfix">
+        <li>
+            <a id="TodayRaceInfoTop" href="../TodayRaceInfo/TodayRaceInfoTop">本日のレース情報</a>
+        </li>
+        <li>
+            <a id="MonthlyConveneInfoTop" href="../MonthlyConveneInfo/MonthlyConveneInfoTop">月別開催日程</a>
+        </li>
+         
+            <li>
+                <a id="calendar" href="/RaceScheduleList/RaceScheduleListTop.html" class="">日程表ダウンロード</a>
+            </li>
+            </ul>
+</div>
+ <!-- サブメニュー部分の読み込み -->
         <main>
         <div id="mainContainer">
-  <article class="errorInfo">
-    <table class="cover_error" border="0"><tbody><tr><td>
-      <p></p>
-      <p>404 not Found<br />
-お探しのページは見つかりません。</p>
-    </td></tr></tbody></table>
-  </article>
+
+    
+    <article class="todayRace">
+        <div class="innerWrapper">
+        <h3>本日のレース</h3>
+            <table class="today">
+                <tbody>
+                    <tr>
+                        <th></th>
+                        <th>1R</th>
+                        <th>2R</th>
+                        <th>3R</th>
+                        <th>4R</th>
+                        <th>5R</th>
+                        <th>6R</th>
+                        <th>7R</th>
+                        <th>8R</th>
+                        <th>9R</th>
+                        <th>10R</th>
+                        <th>11R</th>
+                        <th>12R</th>
+                        <th></th>
+                    </tr>
+                                            <tr>
+                            <td>
+                                <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36">
+                                    門別
+                                                                            <img src="/KeibaWeb/resources/img/icon_nightrace.png?bld=BUILD_DATE" alt="">
+                                                                    </a>
+                            </td>
+                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=1'"                                         >
+
+                                                                                        14:20
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=2'"                                         >
+
+                                                                                        14:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=3'"                                         >
+
+                                                                                        15:20
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=4'"                                         >
+
+                                                                                        15:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=5'"                                         >
+
+                                                                                        16:25
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=6'"                                         >
+
+                                                                                        16:55
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=7'"                                         >
+
+                                                                                        17:30
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=8'"                                         >
+
+                                                                                        18:00
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=9'"                                         >
+
+                                                                                        18:35
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=10'"                                         >
+
+                                                                                        19:10
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=11'"                                         >
+
+                                                                                        19:50
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=12'"                                         >
+
+                                                                                        20:30
+                                                                                        <br>
+                                            重賞
+                                        </button>
+                                    </td>
+                                                                                        <td>
+                                                                    <button class="refund noPage">払戻金</button>
+                                                            </td>
+                        </tr>
+                                            <tr>
+                            <td>
+                                <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10">
+                                    盛岡
+                                                                    </a>
+                            </td>
+                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=1'"                                         >
+
+                                            確定前
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=2'"                                         >
+
+                                                                                        12:05
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=3'"                                         >
+
+                                                                                        12:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=4'"                                         >
+
+                                                                                        13:15
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=5'"                                         >
+
+                                                                                        13:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=6'"                                         >
+
+                                                                                        14:25
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=7'"                                         >
+
+                                                                                        15:00
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=8'"                                         >
+
+                                                                                        15:35
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=9'"                                         >
+
+                                                                                        16:10
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=10'"                                         >
+
+                                                                                        16:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=11'"                                         >
+
+                                                                                        17:25
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10&amp;k_raceNo=12'"                                         >
+
+                                                                                        18:05
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                        <td>
+                                                                    <button class="refund noPage">払戻金</button>
+                                                            </td>
+                        </tr>
+                                            <tr>
+                            <td>
+                                <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19">
+                                    船橋
+                                                                            <img src="/KeibaWeb/resources/img/icon_nightrace.png?bld=BUILD_DATE" alt="">
+                                                                    </a>
+                            </td>
+                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=1'"                                         >
+
+                                                                                        14:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=2'"                                         >
+
+                                                                                        15:10
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=3'"                                         >
+
+                                                                                        15:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=4'"                                         >
+
+                                                                                        16:15
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=5'"                                         >
+
+                                                                                        16:45
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=6'"                                         >
+
+                                                                                        17:15
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=7'"                                         >
+
+                                                                                        17:45
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=8'"                                         >
+
+                                                                                        18:15
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=9'"                                         >
+
+                                                                                        18:50
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=10'"                                         >
+
+                                                                                        19:25
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=11'"                                         >
+
+                                                                                        20:05
+                                                                                        <br>
+                                            重賞
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=12'"                                         >
+
+                                                                                        20:50
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                        <td>
+                                                                    <button class="refund noPage">払戻金</button>
+                                                            </td>
+                        </tr>
+                                            <tr>
+                            <td>
+                                <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22">
+                                    金沢
+                                                                    </a>
+                            </td>
+                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=1'"                                         >
+
+                                                                                        12:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=2'"                                         >
+
+                                                                                        13:25
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=3'"                                         >
+
+                                                                                        14:00
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=4'"                                         >
+
+                                                                                        14:35
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=5'"                                         >
+
+                                                                                        15:15
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=6'"                                         >
+
+                                                                                        15:55
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=7'"                                         >
+
+                                                                                        16:30
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=8'"                                         >
+
+                                                                                        17:05
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=9'"                                         >
+
+                                                                                        17:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=10'"                                         >
+
+                                                                                        18:20
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22&amp;k_raceNo=11'"                                         >
+
+                                                                                        19:00
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td></td>
+                                                                                        <td>
+                                                                    <button class="refund noPage">払戻金</button>
+                                                            </td>
+                        </tr>
+                                            <tr>
+                            <td>
+                                <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27">
+                                    園田
+                                                                    </a>
+                            </td>
+                                                                                                                                <td>
+                                        <button
+                                            class="  grade "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=1'"                                         >
+
+                                            成績
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class="  grade "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=2'"                                         >
+
+                                            成績
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class="  soon "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=3'"                                         >
+
+                                                                                        11:40
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=4'"                                         >
+
+                                                                                        12:10
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=5'"                                         >
+
+                                                                                        12:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=6'"                                         >
+
+                                                                                        13:10
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=7'"                                         >
+
+                                                                                        13:40
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=8'"                                         >
+
+                                                                                        14:15
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=9'"                                         >
+
+                                                                                        14:50
+                                                                                        <br>
+                                            
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=10'"                                         >
+
+                                                                                        15:25
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=11'"                                         >
+
+                                                                                        16:00
+                                                                                        <br>
+                                            重賞
+                                        </button>
+                                    </td>
+                                                                                                                                                                <td>
+                                        <button
+                                            class=" "
+                                             onclick="location.href='/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=12'"                                         >
+
+                                                                                        16:40
+                                                                                        <br>
+                                            特別
+                                        </button>
+                                    </td>
+                                                                                        <td>
+                                                                    <button class="refund" onclick="location.href='/KeibaWeb/TodayRaceInfo/RefundMoneyList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27'">
+                                        払戻金
+                                    </button>
+                                                            </td>
+                        </tr>
+                                    </tbody>
+            </table>
+        </div>
+    </article>
+
+
+
+
+        <article class="attention middle">
+            <div class="innerWrapper">
+                <p>※アクセス時点から2分後以降に実施される本日の全レースのうち、発走時刻が最も近いレースについて、ボタンが黄色で表示されます。</p>
+                <p>※本日のレースについて、発走時刻に変更があった場合は赤字で表示されます。</p>
+            </div>
+        </article>
+
+    <article class="courseInfo">
+        <div class="innerWrapper">
+                        <h3>開催場</h3>
+                        <table class="course">
+                <tbody>
+                    <tr>
+                                                    <th class="">
+                                11/3（火）
+                            </th>
+                                                    <th class="active">
+                                本日
+                            </th>
+                                                    <th class="">
+                                11/5（木）
+                            </th>
+                                                    <th class="">
+                                11/6（金）
+                            </th>
+                                                    <th class="">
+                                11/7（土）
+                            </th>
+                                            </tr>
+                    <tr>
+                                            <td>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36" class="courseName  " >門別</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=19" class="courseName  night " >船橋</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22" class="courseName  " >金沢</a>
+                                                    </td>
+                                            <td>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36" class="courseName  night " >門別</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10" class="courseName  " >盛岡</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19" class="courseName  night " >船橋</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22" class="courseName  " >金沢</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27" class="courseName  " >園田</a>
+                                                    </td>
+                                            <td>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=36" class="courseName  night " >門別</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=19" class="courseName  night " >船橋</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=23" class="courseName  " >笠松</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=27" class="courseName  " >園田</a>
+                                                    </td>
+                                            <td>
+                                                            <a  href="javascript:void(0);" class="courseName enable  night " onclick="return false;">帯広ば</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=19" class="courseName  night " >船橋</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=23" class="courseName  " >笠松</a>
+                                                            <a href="/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=27" class="courseName  " >園田</a>
+                                                    </td>
+                                            <td>
+                                                            <a  href="javascript:void(0);" class="courseName enable  night " onclick="return false;">帯広ば</a>
+                                                            <a  href="javascript:void(0);" class="courseName enable  night " onclick="return false;">高知</a>
+                                                            <a  href="javascript:void(0);" class="courseName enable  night " onclick="return false;">佐賀</a>
+                                                    </td>
+                                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="gradeInfo">
+        <div class="innerWrapper">
+            <h3 id="majorRace">重賞競走</h3>
+            <table class="grade">
+                <tbody>
+                    <tr>
+                                                    <th class="">
+                                11/3（火）
+                            </th>
+                                                    <th class="active">
+                                本日
+                            </th>
+                                                    <th class="">
+                                11/5（木）
+                            </th>
+                                                    <th class="">
+                                11/6（金）
+                            </th>
+                                                    <th class="">
+                                11/7（土）
+                            </th>
+                                            </tr>
+                    <tr>
+                                                    <td>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36&amp;k_raceNo=9" class="raceName">
+                                            <span class="courseArea">門別競馬場</span>
+                                            <span class="raceArea">ＪＢＣ２歳優駿</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36&amp;k_raceNo=10" class="raceName">
+                                            <span class="courseArea">門別競馬場</span>
+                                            <span class="raceArea">北海道２歳スプリント</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=6" class="raceName">
+                                            <span class="courseArea">金沢競馬場</span>
+                                            <span class="raceArea">かがやきスプリント</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=7" class="raceName">
+                                            <span class="courseArea">金沢競馬場</span>
+                                            <span class="raceArea">ＪＢＣレディスクラシック</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=8" class="raceName">
+                                            <span class="courseArea">金沢競馬場</span>
+                                            <span class="raceArea">ＪＢＣスプリント</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=9" class="raceName">
+                                            <span class="courseArea">金沢競馬場</span>
+                                            <span class="raceArea">ＪＢＣクラシック</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=10" class="raceName">
+                                            <span class="courseArea">金沢競馬場</span>
+                                            <span class="raceArea">能登のために復興応援ありがとう</span>
+                                    </a>
+                                                            </td>
+                                                    <td>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=12" class="raceName">
+                                            <span class="courseArea">門別競馬場</span>
+                                            <span class="raceArea">道営スプリント</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=11" class="raceName">
+                                            <span class="courseArea">船橋競馬場</span>
+                                            <span class="raceArea">平和賞</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=11" class="raceName">
+                                            <span class="courseArea">園田競馬場</span>
+                                            <span class="raceArea">楠賞</span>
+                                    </a>
+                                                            </td>
+                                                    <td>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F05&amp;k_babaCode=36&amp;k_raceNo=12" class="raceName">
+                                            <span class="courseArea">門別競馬場</span>
+                                            <span class="raceArea">道営記念</span>
+                                    </a>
+                                                                    <a href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F05&amp;k_babaCode=23&amp;k_raceNo=12" class="raceName">
+                                            <span class="courseArea">笠松競馬場</span>
+                                            <span class="raceArea">ラブミーチャン記念</span>
+                                    </a>
+                                                            </td>
+                                                    <td>
+                                                            </td>
+                                                    <td>
+                                                            </td>
+                                            </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+    <article class="dataDownload">
+    <div class="innerWrapper">
+        <table class="dataDownloadTbl daily">
+            <tbody>
+                <tr>
+                                        <th>2026年11月4日分 データダウンロード</th>
+                                    </tr>
+                <tr>
+                    <td>
+                        <a href="/KeibaWeb/DataDownload/RaceDataDownload?type=daily"
+                            class="linkBtn">
+                            <p>レース情報</p>
+                        </a>
+                                                <a href="/KeibaWeb/DataDownload/OddsDataDownload?type=daily"
+                            class="linkBtn">
+                            <p>オッズ情報</p>
+                        </a>
+                                                <a href="/pdf/manual/data_pdf_manual.pdf"
+                            target="_blank" class="pdfBtn">
+                            <p>データ説明</p>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</article>
+    <article class="attention">
+        <div class="innerWrapper">
+                        <p>※2014年4月以降、出馬表など各ページで「ナ」と表示されるのは、南関東のナイター開催日における照明点灯時のレースに限られます。<br>　馬場別成績においてナイターとして集計されるのも同様の扱いとなります。</p>
+                        <p>※勝馬投票券は、必ず正規の窓口または電話投票で購入してください。ノミ行為・代行業は、法律で禁止されています。<br>　20歳未満の者は、勝馬投票券を購入することはできません。出馬表・成績・オッズ等は、主催者発表のものと照合してください。</p>
+                    </div>
+    </article>
 </div>
     </main>
 </body>
