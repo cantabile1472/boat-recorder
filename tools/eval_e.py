@@ -57,9 +57,9 @@ def auto_pay():
             continue
         o = {}
         for x in (ri.get('fns') or {}).get('list', []):
-            o[('複勝', str(x['carNo']))] = int(x['refund'])
+            o[('複勝', str(x['carNo']))] = int(x.get('refund') or 0)
         for x in (ri.get('wid') or {}).get('list', []):
-            o[('ワイド', key(f"{x['1thCarNo']}-{x['2thCarNo']}"))] = int(x['refund'])
+            o[('ワイド', key(f"{x['1thCarNo']}-{x['2thCarNo']}"))] = int(x.get('refund') or 0)
         res[(APL.get(int(d['pc']), str(d['pc'])), int(d['R']))] = o
     return res
 
