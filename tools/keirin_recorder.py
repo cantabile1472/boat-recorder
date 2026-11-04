@@ -25,7 +25,7 @@ def log(m):
 def get(u):
     for _ in range(3):
         try:
-            rq = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0', 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja'})
+            rq = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja'})
             with urllib.request.urlopen(rq, timeout=25) as r:
                 b = r.read()
                 if r.headers.get('Content-Encoding') == 'gzip':
