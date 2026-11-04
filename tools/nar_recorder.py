@@ -2,6 +2,10 @@
 # 締切時のオッズと払戻は、あとで公式の月別データから取る
 import os, re, json, time, gzip, datetime, threading, urllib.request
 from concurrent.futures import ThreadPoolExecutor
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import strat_e
+BABA = {'3': '帯広', '10': '盛岡', '11': '水沢', '18': '浦和', '19': '船橋', '20': '大井', '21': '川崎', '22': '金沢', '23': '笠松', '24': '名古屋', '27': '園田', '28': '姫路', '31': '高知', '32': '佐賀', '36': '門別'}
 JST = datetime.timezone(datetime.timedelta(hours=9))
 now = lambda: datetime.datetime.now(JST)
 RUN_MIN = float(os.environ.get('RUN_MINUTES', 330)); T0 = time.time()
@@ -62,6 +66,20 @@ def snap(x):
     with LOCK:
         with open(os.path.join(DDIR, 'nar_odds.jsonl'), 'a', encoding='utf-8') as f:
             f.write(json.dumps(rec, ensure_ascii=False, separators=(',', ':')) + '\n')
+    if x['snap'] in (2, 3):
+        try:
+            oe = strat_e.evaluate(*strat_e.nar_parse(rec))
+            nm = BABA.get(str(int(x['bc'])), x['bc'])
+            close = x['post'] - datetime.timedelta(minutes=2)
+            strat_e.save(DDIR, f"地方{x['snap']}", nm, x['R'], f"{close:%H:%M}", oe)
+            PE = strat_e.prm()
+            if x['snap'] == 3 and PE.get('notify') and 'nar' in PE['sports']:
+                le = strat_e.lines(oe, '番')
+                if le:
+                    strat_e.notify(f"【E】地方競馬 {nm} {x['R']}R 締切{close:%H:%M}頃（発走{x['post']:%H:%M}）", '\n'.join(le))
+                    log(f"【E】{nm}{x['R']}R " + ' / '.join(le))
+        except Exception as e:
+            log('戦略E NG ' + repr(e))
     if not os.path.exists(os.path.join(DDIR, 'nar_tanfuku_sample.html')):
         open(os.path.join(DDIR, 'nar_tanfuku_sample.html'), 'w', encoding='utf-8').write(res['tf'])
     return len(rec['tf']), len(rec['tri3'])

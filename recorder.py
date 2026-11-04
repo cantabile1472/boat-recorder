@@ -3,6 +3,9 @@
 import os, re, json, gzip, time, math, datetime, subprocess, traceback, threading
 import urllib.request, urllib.parse, http.cookiejar
 from concurrent.futures import ThreadPoolExecutor
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools'))
+import strat_e
 
 JST = datetime.timezone(datetime.timedelta(hours=9))
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -420,6 +423,21 @@ def kyotei_main():
                     x['ntf'] = 1
                 elif x['snap'] == 3 and x.get('ntf'):
                     pool.submit(notify, '【A】最終判定 見送り ' + tag, '直前で条件から外れたよ（買わない）')
+            if x['snap'] in (2, 3):
+                try:
+                    s6, h6 = f6.result()
+                    pe = strat_e.kyotei_parse(k_points(h1), k_points(h6) if s6 == 200 else [], k_points(h2))
+                    if pe:
+                        oe = strat_e.evaluate(*pe)
+                        strat_e.save(DDIR, f"競艇{x['snap']}", KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", oe)
+                        PE = strat_e.prm()
+                        if x['snap'] == int(PE.get('notify_snap', 3)) and PE.get('notify') and 'kyotei' in PE['sports']:
+                            le = strat_e.lines(oe, '号艇')
+                            if le:
+                                pool.submit(strat_e.notify, f"【E】競艇 {tag}", '\n'.join(le))
+                                log('【E】競艇 ' + tag + ' ' + ' / '.join(le))
+                except Exception:
+                    log('戦略E NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] >= len(SN):
                 x['st'] = 'past'
         time.sleep(0.5 if busy else 3)
@@ -637,6 +655,19 @@ def auto_main():
             tag = f"{APL[x['pc']]} {x['R']}R 締切{x['dl']:%H:%M}"
             if x['snap'] <= 3 and prm.get('notify', False) and buys:
                 notify(('【オートA】★最終判定 買い ' if x['snap'] == 3 else '【オートA】買い候補 ') + tag, '\n'.join(buys), x['snap'] == 3)
+            if x['snap'] in (2, 3):
+                try:
+                    pe = strat_e.auto_parse(bd)
+                    oe = strat_e.evaluate(*pe)
+                    strat_e.save(DDIR, f"オート{x['snap']}", APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", oe)
+                    PE = strat_e.prm()
+                    if x['snap'] == int(PE.get('notify_snap', 3)) and PE.get('notify') and 'auto' in PE['sports']:
+                        le = strat_e.lines(oe, '号車')
+                        if le:
+                            strat_e.notify(f"【E】オート {tag}", '\n'.join(le))
+                            log('【E】オート ' + tag + ' ' + ' / '.join(le))
+                except Exception:
+                    log('戦略E NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] >= len(SN):
                 x['st'] = 'past'
         time.sleep(0.5 if busy else 3)

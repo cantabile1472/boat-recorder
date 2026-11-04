@@ -1,54 +1,73 @@
 {
-  "run_minutes": 330,
-  "kyotei_A": {
-    "w1": 0.21,
-    "w2": 0.66,
-    "c": 0.0,
-    "th": 0.85,
-    "fomax": 10,
-    "fo_bands": [
-      [
-        0,
-        2
-      ],
-      [
-        5,
-        10
-      ]
-    ],
-    "notify": false,
-    "final_only": true
-  },
-  "auto_A": {
-    "w1": 0.33,
-    "w2": 0.57,
-    "c": -0.04,
-    "th": 0.95,
-    "fomax": 10,
-    "notify": false
-  },
-  "kyotei_B": {
-    "th": 0.2,
-    "omax": 30,
-    "notify": false,
-    "coef": {
-      "lo3": 0.4657,
-      "lfo": 1.101,
-      "lfo2": -0.7505,
-      "lgap": -0.6353,
-      "tr13": 0.9593,
-      "p3tr": 0.7029,
-      "rgap": 0.2501,
-      "R": 0.0067,
-      "lfav": 0.4707,
-      "over": -0.0264,
-      "b1": -0.5345,
-      "b2": 0.1197,
-      "b3": 0.2105,
-      "b4": 0.3453,
-      "b5": -0.1151,
-      "b6": -0.0618,
-      "intercept": -2.6779
-    }
+ "run_minutes": 330,
+ "kyotei_A": {
+  "w1": 0.21,
+  "w2": 0.66,
+  "c": 0.0,
+  "th": 0.85,
+  "fomax": 10,
+  "fo_bands": [
+   [
+    0,
+    2
+   ],
+   [
+    5,
+    10
+   ]
+  ],
+  "notify": false,
+  "final_only": true
+ },
+ "auto_A": {
+  "w1": 0.33,
+  "w2": 0.57,
+  "c": -0.04,
+  "th": 0.95,
+  "fomax": 10,
+  "notify": false
+ },
+ "kyotei_B": {
+  "th": 0.2,
+  "omax": 30,
+  "notify": false,
+  "coef": {
+   "lo3": 0.4657,
+   "lfo": 1.101,
+   "lfo2": -0.7505,
+   "lgap": -0.6353,
+   "tr13": 0.9593,
+   "p3tr": 0.7029,
+   "rgap": 0.2501,
+   "R": 0.0067,
+   "lfav": 0.4707,
+   "over": -0.0264,
+   "b1": -0.5345,
+   "b2": 0.1197,
+   "b3": 0.2105,
+   "b4": 0.3453,
+   "b5": -0.1151,
+   "b6": -0.0618,
+   "intercept": -2.6779
   }
+ },
+ "strategy_E": {
+  "notify": true,
+  "notify_snap": 3,
+  "d": 0.8,
+  "th": 1.0,
+  "lomin": 1.1,
+  "lomax": 10.0,
+  "pmin": 0.15,
+  "kinds": [
+   "fuku",
+   "wide"
+  ],
+  "sports": [
+   "kyotei",
+   "auto",
+   "nar"
+  ],
+  "max_per_race": 3
+ }
 }
