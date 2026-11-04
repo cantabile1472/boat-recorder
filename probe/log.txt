@@ -1,0 +1,7 @@
+0 200 37407 https://keirin.kdreams.jp/racecard/2026/11/04/ -> https://keirin.kdreams.jp/racecard/2026/11/04/
+1 200 137513 https://keirin.netkeiba.com/ -> https://keirin.netkeiba.com/
+2 ERR 28 https://www.oddspark.com/keirin/ -> https://www.oddspark.com/keirin/
+3 200 787785 https://www.winticket.jp/keirin/ -> https://www.winticket.jp/keirin/
+4 200 77055 https://keirin.jp/pc/top -> https://keirin.jp/pc/top
+5 200 41951 https://www.chariloto.com/keirin -> https://www.chariloto.com/login
+6 200 153453 https://keirin.kdreams.jp/ -> https://keirin.kdreams.jp/
