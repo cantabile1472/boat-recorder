@@ -625,6 +625,7 @@ def auto_main():
                 continue
             prm = cfg()['auto_A']
             x['snap'] += 1
+            auto_save_full(x['snap'], x['pc'], x['R'], bd)
             rows, buys = [], []
             for a in act:
                 fo, pc_, ev, by = strategy_a(od[a], p3[a], prm)
@@ -642,6 +643,22 @@ def auto_main():
         if not any(x['st'] == 'wait' for x in races):
             break
     log('オート: 監視おわり')
+
+
+AKEYS = ['tnsOddsList', 'fnsOddsList', 'rtwOddsList', 'rfwOddsList', 'widOddsList', 'rt3OddsList', 'rf3OddsList', 'salesInfo']
+
+
+def auto_save_full(snap, pc, R_, bd, extra=None):
+    try:
+        rec = {'snap': snap, 'time': f'{now():%H:%M:%S}', 'pc': pc, 'R': R_}
+        rec.update({k: bd.get(k) for k in AKEYS})
+        if extra:
+            rec.update(extra)
+        with LOCK:
+            with open(os.path.join(DDIR, 'auto_odds_full.jsonl'), 'a', encoding='utf-8') as f:
+                f.write(json.dumps(rec, ensure_ascii=False, separators=(',', ':')) + '\n')
+    except Exception:
+        pass
 
 
 def auto_settle():
@@ -670,6 +687,9 @@ def auto_settle():
             else:
                 continue
         bc = A.post('Odds', int(k[0]), int(k[1]))
+        if bc:
+            auto_save_full('close', int(k[0]), int(k[1]), bc, {'refundInfo': (br or {}).get('refundInfo'),
+                           'order': [[r_.get('order'), r_.get('carNo')] for r_ in ((br or {}).get('raceResult') or [])]})
         od, act, p3, votes, upd = a_calc(bc) if bc else ({}, [], {}, '', '')
         cars = sorted({int(r['car']) for r in rs})
         win = '|'.join(str(c) for c in sorted(pays))
