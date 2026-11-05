@@ -44,6 +44,7 @@ jobs:
         run: |
           python tools/eval_e.py $(TZ=Asia/Tokyo date +%Y%m%d) > /dev/null 2>&1 || true
           python tools/eval_e.py $(TZ=Asia/Tokyo date +%Y%m%d) all > /dev/null 2>&1 || true
+          python tools/drop_table.py check $(TZ=Asia/Tokyo date +%Y%m%d) > /dev/null 2>&1 || true
           git add data || true
           git commit -qm "記録（最終保存）" || true
           git pull -q --rebase -X theirs origin main || true
