@@ -15,6 +15,8 @@ races = []
 for s in lst:
     jo = s['RaceStudiumNo']
     for i, t in enumerate(s['DeadlineTimeAll']):
+        if not (len(t) == 5 and t[2] == ':' and t[:2].isdigit()):
+            continue
         dl = now().replace(hour=int(t[:2]), minute=int(t[3:]), second=0, microsecond=0)
         if dl > now() + datetime.timedelta(minutes=4):
             races.append((dl, jo, i + 1))
