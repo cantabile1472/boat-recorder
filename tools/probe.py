@@ -11,4 +11,5 @@ for i, u in enumerate(open('probe_urls.txt', encoding='utf-8').read().split()):
     except Exception as e:
         b = repr(e).encode(); st = 'ERR'; fu = u; hd = ''
     open(f'probe/{i:02d}.html', 'wb').write(b)
+    import time; time.sleep(float(os.environ.get('SLEEP','0')))
     print(i, st, len(b), u, '|', hd, flush=True)
