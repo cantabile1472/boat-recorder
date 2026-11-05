@@ -10,6 +10,8 @@ KNAME = {'01': '桐生', '02': '戸田', '03': '江戸川', '04': '平和島', '
          '17': '宮島', '18': '徳山', '19': '下関', '20': '若松', '21': '芦屋', '22': '福岡', '23': '唐津', '24': '大村'}
 KJ = {v: k for k, v in KNAME.items()}
 APL = {2: '川口', 3: '伊勢崎', 4: '浜松', 5: '飯塚', 6: '山陽'}
+BABA = {'3': '帯広', '10': '盛岡', '11': '水沢', '18': '浦和', '19': '船橋', '20': '大井', '21': '川崎', '22': '金沢', '23': '笠松', '24': '名古屋', '27': '園田', '28': '姫路', '31': '高知', '32': '佐賀', '36': '門別'}
+BJ = {v: k for k, v in BABA.items()}
 
 
 def get(u):
@@ -44,6 +46,22 @@ def kyotei_pay(j, r):
             pay = re.search(r'&yen;([\d,]+)', row)
             if nums and pay:
                 out[(kd, key('-'.join(nums)))] = int(pay.group(1).replace(',', ''))
+    return out or None
+
+
+def nar_pay(bc, r):
+    """地方競馬：成績ページの払戻 {('複勝','5'):円, ('ワイド','4-5'):円}"""
+    h = get(f'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate={HD[:4]}%2F{HD[4:6]}%2F{HD[6:]}&k_raceNo={r}&k_babaCode={bc}')
+    i = h.find('newRefundTable')
+    if i < 0:
+        return None
+    seg = h[i:h.find('</section>', i)]
+    out, kind = {}, ''
+    for t in re.finditer(r'<td class="title"[^>]*>\s*([^<]+?)\s*</td>|<td class="[ad]">\s*([^<]+?)\s*</td>\s*<td class="refundMoney">\s*([\d,]+)円', seg):
+        if t.group(1):
+            kind = t.group(1)
+        elif kind in ('複勝', 'ワイド'):
+            out[(kind, key(t.group(2)))] = int(t.group(3).replace(',', ''))
     return out or None
 
 
@@ -83,6 +101,9 @@ kt = sorted({(KJ[r['place']], int(r['R'])) for r in rows if r['sport'].startswit
 with ThreadPoolExecutor(6) as ex:
     KP = dict(zip(kt, ex.map(lambda x: kyotei_pay(*x), kt)))
 AP, CP = auto_pay(), keirin_pay()
+nt = sorted({(BJ[r['place']], int(r['R'])) for r in rows if r['sport'].startswith('地方') and r['place'] in BJ})
+with ThreadPoolExecutor(4) as ex:
+    NP = dict(zip(nt, ex.map(lambda x: nar_pay(*x), nt)))
 out = []
 for r in rows:
     sp, snap = r['sport'][:-1], r['sport'][-1]
@@ -93,6 +114,8 @@ for r in rows:
         pays = AP.get((r['place'], R))
     elif sp == '競輪':
         pays = CP.get((r['place'], R))
+    elif sp == '地方':
+        pays = NP.get((BJ.get(r['place']), R))
     else:
         pays = None
     if pays is None:
@@ -106,7 +129,7 @@ L = [f'# 戦略E 答え合わせ（{HD}）', '', '1点100円で全部買った�
      '| 判定 | 競技 | 券種 | 点数 | 的中 | 的中率 | 回収率 |', '|---|---|---|---|---|---|---|']
 lab = {'2': '2分前前後', '3': '1分前（通知）'}
 for snap in ('3', '2'):
-    for sp in ('競艇', 'オート', '競輪', '全部'):
+    for sp in ('競艇', 'オート', '競輪', '地方', '全部'):
         for kd in ('複勝', 'ワイド', '計'):
             g = [x for x in out if x['snap'] == snap and (sp == '全部' or x['sp'] == sp) and (kd == '計' or x['kind'] == kd)]
             if not g:
