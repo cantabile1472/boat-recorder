@@ -96,13 +96,6 @@
   ],
   "table_min": 0.7,
   "table_cap": 1.0,
-  "simple_rules": {
-   "nar": {
-    "kind": "fuku",
-    "lomin": 1.1,
-    "lomax": 3.0,
-    "evmin": 0.9
-   }
-  }
+  "simple_rules": {}
  }
 }
