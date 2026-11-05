@@ -1,10 +1,9 @@
-0 200 8 https://race.boatcast.jp/txt/03/bc_smt_od1_20261001_03_01.txt | LM=Thu, 01 Oct 2026 15:07:00 GMT ET="406898eb8d8599239e385af88d62e9ff" CT=text/plain Date=Thu, 05 Nov 2026 06:02:44 GMT
-1 200 555 https://race.boatcast.jp/txt/03/bc_kakutei_od1_20261001_03_01.txt | LM=Thu, 01 Oct 2026 15:07:00 GMT ET="41b035d77d66bd47be1a9a6b577d45a1" CT=text/plain Date=Thu, 05 Nov 2026 06:02:44 GMT
-2 ERR 28 https://race.boatcast.jp/txt/03/bc_smt_hyousu1_20261001_03_01.txt | 
-3 200 323 https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20261001_03_01.txt | LM=Thu, 01 Oct 2026 15:07:00 GMT ET="baea4a4d61860428cb4e10d96dee7e4f" CT=text/plain Date=Thu, 05 Nov 2026 06:02:45 GMT
-4 200 711 https://race.boatcast.jp/txt/03/bc_kakutei_hyousu3_20261001_03_01.txt | LM=Thu, 01 Oct 2026 15:07:00 GMT ET="ab5d8ddcea8e9b87cf9fa522641dbc0e" CT=text/plain Date=Thu, 05 Nov 2026 06:02:46 GMT
-5 ERR 28 https://race.boatcast.jp/txt/03/bc_kakutei_od1_20250101_03_01.txt | 
-6 ERR 28 https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20250101_03_01.txt | 
-7 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_10.txt | LM=Thu, 05 Nov 2026 06:02:45 GMT ET="0953e7840e79b2dc3fae452caba58a15" CT=text/plain Date=Thu, 05 Nov 2026 06:02:47 GMT
-8 ERR 28 https://race.boatcast.jp/txt/01/bc_smt_hyousu1_20261105_01_10.txt | 
-9 200 16287 https://race.boatcast.jp/api_txt/getHoldingList2_20261105.json | LM=Thu, 05 Nov 2026 06:02:39 GMT ET=W/"056779f1cb354d9a14b637b0d6fac2dd" CT=application/json Date=Thu, 05 Nov 2026 06:02:50 GMT
+0 ERR 28 https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20260101_03_01.txt | 
+1 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20250701_01_01.txt | 
+2 200 339 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20250101_01_01.txt | LM=Mon, 03 Mar 2025 09:09:40 GMT ET="bdbb709354597fd66cd1d17b72741f87" CT=text/plain Date=Thu, 05 Nov 2026 06:04:21 GMT
+3 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20240701_01_01.txt | 
+4 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20230701_01_01.txt | 
+5 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_od1_20230701_01_01.txt | 
+6 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:05:43 GMT
+7 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:06:04 GMT
+8 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:06:24 GMT
