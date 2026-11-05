@@ -3,7 +3,7 @@ import sys, os, gzip, urllib.request, re
 os.makedirs('probe', exist_ok=True)
 for i, u in enumerate(open('probe_urls.txt', encoding='utf-8').read().split()):
     try:
-        rq = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja'})
+        rq = urllib.request.Request(u, headers={'User-Agent': os.environ.get('UA', 'Mozilla/5.0'), 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja'})
         with urllib.request.urlopen(rq, timeout=30) as r:
             b = r.read()
             if r.headers.get('Content-Encoding') == 'gzip': b = gzip.decompress(b)
