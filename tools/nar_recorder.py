@@ -13,7 +13,7 @@ B = 'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/'
 TODAY = now(); HD = TODAY.strftime('%Y%m%d'); DS = TODAY.strftime('%Y%%2F%m%%2F%d')
 DDIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', HD); os.makedirs(DDIR, exist_ok=True)
 LOCK = threading.Lock()
-SN = [360, 240, 180, 150]   # 発走の何秒前に取るか（締切は発走の約2分前）
+SN = [360, 240, 180, 150, 60]   # 発走の何秒前に取るか（締切は発走の約2分前。最後の60秒前は締切後＝最終オッズ）
 PAGES = {'tf': 'OddsTanFuku', 'wide': 'OddsWide', 'q': 'OddsUmLenFuku', 'ex': 'OddsUmLenTan', 'tri': 'Odds3LenFuku', 'tri3': 'Odds3LenTan'}
 def log(m):
     print(f'[{now():%H:%M:%S}] 地方 {m}', flush=True)
@@ -101,7 +101,7 @@ def main():
     while time.time() - T0 < RUN_MIN * 60 and rs:
         for x in list(rs):
             sec = (x['post'] - now()).total_seconds()
-            if x['snap'] >= len(SN) or sec < 120:
+            if x['snap'] >= len(SN) or sec < 30:
                 rs.remove(x); continue
             if sec <= SN[x['snap']]:
                 x['snap'] += 1
