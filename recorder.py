@@ -228,7 +228,7 @@ def k_upd(html):
     return re.sub(r'[,\s]+', ' ', re.sub('<[^>]+>', ' ', m.group(1))).strip()
 
 
-XS = [120, 80, 60, 30, 25, 12]   # 記録だけの細かいチェック（単勝のみ）
+XS = [150, 120, 80, 60, 30, 25, 12]   # 締切オッズ予想用の細かい記録（単勝・複勝・ワイド・3連単）
 
 
 def k_points(html):
@@ -261,12 +261,23 @@ def k_info(jcd, R_, rl, bi):
 
 
 def k_fine(w, x):
+    """締切オッズ予想用の細かい記録：単勝・複勝（oddstf）、ワイド（oddsk）、3連単（odds3t）を全部残す"""
     q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
-    s1, h1 = w.req(KB + 'oddstf' + q)
+    with ThreadPoolExecutor(3) as ex:
+        f1, f2, f3 = ex.submit(w.req, KB + 'oddstf' + q), ex.submit(w.req, KB + 'oddsk' + q), ex.submit(w.req, KB + 'odds3t' + q)
+    s1, h1 = f1.result()
     od = k_odds(h1) if s1 == 200 else None
     if od:
+        t = f'{now():%H:%M:%S}'
         append_csv('kyotei_fine.csv', 'time,jcd,R,deadline,upd,o1,o2,o3,o4,o5,o6',
-                   [[f'{now():%H:%M:%S}', x['jcd'], x['R'], f"{x['dl']:%H:%M}", k_upd(h1)] + [od[b] for b in range(1, 7)]])
+                   [[t, x['jcd'], x['R'], f"{x['dl']:%H:%M}", k_upd(h1)] + [od[b] for b in range(1, 7)]])
+        sec = int((x['dl'] - now()).total_seconds())
+        rows = [[sec, t, x['jcd'], x['R'], 'tf', ' '.join(k_points(h1))]]
+        for kd, fx in (('k', f2), ('3t', f3)):
+            sx, hx = fx.result()
+            if sx == 200:
+                rows.append([sec, t, x['jcd'], x['R'], kd, ' '.join(k_points(hx))])
+        append_csv('kyotei_fine_full.csv', 'sec,time,jcd,R,kind,values', rows)
 
 
 def k_result(html):
