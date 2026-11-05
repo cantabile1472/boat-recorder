@@ -274,31 +274,34 @@ def k_racer1(rl):
         return {}
 
 
-def strategy_f(x, od, prm):
-    """戦略F：弱い1号艇が人気薄なら単勝を買う。戻り値 (買い, 理由文)"""
+def strategy_f(x, od, p3, prm):
+    """戦略F改：弱い1号艇（勝率4.5〜5）で、3連単換算の勝率が間違えてそうな時（40%未満）に、単勝市場がさらに弱気なら単勝を買う
+    戻り値 (買い, 通知文, 動き)"""
     i = x.get('r1') or {}
-    o = od.get(1, 0)
+    o = od.get(1, 0); p = (p3 or {}).get(1, 0)
     o1 = (x.get('s1') or {}).get(1, (0, 0))[0]
     nat = i.get('nat', '')
-    why = []
     ok = True
-    if nat == '' or not (prm.get('natmin', 0) <= nat < prm.get('natmax', 5.0)):
+    if nat == '' or not (prm.get('natmin', 4.5) <= nat < prm.get('natmax', 5.0)):
         ok = False
-    if prm.get('f_max', 0) is not None and (i.get('F', '') == '' or i['F'] > prm.get('f_max', 0)):
+    if i.get('F', '') == '' or i['F'] > prm.get('f_max', 0):
         ok = False
-    if not (prm.get('omin', 3.0) <= o <= prm.get('omax', 12.0)):
+    if prm.get('tenji_max') and not (i.get('tenji_rank') and i['tenji_rank'] <= prm['tenji_max']):
         ok = False
-    if x['R'] > prm.get('rmax', 12) or x['dl'].hour >= prm.get('hour_max', 24):
+    if prm.get('require_course1', True) and i.get('course1') is False:
+        ok = False
+    if not (prm.get('omin', 0) <= o <= prm.get('omax', 30)) or o <= 0 or p <= 0:
+        ok = False
+    if p >= prm.get('p3max', 0.40):
+        ok = False
+    gap = o * p          # 単勝オッズ×3連単換算勝率（＝3連単基準の期待値。1.07以上＝単勝市場の方が3連単より1号艇を嫌ってる）
+    if gap < prm.get('gapmin', 1.07):
         ok = False
     trend = ''
     if o1 > 0:
-        if o >= o1 * 1.2:
-            trend = '↑上昇中'
-        elif o <= o1 * 0.8:
-            trend = '↓下降中'
-        else:
-            trend = '→横ばい'
-    txt = f"1号艇 単勝 今{o:.1f}倍（3分前{o1:.1f}倍{trend}） {i.get('cls', '?')} 勝率{nat} F{i.get('F', '?')} ST{i.get('st', '?')}"
+        trend = '↑上昇中' if o >= o1 * 1.2 else ('↓下降中' if o <= o1 * 0.8 else '→横ばい')
+    txt = (f"1号艇 単勝 今{o:.1f}倍（3分前{o1:.1f}倍{trend}） 3連単換算の勝率{p*100:.0f}% 3連単基準の期待値{gap:.2f}\n"
+           f"{i.get('cls', '?')} 勝率{nat} F{i.get('F', '?')} ST{i.get('st', '?')} 展示{i.get('tenji_rank', '?')}位 進入{'1コース' if i.get('course1') else ('?' if i.get('course1') is None else '前付けあり')}")
     return ok, txt, trend
 
 
@@ -415,7 +418,19 @@ def kyotei_main():
                     s5, h5 = f5.result()
                     s3x, h3x = f3.result()
                     if s5 == 200 and s3x == 200:
-                        append_csv('kyotei_info.csv', 'jcd,R,boat,cls,nat,loc,mot,tenji,ws,wv,wtemp', k_info(x['jcd'], x['R'], h3x, h5))
+                        rowsI = k_info(x['jcd'], x['R'], h3x, h5)
+                        append_csv('kyotei_info.csv', 'jcd,R,boat,cls,nat,loc,mot,tenji,ws,wv,wtemp', rowsI)
+                        if not os.path.exists(os.path.join(DDIR, 'kyotei_beforeinfo_sample.html')):
+                            open(os.path.join(DDIR, 'kyotei_beforeinfo_sample.html'), 'w', encoding='utf-8').write(h5)
+                        try:
+                            x.setdefault('r1', {})
+                            tj = {r[2]: num(r[7]) for r in rowsI if r[7] not in ('', None) and num(r[7]) > 0}
+                            if 1 in tj:
+                                x['r1']['tenji_rank'] = sorted(tj.values()).index(tj[1]) + 1
+                            order = re.findall(r'table1_boatImage1Number[^>]*>\s*(\d)\s*<', h5)
+                            x['r1']['course1'] = (order[0] == '1') if order else None
+                        except Exception:
+                            pass
             except Exception:
                 log('追加記録NG ' + traceback.format_exc().splitlines()[-1])
             if f3:
@@ -481,11 +496,11 @@ def kyotei_main():
             prmF = cfg().get('strategy_F') or {}
             if x['snap'] in (1, 2, 3) and prmF:
                 try:
-                    okF, txtF, trF = strategy_f(x, od, prmF)
+                    okF, txtF, trF = strategy_f(x, od, p3, prmF)
                     i1 = x.get('r1') or {}
-                    append_csv('f_log.csv', 'snap,time,jcd,place,R,deadline,odds,odds3min,cls,nat,F,st,trend,buy',
+                    append_csv('f_log2.csv', 'snap,time,jcd,place,R,deadline,odds,odds3min,p3,cls,nat,F,st,tenji_rank,course1,trend,buy',
                                [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0),
-                                 (x.get('s1') or {}).get(1, (0, 0))[0], i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('st', ''), trF, int(okF)]])
+                                 (x.get('s1') or {}).get(1, (0, 0))[0], round((p3 or {}).get(1, 0), 4), i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('st', ''), i1.get('tenji_rank', ''), i1.get('course1', ''), trF, int(okF)]])
                     if okF and x['snap'] == int(prmF.get('notify_snap', 3)) and prmF.get('notify'):
                         pool.submit(notify, f"【F】競艇 {tag}", txtF, True)
                         log('【F】競艇 ' + tag + ' ' + txtF)

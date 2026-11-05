@@ -101,12 +101,14 @@
  "strategy_F": {
   "notify": true,
   "notify_snap": 3,
-  "natmin": 0,
+  "natmin": 4.5,
   "natmax": 5.0,
   "f_max": 0,
-  "omin": 3.0,
-  "omax": 12.0,
-  "rmax": 12,
-  "hour_max": 24
+  "tenji_max": 2,
+  "p3max": 0.4,
+  "omin": 0,
+  "omax": 30,
+  "require_course1": true,
+  "gapmin": 1.07
  }
 }
