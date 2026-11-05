@@ -1,0 +1,29 @@
+name: 過去の締切オッズ（競艇）
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: '開始日 YYYYMMDD'
+        required: true
+      days:
+        description: '日数'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+          for i in $(seq 0 $(( ${{ github.event.inputs.days }} - 1 ))); do
+            d=$(date -d "${{ github.event.inputs.start }} +$i day" +%Y%m%d)
+            python tools/backfill_close.py $d
+            git add data/kclose && git commit -qm "過去の締切オッズ $d" || true
+            for k in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          done
