@@ -85,6 +85,15 @@
    "keirin": [
     "wide"
    ]
-  }
+  },
+  "notify_mode": "table",
+  "table_sports": [
+   "kyotei"
+  ],
+  "table_kinds": [
+   "fuku"
+  ],
+  "table_min": 0.7,
+  "table_cap": 1.0
  }
 }

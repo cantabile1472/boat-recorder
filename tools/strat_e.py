@@ -27,8 +27,40 @@ def prm():
                 v = {}
         d = dict(DEF)
         d.update(v.get('strategy_E', {}))
+        d['_table'] = load_table()
         _C['v'] = d
     return _C['v']
+
+
+def load_table():
+    """下がり方の表（data/drop_table.json）。GitHub の最新を読む"""
+    t = None
+    if not os.environ.get('NO_GIT'):
+        try:
+            t = json.loads(subprocess.run(['git', 'show', 'origin/main:data/drop_table.json'], cwd=ROOT,
+                                          capture_output=True, text=True, timeout=30).stdout)
+        except Exception:
+            t = None
+    if t is None:
+        try:
+            t = json.load(open(os.path.join(ROOT, 'data', 'drop_table.json'), encoding='utf-8'))
+        except Exception:
+            t = {}
+    return t.get('table', {})
+
+
+T_LO = [(1, 2), (2, 3), (3, 5), (5, 10), (10, 1e9)]
+T_EV = [(0, 0.8), (0.8, 1.0), (1.0, 1.2), (1.2, 1.5), (1.5, 1e9)]
+
+
+def table_coef(tb, kind, lo, ev, minn=5):
+    """表の係数（締切で下限オッズが何割残るか）。件数が少ないマスは None"""
+    i = next((n for n, (a, b) in enumerate(T_LO) if a <= lo < b), None)
+    k = next((n for n, (a, b) in enumerate(T_EV) if a <= ev < b), None)
+    c = tb.get(f'{kind}|{i}|{k}')
+    if c and c.get('n', 0) >= minn and c.get('d'):
+        return c['d']
+    return None
 
 
 def num(s):
@@ -89,6 +121,8 @@ SPORT_OF = {'号艇': 'kyotei', '号車': 'auto', '番': 'nar', '番車': 'keiri
 def lines(out, unit):
     """通知文。notify_kinds（競技ごとに通知する券種）で絞る。記録は全部残す"""
     P = prm()
+    if P.get('notify_mode') == 'table':
+        return table_lines(out, unit, P)
     ok = {'fuku': '複勝', 'wide': 'ワイド'}
     ks = (P.get('notify_kinds') or {}).get(SPORT_OF.get(unit, ''), P['kinds'])
     ks = {ok[k] for k in ks if k in ok}
@@ -97,6 +131,29 @@ def lines(out, unit):
         tgt = f'{r[1]}{unit}' if r[0] == '複勝' else r[1]
         res.append(f"{r[0]} {tgt}  {r[2]:.1f}〜{r[3]:.1f}倍  確率{r[4]*100:.0f}%  期待値{r[5]:.2f}（{int(P['d']*100)}%に下がっても{r[5]*P['d']:.2f}）")
     return res
+
+
+def table_lines(out, unit, P):
+    """表モード：表のある競技・券種だけ。締切期待値の予想（期待値×係数、係数は上限 table_cap）が table_min 以上なら通知"""
+    sp = SPORT_OF.get(unit, '')
+    if sp not in P.get('table_sports', ['kyotei']):
+        return []
+    kinds = {'fuku': '複勝', 'wide': 'ワイド'}
+    ks = {kinds[k] for k in P.get('table_kinds', ['fuku'])}
+    tb = P.get('_table') or {}
+    res = []
+    for r in out:
+        if r[0] not in ks or r[2] < P.get('lomin', 1.1) or r[2] > P.get('lomax', 10):
+            continue
+        d = table_coef(tb, r[0], r[2], r[5])
+        if d is None:
+            continue
+        pe = r[5] * min(d, P.get('table_cap', 1.0))
+        if pe >= P.get('table_min', 0.7):
+            res.append((pe, r))
+    res.sort(key=lambda x: -x[0])
+    return [f"{r[0]} {r[1]}{unit if r[0] == '複勝' else ''}  {r[2]:.1f}〜{r[3]:.1f}倍  確率{r[4]*100:.0f}%  締切期待値の予想{pe:.2f}"
+            for pe, r in res[:int(P.get('max_per_race', 3))]]
 
 
 def save(ddir, sport, place, R_, dl, out):
