@@ -141,7 +141,7 @@ def table_lines(out, unit, P):
     sr = (P.get('simple_rules') or {}).get(sp)
     if sr:      # 表がまだない競技は簡易ルール（1分前の期待値と下限オッズの範囲だけで判定）
         res = sorted([r for r in out if r[0] in {'fuku': '複勝', 'wide': 'ワイド'}.get(sr.get('kind', 'fuku'), '複勝')
-                      and sr.get('lomin', 1.1) <= r[2] < sr.get('lomax', 3) and r[5] >= sr.get('evmin', 0.9)], key=lambda r: -r[5])
+                      and sr.get('lomin', 1.1) <= r[2] < sr.get('lomax', 3) and sr.get('evmin', 0.9) <= r[5] < sr.get('evmax', 99)], key=lambda r: -r[5])
         return [f"{r[0]} {r[1]}{unit if r[0] == '複勝' else ''}  {r[2]:.1f}〜{r[3]:.1f}倍  確率{r[4]*100:.0f}%  期待値{r[5]:.2f}"
                 for r in res[:int(P.get('max_per_race', 3))]]
     kinds = {'fuku': '複勝', 'wide': 'ワイド'}
