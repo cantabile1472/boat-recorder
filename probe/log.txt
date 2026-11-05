@@ -1,0 +1,2 @@
+0 ERR 28 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F04&k_raceNo=3&k_babaCode=27 -> https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F04&k_raceNo=3&k_babaCode=27
+1 ERR 28 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RefundMoneyList?k_raceDate=2026%2F11%2F04&k_babaCode=27 -> https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RefundMoneyList?k_raceDate=2026%2F11%2F04&k_babaCode=27
