@@ -1,0 +1,17 @@
+name: bcwatch
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - run: NRACE=4 python tools/bcwatch.py
+      - if: always()
+        run: |
+          git config user.name bot; git config user.email bot@example.com
+          git add probe; git commit -qm bcwatch || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
