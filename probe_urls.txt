@@ -1,0 +1,10 @@
+https://race.boatcast.jp/txt/03/bc_smt_od1_20261001_03_01.txt
+https://race.boatcast.jp/txt/03/bc_kakutei_od1_20261001_03_01.txt
+https://race.boatcast.jp/txt/03/bc_smt_hyousu1_20261001_03_01.txt
+https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20261001_03_01.txt
+https://race.boatcast.jp/txt/03/bc_kakutei_hyousu3_20261001_03_01.txt
+https://race.boatcast.jp/txt/03/bc_kakutei_od1_20250101_03_01.txt
+https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20250101_03_01.txt
+https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_10.txt
+https://race.boatcast.jp/txt/01/bc_smt_hyousu1_20261105_01_10.txt
+https://race.boatcast.jp/api_txt/getHoldingList2_20261105.json
