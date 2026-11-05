@@ -260,6 +260,48 @@ def k_info(jcd, R_, rl, bi):
     return rows
 
 
+def k_racer1(rl):
+    """出走表から1号艇の 級別・全国勝率・F本数・平均ST を取る（戦略F用）"""
+    try:
+        t = k_split_boats(rl).get(1, '')
+        m = re.search(r'\d{4}\s*/\s*<span class="[^"]*">\s*([AB][12])\s*</span>', t)
+        L = re.findall(r'is-lineH2"\s+rowspan="4">\s*([^<]*)<br\s*/>\s*([^<]*)<br\s*/>\s*([^<]*)</td>', t)
+        F = re.search(r'F(\d)', L[0][0]) if L else None
+        st = num(L[0][2]) if L else ''
+        nat = num(L[1][0]) if len(L) > 1 else ''
+        return {'cls': m.group(1) if m else '', 'nat': nat, 'F': int(F.group(1)) if F else '', 'st': st}
+    except Exception:
+        return {}
+
+
+def strategy_f(x, od, prm):
+    """戦略F：弱い1号艇が人気薄なら単勝を買う。戻り値 (買い, 理由文)"""
+    i = x.get('r1') or {}
+    o = od.get(1, 0)
+    o1 = (x.get('s1') or {}).get(1, (0, 0))[0]
+    nat = i.get('nat', '')
+    why = []
+    ok = True
+    if nat == '' or not (prm.get('natmin', 0) <= nat < prm.get('natmax', 5.0)):
+        ok = False
+    if prm.get('f_max', 0) is not None and (i.get('F', '') == '' or i['F'] > prm.get('f_max', 0)):
+        ok = False
+    if not (prm.get('omin', 3.0) <= o <= prm.get('omax', 12.0)):
+        ok = False
+    if x['R'] > prm.get('rmax', 12) or x['dl'].hour >= prm.get('hour_max', 24):
+        ok = False
+    trend = ''
+    if o1 > 0:
+        if o >= o1 * 1.2:
+            trend = '↑上昇中'
+        elif o <= o1 * 0.8:
+            trend = '↓下降中'
+        else:
+            trend = '→横ばい'
+    txt = f"1号艇 単勝 今{o:.1f}倍（3分前{o1:.1f}倍{trend}） {i.get('cls', '?')} 勝率{nat} F{i.get('F', '?')} ST{i.get('st', '?')}"
+    return ok, txt, trend
+
+
 def k_fine(w, x):
     """締切オッズ予想用の細かい記録：単勝・複勝（oddstf）、ワイド（oddsk）、3連単（odds3t）を全部残す"""
     q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
@@ -378,6 +420,8 @@ def kyotei_main():
                 log('追加記録NG ' + traceback.format_exc().splitlines()[-1])
             if f3:
                 s3, h3 = f3.result()
+                if s3 == 200 and not x.get('r1'):
+                    x['r1'] = k_racer1(h3)
                 ts = k_deadlines(h3)
                 if len(ts) >= x['R']:
                     hh, mm = map(int, ts[x['R'] - 1].split(':'))
@@ -434,6 +478,19 @@ def kyotei_main():
                     x['ntf'] = 1
                 elif x['snap'] == 3 and x.get('ntf'):
                     pool.submit(notify, '【A】最終判定 見送り ' + tag, '直前で条件から外れたよ（買わない）')
+            prmF = cfg().get('strategy_F') or {}
+            if x['snap'] in (1, 2, 3) and prmF:
+                try:
+                    okF, txtF, trF = strategy_f(x, od, prmF)
+                    i1 = x.get('r1') or {}
+                    append_csv('f_log.csv', 'snap,time,jcd,place,R,deadline,odds,odds3min,cls,nat,F,st,trend,buy',
+                               [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0),
+                                 (x.get('s1') or {}).get(1, (0, 0))[0], i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('st', ''), trF, int(okF)]])
+                    if okF and x['snap'] == int(prmF.get('notify_snap', 3)) and prmF.get('notify'):
+                        pool.submit(notify, f"【F】競艇 {tag}", txtF, True)
+                        log('【F】競艇 ' + tag + ' ' + txtF)
+                except Exception:
+                    log('戦略F NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()

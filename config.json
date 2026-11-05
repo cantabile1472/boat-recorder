@@ -52,7 +52,7 @@
   }
  },
  "strategy_E": {
-  "notify": true,
+  "notify": false,
   "notify_snap": 3,
   "d": 0.8,
   "th": 1.0,
@@ -97,5 +97,16 @@
   "table_min": 0.7,
   "table_cap": 1.0,
   "simple_rules": {}
+ },
+ "strategy_F": {
+  "notify": true,
+  "notify_snap": 3,
+  "natmin": 0,
+  "natmax": 5.0,
+  "f_max": 0,
+  "omin": 3.0,
+  "omax": 12.0,
+  "rmax": 12,
+  "hour_max": 24
  }
 }
