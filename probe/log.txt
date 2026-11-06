@@ -1,9 +1,3 @@
-0 ERR 28 https://race.boatcast.jp/txt/03/bc_kakutei_hyousu1_20260101_03_01.txt | 
-1 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20250701_01_01.txt | 
-2 200 339 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20250101_01_01.txt | LM=Mon, 03 Mar 2025 09:09:40 GMT ET="bdbb709354597fd66cd1d17b72741f87" CT=text/plain Date=Thu, 05 Nov 2026 06:04:21 GMT
-3 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20240701_01_01.txt | 
-4 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_hyousu1_20230701_01_01.txt | 
-5 ERR 28 https://race.boatcast.jp/txt/01/bc_kakutei_od1_20230701_01_01.txt | 
-6 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:05:43 GMT
-7 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:06:04 GMT
-8 200 552 https://race.boatcast.jp/txt/01/bc_smt_od1_20261105_01_11.txt | LM=Thu, 05 Nov 2026 05:58:19 GMT ET="5afe6dc33acdbeafba0bb234d29398ed" CT=text/plain Date=Thu, 05 Nov 2026 06:06:24 GMT
+0 200 138688 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F06%2F10&k_raceNo=3&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:03 GMT
+1 200 70763 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F10&k_raceNo=3&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:23 GMT
+2 200 65632 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F06%2F10&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:44 GMT
