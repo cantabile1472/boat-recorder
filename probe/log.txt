@@ -1,3 +1,2 @@
-0 200 138688 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F06%2F10&k_raceNo=3&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:03 GMT
-1 200 70763 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F10&k_raceNo=3&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:23 GMT
-2 200 65632 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F06%2F10&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:32:44 GMT
+0 200 277136 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F06%2F10&k_raceNo=5&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:33:50 GMT
+1 200 104677 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F10&k_raceNo=5&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:34:11 GMT
