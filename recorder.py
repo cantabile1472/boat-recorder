@@ -797,6 +797,22 @@ def auto_main():
             tag = f"{APL[x['pc']]} {x['R']}R 締切{x['dl']:%H:%M}"
             if x['snap'] <= 3 and prm.get('notify', False) and buys:
                 notify(('【オートA】★最終判定 買い ' if x['snap'] == 3 else '【オートA】買い候補 ') + tag, '\n'.join(buys), x['snap'] == 3)
+            # 戦略G（オート）：1号車（最前ハンデ）で3連単換算の1着率が中穴帯なら単勝を通知
+            if x['snap'] == 3 and 1 in act and not x.get('g_sent'):
+                try:
+                    GA = cfg().get('strategy_G_auto', {})
+                    pmin, pmax, smax = float(GA.get('pmin', 0.05)), float(GA.get('pmax', 0.30)), float(GA.get('star_max', 0.15))
+                    hit = pmin <= p3[1] < pmax
+                    append_csv('g_auto_log.csv', ['snap', 'time', 'pc', 'place', 'R', 'deadline', 'odds', 'p3', 'votes', 'hit'],
+                               [[x['snap'], f'{now():%H:%M:%S}', x['pc'], APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", od[1], f'{p3[1]:.4f}', votes, int(hit)]])
+                    if hit and GA.get('notify', False):
+                        star = '★' if p3[1] < smax else ''
+                        x['g_sent'] = True
+                        notify(f"{star}【G】{star}オート {tag}（40秒前）",
+                               f"1号車 単勝 今{od[1]:.1f}倍 3連単換算の1着率{p3[1]*100:.0f}%（単勝プール{votes}票）", bool(star))
+                        log(f"【G】オート {tag} 1号車 {od[1]}倍 換算{p3[1]*100:.0f}%")
+                except Exception:
+                    log('戦略G(オート) NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     pe = strat_e.auto_parse(bd)
