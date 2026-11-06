@@ -1,4 +1,4 @@
-0 200 111818 https://db.netkeiba.com/race/202605040811/ | LM=None ET=None CT=text/html; charset=EUC-JP Date=Fri, 06 Nov 2026 23:05:48 GMT
-1 200 132199 https://race.netkeiba.com/race/shutuba_past.html?race_id=202605040811 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:06:09 GMT
-2 200 95951 https://db.netkeiba.com/race/list/20261101/ | LM=None ET=None CT=text/html; charset=EUC-JP Date=Fri, 06 Nov 2026 23:06:29 GMT
-3 ERR 28 https://www.jra.go.jp/datafile/seiseki/replay/2026/ | 
+0 200 128061 https://race.netkeiba.com/odds/index.html?type=b8&race_id=202605040811&housiki=c0 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:31:45 GMT
+1 200 57328 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202605040811&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:06 GMT
+2 200 62367 https://race.netkeiba.com/odds/index.html?type=b1&race_id=202605040811 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:26 GMT
+3 200 77880 https://race.netkeiba.com/odds/index.html?type=b8&race_id=202601010101&housiki=c0 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:46 GMT
