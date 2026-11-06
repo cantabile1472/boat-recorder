@@ -1,2 +1,0 @@
-0 200 277136 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F06%2F10&k_raceNo=5&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:33:50 GMT
-1 200 104677 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F10&k_raceNo=5&k_babaCode=27 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 02:34:11 GMT
