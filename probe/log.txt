@@ -1,4 +1,4 @@
-0 200 128061 https://race.netkeiba.com/odds/index.html?type=b8&race_id=202605040811&housiki=c0 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:31:45 GMT
-1 200 57328 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202605040811&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:06 GMT
-2 200 62367 https://race.netkeiba.com/odds/index.html?type=b1&race_id=202605040811 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:26 GMT
-3 200 77880 https://race.netkeiba.com/odds/index.html?type=b8&race_id=202601010101&housiki=c0 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 23:32:46 GMT
+0 200 116145 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:33:39 GMT
+1 200 906 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=1&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:00 GMT
+2 200 7230 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=6&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:20 GMT
+3 200 115697 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202406010101&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:40 GMT
