@@ -1,0 +1,26 @@
+name: 過去データ（オート）
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: '開始日 YYYYMMDD'
+        required: true
+      end:
+        description: '終了日 YYYYMMDD'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+          python tools/backfill_auto.py ${{ github.event.inputs.start }} ${{ github.event.inputs.end }}
+          git add data/auto && git commit -qm "過去データ（オート） ${{ github.event.inputs.start }}〜${{ github.event.inputs.end }}" || true
+          for k in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
