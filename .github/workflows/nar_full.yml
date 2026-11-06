@@ -1,0 +1,22 @@
+name: 地方競馬 土台データ
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: '月（1〜12）'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: python tools/nar_full.py 2026 ${{ github.event.inputs.month }}
+      - run: |
+          git config user.name "recorder-bot"; git config user.email "recorder-bot@users.noreply.github.com"
+          git add data/nar && git commit -qm "地方競馬 土台データ 2026/${{ github.event.inputs.month }}" || true
+          for i in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 7; done
