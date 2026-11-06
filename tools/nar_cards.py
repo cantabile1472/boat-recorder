@@ -2,7 +2,7 @@
 #  使い方: python tools/nar_cards.py 2026 6   → data/nar/cards_202606.jsonl.gz（馬ごと1行）
 import sys, os, re, io, gzip, json, time, urllib.request, glob
 from concurrent.futures import ThreadPoolExecutor
-import pandas as pd
+import csv
 BABA = {'帯広ば': '3', '盛岡': '10', '水沢': '11', '浦和': '18', '船橋': '19', '大井': '20', '川崎': '21', '金沢': '22', '笠松': '23', '名古屋': '24', '園田': '27', '姫路': '28', '高知': '31', '佐賀': '32', '門別': '36'}
 B = 'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/'
 
@@ -118,8 +118,8 @@ def one(args):
 
 if __name__ == '__main__':
     Y, M = int(sys.argv[1]), int(sys.argv[2])
-    p = pd.read_csv(f'data/nar/prob_{Y}{M:02d}.csv.gz')
-    races = sorted({(str(d), BABA.get(b), int(r)) for b, d, r in zip(p['場'], p['日'], p['R']) if BABA.get(b)})
+    with gzip.open(f'data/nar/prob_{Y}{M:02d}.csv.gz', 'rt', encoding='utf-8') as f:
+        races = sorted({(str(r['日']), BABA.get(r['場']), int(r['R'])) for r in csv.DictReader(f) if BABA.get(r['場'])})
     print(Y, M, len(races), 'レース', flush=True)
     out = []
     with ThreadPoolExecutor(6) as ex:
