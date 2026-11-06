@@ -22,20 +22,17 @@ def umatan_probs(h):
 
 
 def allocate(P, N):
-    """P: レースごとの確率リスト(降順)。積が最大になるように各レースの点数を増やしていく"""
-    k = [1] * len(P)
-    cov = lambda i: sum(P[i][:k[i]])
-    while sum(k) < N:
-        best, bi = -1, -1
-        for i in range(len(P)):
-            if k[i] < len(P[i]):
-                g = (cov(i) + P[i][k[i]]) / cov(i)   # 1点足したときの積の伸び率
-                if g > best:
-                    best, bi = g, i
-        if bi < 0:
-            break
-        k[bi] += 1
-    return k
+    """P: レースごとの確率リスト(降順)。点数の掛け算（組数）が N 以下で、3レースのカバー率の積が最大になる点数を選ぶ"""
+    best, bk = -1, None
+    for a in range(1, N + 1):
+        for b in range(1, N // a + 1):
+            c = N // (a * b)
+            if c < 1:
+                continue
+            v = sum(P[0][:a]) * sum(P[1][:b]) * sum(P[2][:c])
+            if v > best:
+                best, bk = v, [a, b, c]
+    return bk
 
 
 if __name__ == '__main__':
@@ -50,4 +47,5 @@ if __name__ == '__main__':
         print(f"[{i+1}レース目] {k[i]}点 カバー率{c*100:.0f}%")
         for (a, b), v in items:
             print(f"  {a}→{b}  {v*100:.1f}%")
-    print(f"3レース合計の的中見込み {tot*100:.1f}%（{sum(k)}組 {sum(k)*50}円）")
+    n = k[0] * k[1] * k[2]
+    print(f"3レース合計の的中見込み {tot*100:.1f}%（{k[0]}×{k[1]}×{k[2]}＝{n}組 {n*50}円）")
