@@ -1,4 +1,4 @@
-https://race.netkeiba.com/odds/index.html?type=b8&race_id=202605040811&housiki=c0
-https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202605040811&type=8&action=init
-https://race.netkeiba.com/odds/index.html?type=b1&race_id=202605040811
-https://race.netkeiba.com/odds/index.html?type=b8&race_id=202601010101&housiki=c0
+https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=8&action=init
+https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=1&action=init
+https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=6&action=init
+https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202406010101&type=8&action=init
