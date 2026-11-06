@@ -3,7 +3,7 @@
 #  使い方: python tools/triple.py N 10R.html 11R.html 12R.html
 import sys, re, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from nar_recorder import rank_table
+from nar_recorder import rank_table, tanfuku
 
 
 def umatan_probs(h):
@@ -35,9 +35,33 @@ def allocate(P, N):
     return bk
 
 
+def umatan_from_tan(h):
+    """単勝オッズ → 馬単の確率（ハービル式：2着は残りの単勝確率の比）"""
+    tan = {int(a): float(b) for a, b, _, _ in tanfuku(h) if b.replace('.', '').isdigit() and float(b) > 0}
+    S = sum(1 / v for v in tan.values()); p = {k: (1 / v) / S for k, v in tan.items()}
+    um = {}
+    for a in p:
+        for b in p:
+            if a != b:
+                um[(a, b)] = p[a] * p[b] / (1 - p[a])
+    return um
+
+
+def blend(u3, ut, w):
+    """3連単換算 u3 と 単勝換算 ut を w:(1-w) で混ぜる（w=1 なら3連単だけ）"""
+    keys = set(u3) | set(ut)
+    um = {k: w * u3.get(k, 0) + (1 - w) * ut.get(k, 0) for k in keys}
+    return dict(sorted(um.items(), key=lambda kv: -kv[1]))
+
+
 if __name__ == '__main__':
-    N = int(sys.argv[1]); files = sys.argv[2:]
+    # 使い方: python tools/triple.py N 3連単.html×3 [単勝.html×3 [重み(例 1,0.5,0.5)]]
+    N = int(sys.argv[1]); files = sys.argv[2:5]
     UM = [umatan_probs(open(f, encoding='utf-8', errors='replace').read()) for f in files]
+    if len(sys.argv) >= 8:
+        W = [float(v) for v in sys.argv[8].split(',')] if len(sys.argv) > 8 else [1, 0.5, 0.5]
+        UT = [umatan_from_tan(open(f, encoding='utf-8', errors='replace').read()) for f in sys.argv[5:8]]
+        UM = [blend(UM[i], UT[i], W[i]) for i in range(3)]
     P = [list(u.values()) for u in UM]
     k = allocate(P, N)
     tot = 1
