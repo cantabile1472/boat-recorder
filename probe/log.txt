@@ -1,6 +1,6 @@
-0 200 75335 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 07:59:33 GMT
-1 ERR 28 https://www.spat4.jp/keiba/triple/ | 
-2 200 79422 https://www.f-keiba.com/ | LM=None ET=None CT=text/html Date=Fri, 06 Nov 2026 08:00:15 GMT
-3 200 314794 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F06&k_raceNo=10&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:00:37 GMT
-4 200 314416 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F06&k_raceNo=11&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:00:58 GMT
-5 200 274495 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F06&k_raceNo=12&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:01:18 GMT
+0 200 742232 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F06&k_raceNo=10&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:03:06 GMT
+1 200 742121 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F06&k_raceNo=11&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:03:27 GMT
+2 200 459984 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F06&k_raceNo=12&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:03:48 GMT
+3 200 40518 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F06&k_raceNo=10&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:04:09 GMT
+4 200 40582 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F06&k_raceNo=11&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:04:29 GMT
+5 200 37847 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F06&k_raceNo=12&k_babaCode=19 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 06 Nov 2026 08:04:50 GMT
