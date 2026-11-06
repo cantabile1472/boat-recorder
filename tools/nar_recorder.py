@@ -113,7 +113,9 @@ GN_RULES = [
 
 
 def g_nar(x, rec):
-    """戦略G（地方）：締切1分前に、3連単換算の順位・勝率と出馬表の情報で単勝の買い目を判定して通知"""
+    """戦略G（地方）：締切1分前に、3連単換算の順位・勝率と出馬表の情報で単勝の買い目を判定して通知（ばんえいは対象外）"""
+    if str(int(x['bc'])) == '3':
+        return
     cfgv = {}
     try:
         cfgv = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('strategy_G_nar', {})
