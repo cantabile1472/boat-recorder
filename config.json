@@ -115,5 +115,10 @@
   "notify": true,
   "min_rules": 2,
   "star_rules": 4
+ },
+ "strategy_G_nar": {
+  "notify": true,
+  "min_rules": 2,
+  "star_rules": 3
  }
 }

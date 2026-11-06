@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import strat_e
+import nar_cards
 BABA = {'3': '帯広', '10': '盛岡', '11': '水沢', '18': '浦和', '19': '船橋', '20': '大井', '21': '川崎', '22': '金沢', '23': '笠松', '24': '名古屋', '27': '園田', '28': '姫路', '31': '高知', '32': '佐賀', '36': '門別'}
 JST = datetime.timezone(datetime.timedelta(hours=9))
 now = lambda: datetime.datetime.now(JST)
@@ -66,6 +67,19 @@ def snap(x):
     with LOCK:
         with open(os.path.join(DDIR, 'nar_odds.jsonl'), 'a', encoding='utf-8') as f:
             f.write(json.dumps(rec, ensure_ascii=False, separators=(',', ':')) + '\n')
+    if x['snap'] == 1 or (x['snap'] in (2, 3) and not x.get('cards')):
+        try:
+            hd_ = get(B + 'DebaTable' + q)
+            x['cards'] = nar_cards.parse_deba(hd_) if hd_ else {}
+            t = nar_cards.txt(hd_[:20000]) if hd_ else ''
+            x['title'] = (re.search(r'発走\s*(.*?)(?:ダート|芝|サラブレッド)', t) or [None, ''])[1]
+        except Exception as e:
+            log('出馬表NG ' + repr(e)); x['cards'] = x.get('cards') or {}
+    if x['snap'] == 3:
+        try:
+            g_nar(x, rec)
+        except Exception as e:
+            log('戦略G(地方) NG ' + repr(e))
     if x['snap'] in (2, 3):
         try:
             oe = strat_e.evaluate(*strat_e.nar_parse(rec))
@@ -83,6 +97,72 @@ def snap(x):
     if not os.path.exists(os.path.join(DDIR, 'nar_tanfuku_sample.html')):
         open(os.path.join(DDIR, 'nar_tanfuku_sample.html'), 'w', encoding='utf-8').write(res['tf'])
     return len(rec['tf']), len(rec['tri3'])
+GN_RULES = [
+    # 2〜3番人気（3連単換算）の単勝
+    ('N1 2〜3番人気・前走6着以下・通算10走未満・単勝と3連単が一致', lambda h: h['rank'] in (2, 3) and h['p1_fin'] >= 6 and h['rec_n'] < 10 and 0.9 <= h['gap'] <= 1.1),
+    ('N2 2〜3番人気・前走6着以下・通算10走未満・1番人気が50%未満', lambda h: h['rank'] in (2, 3) and h['p1_fin'] >= 6 and h['rec_n'] < 10 and h['pw1'] < 0.5),
+    ('N3 2〜3番人気・前走6着以下・過去走1〜2・1番人気が50%未満', lambda h: h['rank'] in (2, 3) and h['p1_fin'] >= 6 and 1 <= h['npast'] <= 2 and h['pw1'] < 0.5),
+    ('N4 2〜3番人気・前走6着以下・通算10走未満・3歳戦', lambda h: h['rank'] in (2, 3) and h['p1_fin'] >= 6 and h['rec_n'] < 10 and '３歳' in h['title']),
+    ('N5 2〜3番人気・換算25%以上・通算10走未満・単勝が3連単より弱気', lambda h: h['rank'] in (2, 3) and h['pw'] >= 0.25 and h['rec_n'] < 10 and h['gap'] < 0.85),
+    # 大本命の単勝
+    ('N6 大本命・前走4着以下・換算70%以上・笠松浦和川崎以外', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['p1_fin'] >= 4 and h['place'] not in ('笠松', '浦和', '川崎')),
+    ('N7 大本命・前走4着以下・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['p1_fin'] >= 4),
+    ('N8 大本命・前走4人気以下・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['p1_pop'] >= 4),
+    ('N9 大本命・水沢/佐賀・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['place'] in ('水沢', '佐賀')),
+]
+
+
+def g_nar(x, rec):
+    """戦略G（地方）：締切1分前に、3連単換算の順位・勝率と出馬表の情報で単勝の買い目を判定して通知"""
+    cfgv = {}
+    try:
+        cfgv = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('strategy_G_nar', {})
+    except Exception:
+        pass
+    if cfgv and not cfgv.get('notify', True):
+        return
+    fuku, wide, tri, nf = strat_e.nar_parse(rec)
+    pw = {}
+    for (a, b, c), v in tri.items():
+        if v > 0:
+            pw[a] = pw.get(a, 0) + 1 / v
+    s = sum(pw.values())
+    if s <= 0:
+        return
+    pw = {k: v / s for k, v in pw.items()}
+    tan = {int(r[0]): strat_e.num(r[1]) for r in rec['tf'] if strat_e.num(r[1]) > 0}
+    S = sum(1 / v for v in tan.values())
+    order = sorted(pw, key=lambda k: -pw[k]); pw1 = pw[order[0]]
+    nm = BABA.get(str(int(x['bc'])), x['bc']); close = x['post'] - datetime.timedelta(minutes=2)
+    cards = x.get('cards') or {}
+    hits = []
+    for hn in order[:3]:
+        if hn not in tan:
+            continue
+        c = cards.get(hn, {}); past = [p for p in (c.get('past') or []) if p]
+        p1 = past[0] if past else {}
+        h = {'rank': order.index(hn) + 1, 'pw': pw[hn], 'pw1': pw1, 'gap': ((1 / tan[hn]) / S) / pw[hn], 'tan': tan[hn],
+             'p1_fin': p1.get('fin') if isinstance(p1.get('fin'), int) else 0, 'p1_pop': p1.get('pop') or 0, 'npast': len(past),
+             'rec_n': sum(c.get('rec_all') or [0]), 'title': x.get('title', ''), 'place': nm}
+        rules = [n for n, f in GN_RULES if f(h)]
+        with LOCK:
+            with open(os.path.join(DDIR, 'g_nar_log.csv'), 'a', encoding='utf-8') as f:
+                if f.tell() == 0:
+                    f.write('time,place,R,close,num,rank,tan,pw,pw1,gap,p1_fin,p1_pop,npast,rec_n,rules\n')
+                f.write(f"{now():%H:%M:%S},{nm},{x['R']},{close:%H:%M},{hn},{h['rank']},{h['tan']},{h['pw']:.4f},{h['pw1']:.4f},{h['gap']:.3f},{h['p1_fin']},{h['p1_pop']},{h['npast']},{h['rec_n']},{' / '.join(r.split(' ')[0] for r in rules)}\n")
+        if rules:
+            hits.append((hn, h, rules))
+    nmin = int(cfgv.get('min_rules', 2)); nstar = int(cfgv.get('star_rules', 3))
+    for hn, h, rules in hits:
+        if len(rules) < nmin:
+            continue
+        star = '★' * (len(rules) >= nstar)
+        body = (f"{hn}番 単勝 今{h['tan']:.1f}倍 3連単換算の勝率{h['pw']*100:.0f}%（{h['rank']}番人気） 単勝÷3連単{h['gap']:.2f}\n"
+                f"前走{h['p1_fin']}着・前走{h['p1_pop']}人気・通算{h['rec_n']}走・1番人気の換算{h['pw1']*100:.0f}%\n" + '\n'.join('・' + r for r in rules))
+        strat_e.notify(f"{star}【G{len(rules)}】{star}地方競馬 {nm} {x['R']}R 締切{close:%H:%M}頃（発走{x['post']:%H:%M}）", body)
+        log(f"【G{len(rules)}】{star}{nm}{x['R']}R {hn}番 " + ' / '.join(rules))
+
+
 def main():
     n = now()
     if n.hour < 9 or n.hour >= 21: return
