@@ -977,9 +977,11 @@ if __name__ == '__main__':
         if _n.hour >= 23:
             wake += datetime.timedelta(days=1)
         sec = min((wake - _n).total_seconds(), RUN_MIN * 60)
-        print(f'夜なので {sec/60:.0f}分 待機して終わる', flush=True)
+        print(f'夜なので {sec/60:.0f}分 待機', flush=True)
         time.sleep(max(0, sec))
-        raise SystemExit(0)
+        if now() < wake:
+            raise SystemExit(0)   # 時間切れ → 次の回に任せる
+        # 7:30 になったのでそのまま記録を始める（ここで終わると地方の記録だけが残って競艇・オートが止まる）
     log(f'開始（{RUN_MIN:.0f}分まで動く）')
     if os.environ.get('START_NOTIFY') == '1':
         notify('記録ツール 起動', f'{now():%H:%M} から記録を始めるよ')
