@@ -1,0 +1,29 @@
+name: 過去の締切オッズ（JRA）
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: '年'
+        required: true
+      m0:
+        description: '開始月'
+        required: true
+      m1:
+        description: '終了月'
+        required: true
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: |
+          git config user.name "recorder-bot"
+          git config user.email "recorder-bot@users.noreply.github.com"
+          python tools/jra_odds.py ${{ github.event.inputs.year }} ${{ github.event.inputs.m0 }} ${{ github.event.inputs.m1 }}
+          git add data/jra && git commit -qm "過去の締切オッズ（JRA） ${{ github.event.inputs.year }} ${{ github.event.inputs.m0 }}〜${{ github.event.inputs.m1 }}" || true
+          for k in 1 2 3 4 5; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 10; done
