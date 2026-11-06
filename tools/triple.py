@@ -54,14 +54,36 @@ def blend(u3, ut, w):
     return dict(sorted(um.items(), key=lambda kv: -kv[1]))
 
 
+def harville(p):
+    um = {}
+    for a in p:
+        for b in p:
+            if a != b:
+                um[(a, b)] = p[a] * p[b] / (1 - p[a])
+    return um
+
+
+def umatan_from_model(deba_html, nh, place='船橋'):
+    """自前モデル（nar_model）の勝率 → 馬単"""
+    import subprocess, re
+    out = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nar_model.py'), 'predict', deba_html, str(nh), place],
+                         capture_output=True, text=True).stdout
+    p = {int(m.group(1)): float(m.group(2)) / 100 for m in re.finditer(r'^(\d+)番 ([\d.]+)%', out, re.M)}
+    return harville(p)
+
+
 if __name__ == '__main__':
-    # 使い方: python tools/triple.py N 3連単.html×3 [単勝.html×3 [重み(例 1,0.5,0.5)]]
+    # 使い方: python tools/triple.py N 3連単.html×3 単勝.html×3 出馬表.html×3 頭数,頭数,頭数
+    #   10R は3連単のみ、11R・12R は 3連単・単勝・自前モデルを 1/3 ずつ
     N = int(sys.argv[1]); files = sys.argv[2:5]
     UM = [umatan_probs(open(f, encoding='utf-8', errors='replace').read()) for f in files]
-    if len(sys.argv) >= 8:
-        W = [float(v) for v in sys.argv[8].split(',')] if len(sys.argv) > 8 else [1, 0.5, 0.5]
+    if len(sys.argv) >= 12:
         UT = [umatan_from_tan(open(f, encoding='utf-8', errors='replace').read()) for f in sys.argv[5:8]]
-        UM = [blend(UM[i], UT[i], W[i]) for i in range(3)]
+        NH = [int(v) for v in sys.argv[11].split(',')]
+        UMd = [umatan_from_model(sys.argv[8 + i], NH[i]) for i in range(3)]
+        W = [(1, 0, 0), (1 / 3, 1 / 3, 1 / 3), (1 / 3, 1 / 3, 1 / 3)]
+        UM = [dict(sorted({k: W[i][0] * UM[i].get(k, 0) + W[i][1] * UT[i].get(k, 0) + W[i][2] * UMd[i].get(k, 0)
+                           for k in set(UM[i]) | set(UT[i]) | set(UMd[i])}.items(), key=lambda kv: -kv[1])) for i in range(3)]
     P = [list(u.values()) for u in UM]
     k = allocate(P, N)
     tot = 1
