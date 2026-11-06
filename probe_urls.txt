@@ -1,4 +1,4 @@
-https://db.netkeiba.com/race/202605040811/
-https://race.netkeiba.com/race/shutuba_past.html?race_id=202605040811
-https://db.netkeiba.com/race/list/20261101/
-https://www.jra.go.jp/datafile/seiseki/replay/2026/
+https://race.netkeiba.com/odds/index.html?type=b8&race_id=202605040811&housiki=c0
+https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202605040811&type=8&action=init
+https://race.netkeiba.com/odds/index.html?type=b1&race_id=202605040811
+https://race.netkeiba.com/odds/index.html?type=b8&race_id=202601010101&housiki=c0
