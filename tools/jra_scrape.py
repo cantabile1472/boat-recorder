@@ -23,7 +23,7 @@ def txt(s):
 
 def race_ids(ymd):
     h = get(f'https://db.netkeiba.com/race/list/{ymd}/', 'euc-jp')
-    return sorted(set(re.findall(r'/race/(\d{12})/', h)))
+    return sorted({i for i in re.findall(r'/race/(\d{12})/', h) if 1 <= int(i[4:6]) <= 10})   # JRA（01〜10）だけ
 
 
 def parse_result(h):
