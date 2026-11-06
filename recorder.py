@@ -305,6 +305,40 @@ def strategy_f(x, od, p3, prm):
     return ok, txt, trend
 
 
+G_RULES = [
+    # 名前, オッズを使うか, 判定関数(i=1号艇情報, o=単勝, p=3連単換算勝率, x=レース)
+    ('G1 勝率5未満・展示ST0.20以上・単勝が3連単より弱気', True, lambda i, o, p, x: i['nat'] < 5 and i.get('est', -9) >= 0.20 and o * p >= 1.0),
+    ('G2 勝率5未満・展示1位・単勝が3連単より弱気', True, lambda i, o, p, x: i['nat'] < 5 and i.get('tenji_rank') == 1 and o * p >= 1.05),
+    ('G3 勝率5未満・展示1位・3倍以上', True, lambda i, o, p, x: i['nat'] < 5 and i.get('tenji_rank') == 1 and o >= 3),
+    ('G4 B1・展示1位・3倍以上', True, lambda i, o, p, x: i.get('cls') == 'B1' and i.get('tenji_rank') == 1 and o >= 3),
+    ('G5 B1・勝率5.5以上・展示1〜2位', False, lambda i, o, p, x: i.get('cls') == 'B1' and i['nat'] >= 5.5 and (i.get('tenji_rank') or 9) <= 2),
+    ('G6 勝率4.5〜5・展示1〜2位・平和島桐生戸田以外', False, lambda i, o, p, x: 4.5 <= i['nat'] < 5 and (i.get('tenji_rank') or 9) <= 2 and x['jcd'] not in ('01', '02', '04')),
+    ('G7 勝率5未満・展示1〜2位・平和島桐生戸田以外', False, lambda i, o, p, x: i['nat'] < 5 and (i.get('tenji_rank') or 9) <= 2 and x['jcd'] not in ('01', '02', '04')),
+    ('G8 勝率4〜5・展示1位・3連単換算30〜45%', False, lambda i, o, p, x: 4 <= i['nat'] < 5 and i.get('tenji_rank') == 1 and 0.30 <= p < 0.45),
+    ('G9 B1・展示1位・平和島桐生戸田以外', False, lambda i, o, p, x: i.get('cls') == 'B1' and i.get('tenji_rank') == 1 and x['jcd'] not in ('01', '02', '04')),
+    ('G10 勝率4.5〜5・展示1〜2位・3連単換算30〜45%', False, lambda i, o, p, x: 4.5 <= i['nat'] < 5 and (i.get('tenji_rank') or 9) <= 2 and 0.30 <= p < 0.45),
+    ('G11 勝率5未満・展示1位・平和島桐生戸田以外', False, lambda i, o, p, x: i['nat'] < 5 and i.get('tenji_rank') == 1 and x['jcd'] not in ('01', '02', '04')),
+]
+
+
+def strategy_g(x, od, p3, use_odds):
+    """戦略G：1号艇の単勝。当てはまった条件の一覧を返す（use_odds=False なら単勝オッズを使わない条件だけ）"""
+    i = x.get('r1') or {}
+    if i.get('nat', '') == '' or i.get('course1') is False:
+        return []
+    o = od.get(1, 0); p = (p3 or {}).get(1, 0)
+    hit = []
+    for nm, needs_odds, fn in G_RULES:
+        if needs_odds and not use_odds:
+            continue
+        try:
+            if fn(i, o, p, x):
+                hit.append(nm)
+        except Exception:
+            pass
+    return hit
+
+
 def k_fine(w, x):
     """締切オッズ予想用の細かい記録：単勝・複勝（oddstf）、ワイド（oddsk）、3連単（odds3t）を全部残す"""
     q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
@@ -394,7 +428,7 @@ def kyotei_main():
             f4 = pool.submit(w.req, KB + 'odds2tf' + q)
             f6 = pool.submit(w.req, KB + 'oddsk' + q)
             f7 = pool.submit(w.req, KB + 'odds3f' + q)
-            f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if x['snap'] == 2 else None
+            f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if (x['snap'] in (1, 2) and not (x.get('r1') or {}).get('tenji_rank')) else None
             (s1, h1), (s2, h2) = f1.result(), f2.result()
             s4, h4 = f4.result()
             try:
@@ -429,6 +463,11 @@ def kyotei_main():
                                 x['r1']['tenji_rank'] = sorted(tj.values()).index(tj[1]) + 1
                             order = re.findall(r'table1_boatImage1Number[^>]*>\s*(\d)\s*<', h5)
                             x['r1']['course1'] = (order[0] == '1') if order else None
+                            pairs = re.findall(r'table1_boatImage1Number[^>]*>\s*(\d)\s*<.*?table1_boatImage1TimeInner[^>]*>\s*([^<]*?)\s*<', h5, re.S)
+                            for bno, stv in pairs:
+                                if bno == '1':
+                                    stv = stv.strip()
+                                    x['r1']['est'] = -num(stv.replace('F', '')) if stv.startswith('F') else num(stv)
                         except Exception:
                             pass
             except Exception:
@@ -506,6 +545,24 @@ def kyotei_main():
                         log('【F】競艇 ' + tag + ' ' + txtF)
                 except Exception:
                     log('戦略F NG ' + traceback.format_exc().splitlines()[-1])
+            prmG = cfg().get('strategy_G') or {}
+            if x['snap'] in (2, 3) and prmG:
+                try:
+                    hitG = strategy_g(x, od, p3, use_odds=(x['snap'] == 3))
+                    i1 = x.get('r1') or {}
+                    append_csv('g_log.csv', 'snap,time,jcd,place,R,deadline,odds,p3,cls,nat,F,tenji_rank,est,course1,rules',
+                               [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0), round((p3 or {}).get(1, 0), 4),
+                                 i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG)]])
+                    newG = [h for h in hitG if h not in x.get('g_sent', [])]
+                    if newG and prmG.get('notify') and len(hitG) >= int(prmG.get('min_rules', 1)):
+                        x['g_sent'] = x.get('g_sent', []) + newG
+                        body = (f"1号艇 単勝 今{od.get(1, 0):.1f}倍 3連単換算の勝率{(p3 or {}).get(1, 0)*100:.0f}% "
+                                f"{i1.get('cls', '?')} 勝率{i1.get('nat', '?')} F{i1.get('F', '?')} 展示{i1.get('tenji_rank', '?')}位 展示ST{i1.get('est', '?')}\n"
+                                + '\n'.join('・' + h for h in hitG))
+                        pool.submit(notify, f"【G{len(hitG)}】競艇 {tag}" + ('（1分半前・展示のみ）' if x['snap'] == 2 else '（40秒前）'), body, x['snap'] == 3)
+                        log(f"【G】競艇 {tag} " + ' / '.join(hitG))
+                except Exception:
+                    log('戦略G NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()

@@ -99,7 +99,7 @@
   "simple_rules": {}
  },
  "strategy_F": {
-  "notify": true,
+  "notify": false,
   "notify_snap": 3,
   "natmin": 4.5,
   "natmax": 5.0,
@@ -110,5 +110,9 @@
   "omax": 30,
   "require_course1": true,
   "gapmin": 1.07
+ },
+ "strategy_G": {
+  "notify": true,
+  "min_rules": 1
  }
 }
