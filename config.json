@@ -113,6 +113,7 @@
  },
  "strategy_G": {
   "notify": true,
-  "min_rules": 1
+  "min_rules": 2,
+  "star_rules": 4
  }
 }

@@ -554,13 +554,15 @@ def kyotei_main():
                                [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0), round((p3 or {}).get(1, 0), 4),
                                  i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG)]])
                     newG = [h for h in hitG if h not in x.get('g_sent', [])]
-                    if newG and prmG.get('notify') and len(hitG) >= int(prmG.get('min_rules', 1)):
+                    nmin = int(prmG.get('min_rules', 2)); nstar = int(prmG.get('star_rules', 4))
+                    if newG and prmG.get('notify') and len(hitG) >= nmin:
                         x['g_sent'] = x.get('g_sent', []) + newG
+                        star = '★' * (len(hitG) >= nstar)
                         body = (f"1号艇 単勝 今{od.get(1, 0):.1f}倍 3連単換算の勝率{(p3 or {}).get(1, 0)*100:.0f}% "
                                 f"{i1.get('cls', '?')} 勝率{i1.get('nat', '?')} F{i1.get('F', '?')} 展示{i1.get('tenji_rank', '?')}位 展示ST{i1.get('est', '?')}\n"
                                 + '\n'.join('・' + h for h in hitG))
-                        pool.submit(notify, f"【G{len(hitG)}】競艇 {tag}" + ('（1分半前・展示のみ）' if x['snap'] == 2 else '（40秒前）'), body, x['snap'] == 3)
-                        log(f"【G】競艇 {tag} " + ' / '.join(hitG))
+                        pool.submit(notify, f"{star}【G{len(hitG)}】{star}競艇 {tag}" + ('（1分半前・展示のみ）' if x['snap'] == 2 else '（40秒前）'), body, len(hitG) >= nstar)
+                        log(f"【G{len(hitG)}】{star}競艇 {tag} " + ' / '.join(hitG))
                 except Exception:
                     log('戦略G NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
