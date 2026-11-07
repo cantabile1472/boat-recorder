@@ -92,6 +92,24 @@ def notify(title, body, high=False):
         log('通知NG ' + repr(e))
 
 
+ORDER_TOPIC = os.environ.get('ORDER_TOPIC', '').strip()   # 自動投票の注文を流す秘密のトピック（VPS 側が購読）
+
+
+def send_order(sport, jcd, R, kind, sel, deadline, stars, odds, note=''):
+    """自動投票の注文を ntfy に流す（金額は VPS 側の設定で決める）"""
+    if not ORDER_TOPIC:
+        return
+    o = {'sport': sport, 'jcd': str(jcd), 'R': int(R), 'kind': kind, 'sel': str(sel), 'deadline': deadline.strftime('%Y-%m-%d %H:%M:%S'),
+         'stars': int(stars), 'odds': odds, 'note': note, 'sent': now().strftime('%H:%M:%S')}
+    try:
+        rq = urllib.request.Request('https://ntfy.sh/' + ORDER_TOPIC, data=json.dumps(o, ensure_ascii=False).encode('utf-8'), headers={'Priority': 'high'})
+        urllib.request.urlopen(rq, timeout=10).read()
+        append_csv('orders_sent.csv', ['time', 'sport', 'jcd', 'R', 'kind', 'sel', 'deadline', 'stars', 'odds', 'note'],
+                   [[o['sent'], sport, jcd, R, kind, sel, o['deadline'], stars, odds, note]])
+    except Exception as e:
+        log('注文送信NG ' + repr(e))
+
+
 class Web:
     def __init__(self):
         self.cj = http.cookiejar.CookieJar()
@@ -563,6 +581,10 @@ def kyotei_main():
                                 + '\n'.join('・' + h for h in hitG))
                         pool.submit(notify, f"{star}【G{len(hitG)}】{star}競艇 {tag}" + ('（1分半前・展示のみ）' if x['snap'] == 2 else '（40秒前）'), body, len(hitG) >= nstar)
                         log(f"【G{len(hitG)}】{star}競艇 {tag} " + ' / '.join(hitG))
+                        # 自動投票の注文（1レース1回だけ。40秒前判定のときに送る）
+                        if x['snap'] == 3 and not x.get('order_sent') and prmG.get('auto_order', True):
+                            x['order_sent'] = True
+                            pool.submit(send_order, 'kyotei', x['jcd'], x['R'], '単勝', '1', x['dl'], len(hitG) >= nstar, od.get(1, 0), f"G{len(hitG)} " + ' / '.join(h.split(' ')[0] for h in hitG))
                 except Exception:
                     log('戦略G NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):

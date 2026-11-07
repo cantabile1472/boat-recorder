@@ -1,0 +1,13 @@
+[Unit]
+Description=autobet (kyotei auto vote)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/ubuntu/boat-recorder/autobet
+ExecStart=/usr/bin/python3 /home/ubuntu/boat-recorder/autobet/autobet.py
+Restart=always
+RestartSec=10
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target

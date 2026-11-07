@@ -1,0 +1,17 @@
+{
+  "mode": "dry",
+  "order_topic": "ここに注文用の秘密トピック名（GitHubのORDER_TOPICと同じ）",
+  "notify_topic": "ここに今使っている通知トピック名（購入結果を通知する）",
+  "amount": 3000,
+  "amount_star": 5000,
+  "max_per_day": 30000,
+  "min_seconds_before_deadline": 15,
+  "relogin_minutes": 20,
+  "teleboat": {
+    "member_no": "加入者番号",
+    "pin": "暗証番号",
+    "auth_no": "認証番号"
+  },
+  "test_jcd": "04",
+  "test_R": 1
+}

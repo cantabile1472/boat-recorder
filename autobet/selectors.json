@@ -1,0 +1,20 @@
+{
+  "_説明": "テレボートの画面の部品。空撃ちモードで保存した shots/*.html を見て合わせる。最初の値は仮。",
+  "login_url": "https://ib.mbrace.or.jp/",
+  "member_no": "input[name='memberNo']",
+  "pin": "input[name='pin']",
+  "auth_no": "input[name='authPassword']",
+  "login_button": "button:has-text('ログイン'), input[type='submit']",
+  "login_ok_text": "投票",
+  "vote_url": "https://ib.mbrace.or.jp/vote/?jcd={jcd}&rno={R}",
+  "select_tansho": "text=単勝",
+  "boat_button": "label:has-text('{boat}'), button:has-text('{boat}')",
+  "amount_input": "input[name='amount']",
+  "amount_in_units_of_100": false,
+  "add_button": "text=追加",
+  "confirm_button": "text=投票する",
+  "total_input": "",
+  "pin_again_input": "input[name='pin']",
+  "buy_button": "text=購入する",
+  "bought_ok_text": "受付"
+}
