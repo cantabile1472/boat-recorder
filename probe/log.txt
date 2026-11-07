@@ -1,4 +1,7 @@
-0 200 116145 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:33:39 GMT
-1 200 906 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=1&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:00 GMT
-2 200 7230 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=6&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:20 GMT
-3 200 115697 https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202406010101&type=8&action=init | LM=None ET=None CT=application/json; charset=UTF-8 Date=Fri, 06 Nov 2026 23:34:40 GMT
+0 200 58530 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=02&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:07:52 GMT
+1 200 56381 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=03&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:08:23 GMT
+2 200 58718 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=05&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:08:53 GMT
+3 200 58724 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=5&jcd=05&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:09:22 GMT
+4 200 59038 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=3&jcd=08&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:09:53 GMT
+5 200 58794 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=11&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:10:23 GMT
+6 200 58578 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=6&jcd=23&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sat, 07 Nov 2026 04:10:51 GMT
