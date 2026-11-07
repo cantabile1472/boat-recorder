@@ -1,7 +1,4 @@
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=02&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=03&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=05&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=5&jcd=05&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=3&jcd=08&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=11&hd=20261107
-https://www.boatrace.jp/owpc/pc/race/raceresult?rno=6&jcd=23&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=7&jcd=08&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=7&jcd=03&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=8&jcd=11&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=11&jcd=10&hd=20261107
