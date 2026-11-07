@@ -1,4 +1,7 @@
-https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=8&action=init
-https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=1&action=init
-https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202606010101&type=6&action=init
-https://race.netkeiba.com/api/api_get_jra_odds.html?race_id=202406010101&type=8&action=init
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=02&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=03&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=05&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=5&jcd=05&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=3&jcd=08&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=11&hd=20261107
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=6&jcd=23&hd=20261107
