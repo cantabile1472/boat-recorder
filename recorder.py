@@ -287,7 +287,8 @@ def k_racer1(rl):
         F = re.search(r'F(\d)', L[0][0]) if L else None
         st = num(L[0][2]) if L else ''
         nat = num(L[1][0]) if len(L) > 1 else ''
-        return {'cls': m.group(1) if m else '', 'nat': nat, 'F': int(F.group(1)) if F else '', 'st': st}
+        br = re.search(r'is-fs11">\s*([^/<\s]+)\s*/\s*([^<\s]+)', t)   # 支部/出身地
+        return {'cls': m.group(1) if m else '', 'nat': nat, 'F': int(F.group(1)) if F else '', 'st': st, 'branch': br.group(1) if br else ''}
     except Exception:
         return {}
 
@@ -323,6 +324,8 @@ def strategy_f(x, od, p3, prm):
     return ok, txt, trend
 
 
+HOME_BRANCH = {'01': '群馬', '02': '埼玉', '03': '東京', '04': '東京', '05': '東京', '06': '静岡', '07': '愛知', '08': '愛知', '09': '三重', '10': '福井', '11': '滋賀', '12': '大阪',
+               '13': '兵庫', '14': '徳島', '15': '香川', '16': '岡山', '17': '広島', '18': '山口', '19': '山口', '20': '福岡', '21': '福岡', '22': '福岡', '23': '佐賀', '24': '長崎'}
 G_RULES = [
     # 名前, オッズを使うか, 判定関数(i=1号艇情報, o=単勝, p=3連単換算勝率, x=レース)
     ('G1 勝率5未満・展示ST0.20以上・単勝が3連単より弱気', True, lambda i, o, p, x: i['nat'] < 5 and i.get('est', -9) >= 0.20 and o * p >= 1.0),
@@ -336,6 +339,7 @@ G_RULES = [
     ('G9 B1・展示1位・平和島桐生戸田以外', False, lambda i, o, p, x: i.get('cls') == 'B1' and i.get('tenji_rank') == 1 and x['jcd'] not in ('01', '02', '04')),
     ('G10 勝率4.5〜5・展示1〜2位・3連単換算30〜45%', False, lambda i, o, p, x: 4.5 <= i['nat'] < 5 and (i.get('tenji_rank') or 9) <= 2 and 0.30 <= p < 0.45),
     ('G11 勝率5未満・展示1位・平和島桐生戸田以外', False, lambda i, o, p, x: i['nat'] < 5 and i.get('tenji_rank') == 1 and x['jcd'] not in ('01', '02', '04')),
+    ('G12 勝率5未満・地元支部', False, lambda i, o, p, x: i['nat'] < 5 and i.get('branch') and i.get('branch') == HOME_BRANCH.get(x['jcd'])),
 ]
 
 
@@ -472,6 +476,8 @@ def kyotei_main():
                     if s5 == 200 and s3x == 200:
                         rowsI = k_info(x['jcd'], x['R'], h3x, h5)
                         append_csv('kyotei_info.csv', 'jcd,R,boat,cls,nat,loc,mot,tenji,ws,wv,wtemp', rowsI)
+                        if not os.path.exists(os.path.join(DDIR, 'kyotei_racelist_sample.html')):
+                            open(os.path.join(DDIR, 'kyotei_racelist_sample.html'), 'w', encoding='utf-8').write(h3x)
                         if not os.path.exists(os.path.join(DDIR, 'kyotei_beforeinfo_sample.html')):
                             open(os.path.join(DDIR, 'kyotei_beforeinfo_sample.html'), 'w', encoding='utf-8').write(h5)
                         try:
@@ -571,9 +577,9 @@ def kyotei_main():
                     hitG = strategy_g(x, od, p3, use_odds=(x['snap'] == 3))
                     i1 = x.get('r1') or {}
                     rain = i1.get('weather') == 3
-                    append_csv('g_log.csv', 'snap,time,jcd,place,R,deadline,odds,p3,cls,nat,F,tenji_rank,est,course1,rules,weather',
+                    append_csv('g_log.csv', 'snap,time,jcd,place,R,deadline,odds,p3,cls,nat,F,tenji_rank,est,course1,rules,weather,branch',
                                [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0), round((p3 or {}).get(1, 0), 4),
-                                 i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG), i1.get('weather', '')]])
+                                 i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG), i1.get('weather', ''), i1.get('branch', '')]])
                     newG = [h for h in hitG if h not in x.get('g_sent', [])]
                     nmin = int(prmG.get('min_rules', 2)); nstar = int(prmG.get('star_rules', 4))
                     low = x['snap'] == 3 and od.get(1, 0) and od.get(1, 0) < float(prmG.get('min_odds', 0))
