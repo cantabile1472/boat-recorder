@@ -1,15 +1,2 @@
-0 200 13985 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=7&jcd=25&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:55:31 GMT
-1 200 13985 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=10&jcd=25&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:56:01 GMT
-2 200 95406 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F07&k_raceNo=8&k_babaCode=32 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Sun, 08 Nov 2026 23:56:22 GMT
-3 200 58438 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=6&jcd=03&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:56:52 GMT
-4 200 58594 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=4&jcd=05&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:57:21 GMT
-5 200 58813 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=08&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:57:51 GMT
-6 200 58817 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=4&jcd=08&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:58:21 GMT
-7 200 58660 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=4&jcd=11&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:58:50 GMT
-8 200 58684 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=6&jcd=11&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:59:18 GMT
-9 200 58454 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=1&jcd=19&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 08 Nov 2026 23:59:46 GMT
-10 200 58458 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=19&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:00:16 GMT
-11 200 57265 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=3&jcd=19&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:00:46 GMT
-12 200 58399 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=7&jcd=23&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:01:15 GMT
-13 200 58422 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=9&jcd=23&hd=20261108 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:01:43 GMT
-14 200 91426 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F08&k_raceNo=1&k_babaCode=31 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Mon, 09 Nov 2026 00:02:04 GMT
+0 200 58461 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=7&jcd=19&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:03:29 GMT
+1 200 58458 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=10&jcd=19&hd=20261107 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Mon, 09 Nov 2026 00:03:59 GMT
