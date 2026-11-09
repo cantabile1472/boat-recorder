@@ -576,10 +576,14 @@ def kyotei_main():
                                  i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG), i1.get('weather', '')]])
                     newG = [h for h in hitG if h not in x.get('g_sent', [])]
                     nmin = int(prmG.get('min_rules', 2)); nstar = int(prmG.get('star_rules', 4))
+                    low = x['snap'] == 3 and od.get(1, 0) and od.get(1, 0) < float(prmG.get('min_odds', 0))
                     if newG and len(hitG) >= nmin and rain and prmG.get('skip_rain', True):
                         x['g_sent'] = x.get('g_sent', []) + newG
                         log(f"【G{len(hitG)}】競艇 {tag} 雨なので通知しない " + ' / '.join(hitG))
-                    elif newG and prmG.get('notify') and len(hitG) >= nmin:
+                    elif newG and len(hitG) >= nmin and low:
+                        x['g_sent'] = x.get('g_sent', []) + newG
+                        log(f"【G{len(hitG)}】競艇 {tag} 単勝{od.get(1, 0)}倍で{prmG.get('min_odds')}倍未満なので通知しない " + ' / '.join(hitG))
+                    elif newG and prmG.get('notify') and len(hitG) >= nmin and not (x['snap'] == 2 and float(prmG.get('min_odds', 0)) > 0):
                         x['g_sent'] = x.get('g_sent', []) + newG
                         star = '★' * (len(hitG) >= nstar)
                         body = (f"1号艇 単勝 今{od.get(1, 0):.1f}倍 3連単換算の勝率{(p3 or {}).get(1, 0)*100:.0f}% "

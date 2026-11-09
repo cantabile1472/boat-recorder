@@ -115,7 +115,8 @@
   "notify": true,
   "min_rules": 2,
   "star_rules": 4,
-  "skip_rain": true
+  "skip_rain": true,
+  "min_odds": 2.0
  },
  "strategy_G_nar": {
   "notify": true,
