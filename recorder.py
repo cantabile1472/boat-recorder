@@ -479,6 +479,8 @@ def kyotei_main():
                             tj = {r[2]: num(r[7]) for r in rowsI if r[7] not in ('', None) and num(r[7]) > 0}
                             if 1 in tj:
                                 x['r1']['tenji_rank'] = sorted(tj.values()).index(tj[1]) + 1
+                            mw = re.search(r'is-weather(\d)', h5)
+                            x['r1']['weather'] = int(mw.group(1)) if mw else None   # 1晴 2曇 3雨 4雪 5霧
                             order = re.findall(r'table1_boatImage1Number[^>]*>\s*(\d)\s*<', h5)
                             x['r1']['course1'] = (order[0] == '1') if order else None
                             pairs = re.findall(r'table1_boatImage1Number[^>]*>\s*(\d)\s*<.*?table1_boatImage1TimeInner[^>]*>\s*([^<]*?)\s*<', h5, re.S)
@@ -568,12 +570,16 @@ def kyotei_main():
                 try:
                     hitG = strategy_g(x, od, p3, use_odds=(x['snap'] == 3))
                     i1 = x.get('r1') or {}
-                    append_csv('g_log.csv', 'snap,time,jcd,place,R,deadline,odds,p3,cls,nat,F,tenji_rank,est,course1,rules',
+                    rain = i1.get('weather') == 3
+                    append_csv('g_log.csv', 'snap,time,jcd,place,R,deadline,odds,p3,cls,nat,F,tenji_rank,est,course1,rules,weather',
                                [[x['snap'], f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", od.get(1, 0), round((p3 or {}).get(1, 0), 4),
-                                 i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG)]])
+                                 i1.get('cls', ''), i1.get('nat', ''), i1.get('F', ''), i1.get('tenji_rank', ''), i1.get('est', ''), i1.get('course1', ''), ' / '.join(h.split(' ')[0] for h in hitG), i1.get('weather', '')]])
                     newG = [h for h in hitG if h not in x.get('g_sent', [])]
                     nmin = int(prmG.get('min_rules', 2)); nstar = int(prmG.get('star_rules', 4))
-                    if newG and prmG.get('notify') and len(hitG) >= nmin:
+                    if newG and len(hitG) >= nmin and rain and prmG.get('skip_rain', True):
+                        x['g_sent'] = x.get('g_sent', []) + newG
+                        log(f"【G{len(hitG)}】競艇 {tag} 雨なので通知しない " + ' / '.join(hitG))
+                    elif newG and prmG.get('notify') and len(hitG) >= nmin:
                         x['g_sent'] = x.get('g_sent', []) + newG
                         star = '★' * (len(hitG) >= nstar)
                         body = (f"1号艇 単勝 今{od.get(1, 0):.1f}倍 3連単換算の勝率{(p3 or {}).get(1, 0)*100:.0f}% "

@@ -114,7 +114,8 @@
  "strategy_G": {
   "notify": true,
   "min_rules": 2,
-  "star_rules": 4
+  "star_rules": 4,
+  "skip_rain": true
  },
  "strategy_G_nar": {
   "notify": true,
