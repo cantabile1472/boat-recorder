@@ -453,7 +453,7 @@ def kyotei_main():
             f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if (x['snap'] in (1, 2) and not (x.get('r1') or {}).get('tenji_rank')) else None
             # 締切オッズ予想用：ボートキャストの集計中の票数・オッズ（公式より新しいか確かめる）
             BCU = 'https://race.boatcast.jp/txt/' + x['jcd'] + '/bc_{}_' + HD + '_' + x['jcd'] + f"_{x['R']:02d}.txt"
-            fbc = [(k, pool.submit(w.req, BCU.format(k))) for k in ('hyousu1', 'smt_od1')]
+            fbc = []   # 調査済み：票数は締切前非公開(403)、オッズは公式より1回遅れ → 取らない
             (s1, h1), (s2, h2) = f1.result(), f2.result()
             s4, h4 = f4.result()
             try:
