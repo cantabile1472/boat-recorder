@@ -451,6 +451,9 @@ def kyotei_main():
             f6 = pool.submit(w.req, KB + 'oddsk' + q)
             f7 = pool.submit(w.req, KB + 'odds3f' + q)
             f5 = pool.submit(w.req, KB + 'beforeinfo' + q) if (x['snap'] in (1, 2) and not (x.get('r1') or {}).get('tenji_rank')) else None
+            # 締切オッズ予想用：ボートキャストの集計中の票数・オッズ（公式より新しいか確かめる）
+            BCU = 'https://race.boatcast.jp/txt/' + x['jcd'] + '/bc_{}_' + HD + '_' + x['jcd'] + f"_{x['R']:02d}.txt"
+            fbc = [(k, pool.submit(w.req, BCU.format(k))) for k in ('hyousu1', 'smt_od1')]
             (s1, h1), (s2, h2) = f1.result(), f2.result()
             s4, h4 = f4.result()
             try:
@@ -470,6 +473,14 @@ def kyotei_main():
                         if not os.path.exists(pth):
                             open(pth, 'w', encoding='utf-8').write(hx)
                 append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
+                try:
+                    rowsB = []
+                    for kb, fb in fbc:
+                        sb, hb = fb.result()
+                        rowsB.append([x['snap'] + 1, f'{now():%H:%M:%S}', x['jcd'], x['R'], f"{x['dl']:%H:%M}", kb, sb, (hb or '')[:1500].replace('\n', '|').replace('\t', ' ').replace(',', ';')])
+                    append_csv('kyotei_bc.csv', 'snap,time,jcd,R,deadline,kind,status,body', rowsB)
+                except Exception:
+                    pass
                 if f5:
                     s5, h5 = f5.result()
                     s3x, h3x = f3.result()
