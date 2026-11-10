@@ -622,6 +622,7 @@ def kyotei_main():
                 try:
                     import strategy_h
                     xh, hitH = strategy_h.evaluate(x.get('hist', {}), x.get('info', {}), x['jcd'], f"{x['dl']:%H:%M}", float(prmH.get('th', 0.85)))
+                    hitH = [b for b in hitH if b not in prmH.get('exclude_boats', [])]   # 除外する号艇（6号艇）
                     if xh is not None:
                         append_csv('h_log.csv', 'time,jcd,place,R,deadline,boat,odds,p3,pred_odds,s70_odds,s70_ev,buy',
                                    [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", int(r.boat), od.get(int(r.boat), 0), round(r.q3, 4),
@@ -633,6 +634,8 @@ def kyotei_main():
                             log(f"【H】競艇 {tag} " + ' / '.join(f'{b}号艇 EV{rr[b].s70_ev:.2f}' for b in hitH))
                             if prmH.get('notify'):
                                 pool.submit(notify, f"【H】競艇 {tag}（40秒前）", '\n'.join(lines), False)
+                                append_csv('h_notify.csv', 'time,jcd,place,R,deadline,boat,odds,s70_odds,s70_ev',
+                                           [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, od.get(b, 0), round(rr[b].s70_odds, 1), round(rr[b].s70_ev, 3)] for b in hitH])
                 except Exception:
                     log('戦略H NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):

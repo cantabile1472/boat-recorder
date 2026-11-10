@@ -5,6 +5,7 @@ import sys, os, csv, json, re, glob
 HD = sys.argv[1]; D = f'data/{HD}'; STAKE = 100
 START = {'20261109': '12:33'}   # 出資を始めた時刻（その日のそれ以前の通知は対象外）
 T0 = START.get(HD, '00:00')
+G_END = '20261110 16:55'        # 競艇の戦略Gの通知を止めた時刻（これ以降は戦略Hの通知 h_notify.csv が対象）
 KNAME = {'01': '桐生', '02': '戸田', '03': '江戸川', '04': '平和島', '05': '多摩川', '06': '浜名湖', '07': '蒲郡', '08': '常滑', '09': '津', '10': '三国', '11': 'びわこ', '12': '住之江',
          '13': '尼崎', '14': '鳴門', '15': '丸亀', '16': '児島', '17': '宮島', '18': '徳山', '19': '下関', '20': '若松', '21': '芦屋', '22': '福岡', '23': '唐津', '24': '大村'}
 BJ = {'船橋': '19', '浦和': '18', '川崎': '21', '大井': '20', '園田': '27', '笠松': '23', '名古屋': '24', '水沢': '11', '盛岡': '10', '金沢': '22', '高知': '31', '佐賀': '32', '門別': '36', '姫路': '28'}
@@ -17,7 +18,7 @@ def picks():
         seen = {}
         for r in csv.DictReader(open(f'{D}/g_log.csv', encoding='utf-8')):
             n = len([x for x in r['rules'].split(' / ') if x]); k = (r['jcd'], r['R'])
-            if n >= 2 and int(r['snap']) == 3 and (k not in seen) and r['time'][:5] >= T0:
+            if n >= 2 and int(r['snap']) == 3 and (k not in seen) and r['time'][:5] >= T0 and f"{HD} {r['time'][:5]}" < G_END:
                 seen[k] = dict(r, n=n)
         for (j, R), r in seen.items():
             if r.get('weather') == '3':
@@ -25,6 +26,9 @@ def picks():
             if r.get('odds') and float(r['odds']) and float(r['odds']) < 2.0 and HD >= '20261109':
                 continue
             out.append(['競艇', j, r['place'], int(R), '単勝1', float(r['odds'] or 0), int(r['n'] >= 4)])
+    if os.path.exists(f'{D}/h_notify.csv'):   # 戦略H（s70のEV0.85以上・40秒前・6号艇除外）
+        for r in csv.DictReader(open(f'{D}/h_notify.csv', encoding='utf-8')):
+            out.append(['競艇H', r['jcd'].zfill(2), r['place'], int(r['R']), f"単勝{r['boat']}", float(r['odds'] or 0), 0])
     if os.path.exists(f'{D}/g_nar_log.csv'):
         for r in csv.DictReader(open(f'{D}/g_nar_log.csv', encoding='utf-8')):
             if len([x for x in r['rules'].split(' / ') if x]) >= 2 and r['time'][:5] >= T0:
@@ -87,6 +91,13 @@ if __name__ == '__main__':
         if sport == '競艇':
             u = f"https://www.boatrace.jp/owpc/pc/race/raceresult?rno={R}&jcd={code}&hd={HD}"
             if u in pages: res = result_kyotei(code, R, pages[u])
+        elif sport == '競艇H':   # 結果はレコーダーの kyotei_close.csv から（1着艇と単勝払戻）
+            if os.path.exists(f'{D}/kyotei_close.csv'):
+                for c in csv.DictReader(open(f'{D}/kyotei_close.csv', encoding='utf-8')):
+                    if int(c['jcd']) == int(code) and int(c['R']) == R and c.get('winner'):
+                        res = (int(c['winner']), int(float(c['payout'])) if int(c['boat']) == int(c['winner']) else 0)
+                        if int(c['boat']) == int(c['winner']):
+                            break
         elif sport == '地方':
             u = f"https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate={HD[:4]}%2F{HD[4:6]}%2F{HD[6:]}&k_raceNo={R}&k_babaCode={code}"
             if u in pages: res = result_nar(pages[u])
@@ -109,7 +120,7 @@ if __name__ == '__main__':
         st = sum(int(r[7]) for r in rs); py = sum(int(r[9]) for r in rs if r[9] != ''); n = len(rs); h = sum(1 for r in rs if r[9] not in ('', '0', 0) and int(r[9]) > 0)
         return n, h, st, py
     print(f"# 出資記録 {HD}")
-    for sp in ('競艇', '地方', 'オート'):
+    for sp in ('競艇', '競艇H', '地方', 'オート'):
         n, h, st, py = summ([r for r in rows if r[1] == sp])
         if n: print(f"{sp}: {n}件 的中{h} 出資{st:,}円 払戻{py:,}円 回収率{py/st*100:.0f}%")
     n, h, st, py = summ(rows); print(f"本日合計: {n}件 的中{h} 出資{st:,}円 払戻{py:,}円 収支{py-st:+,}円 回収率{py/st*100 if st else 0:.0f}%")

@@ -112,7 +112,7 @@
   "gapmin": 1.07
  },
  "strategy_G": {
-  "notify": true,
+  "notify": false,
   "min_rules": 2,
   "star_rules": 4,
   "skip_rain": true,
@@ -130,9 +130,12 @@
   "star_max": 0.15
  },
  "strategy_H": {
-  "notify": false,
+  "notify": true,
   "th": 0.85,
   "snap": 3,
-  "model": "s70"
+  "model": "s70",
+  "exclude_boats": [
+   6
+  ]
  }
 }
