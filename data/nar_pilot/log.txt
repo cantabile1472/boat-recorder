@@ -1,60 +1,59 @@
-top 200 73676
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=10
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=6
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=7
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=8
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=9
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36&amp;k_raceNo=10
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36&amp;k_raceNo=9
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19&amp;k_raceNo=11
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27&amp;k_raceNo=11
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36&amp;k_raceNo=12
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F05&amp;k_babaCode=23&amp;k_raceNo=12
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F05&amp;k_babaCode=36&amp;k_raceNo=12
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=19
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F03&amp;k_babaCode=36
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=10
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=19
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=27
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F04&amp;k_babaCode=36
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=19
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=23
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=27
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F05&amp;k_babaCode=36
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=19
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=23
-/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F06&amp;k_babaCode=27
+top 200 70444
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_babaCode=21&amp;k_raceNo=11
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F12&amp;k_babaCode=21&amp;k_raceNo=11
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F12&amp;k_babaCode=24&amp;k_raceNo=11
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F09&amp;k_babaCode=10
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F09&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F09&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F09&amp;k_babaCode=32
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F10&amp;k_babaCode=10
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F10&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F10&amp;k_babaCode=22
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F10&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F10&amp;k_babaCode=36
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F11&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F11&amp;k_babaCode=27
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F11&amp;k_babaCode=36
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F12&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F12&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F12&amp;k_babaCode=27
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F12&amp;k_babaCode=36
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F13&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F13&amp;k_babaCode=22
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F13&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/RaceList?k_raceDate=2026%2F11%2F13&amp;k_babaCode=27
 /KeibaWeb/TodayRaceInfo/TodayRaceInfoTop
-racelist 200 187364 /KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_babaCode=22&amp;k_raceNo=10
+racelist 200 307283 /KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_babaCode=21&amp;k_raceNo=11
 --- racelist links
-/KeibaWeb/TodayRaceInfo/CompeteTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=1&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=19
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=36
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=11&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=12&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=2&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=3&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=4&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=5&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=6&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=7&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=8&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=9&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/DebaTableSmall?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
+/KeibaWeb/TodayRaceInfo/CompeteTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=1&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=10&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=24
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=27
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=36
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=12&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=2&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=3&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=4&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=5&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=6&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=7&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=8&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F11&amp;k_raceNo=9&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/DebaTableSmall?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/OddsWakuLenFukuTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+/KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
 /KeibaWeb/TodayRaceInfo/TodayRaceInfoTop
-data/nar_pilot/odds_0.html 200 35402 /KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-data/nar_pilot/odds_1.html 200 139703 /KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-data/nar_pilot/odds_2.html 200 30312 /KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-data/nar_pilot/odds_3.html 200 30414 /KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-data/nar_pilot/odds_4.html 200 33067 /KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
-data/nar_pilot/odds_5.html 200 30950 /KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F03&amp;k_raceNo=10&amp;k_babaCode=22
+data/nar_pilot/odds_0.html 200 70394 /KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_1.html 200 734731 /KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_2.html 200 38435 /KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_3.html 200 39735 /KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_4.html 200 48671 /KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_5.html 200 25617 /KeibaWeb/TodayRaceInfo/OddsWakuLenFukuTan?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
+data/nar_pilot/odds_6.html 200 41678 /KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F11&amp;k_raceNo=11&amp;k_babaCode=21
