@@ -137,5 +137,12 @@
   "exclude_boats": [
    6
   ]
+ },
+ "strategy_H_auto": {
+  "notify": false,
+  "th": 0.9,
+  "snap": 3,
+  "model": "s70オート版",
+  "note": "記録のみ（データ集め）"
  }
 }

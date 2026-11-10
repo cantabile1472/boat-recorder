@@ -859,6 +859,7 @@ def auto_main():
             prm = cfg()['auto_A']
             x['snap'] += 1
             auto_save_full(x['snap'], x['pc'], x['R'], bd)
+            x.setdefault('hist', {})[x['snap']] = {'od': dict(od), 'p3': dict(p3), 'votes': votes}   # オート版s70用
             rows, buys = [], []
             for a in act:
                 fo, pc_, ev, by = strategy_a(od[a], p3[a], prm)
@@ -886,6 +887,20 @@ def auto_main():
                         log(f"【G】オート {tag} 1号車 {od[1]}倍 換算{p3[1]*100:.0f}%")
                 except Exception:
                     log('戦略G(オート) NG ' + traceback.format_exc().splitlines()[-1])
+            # オート版s70（記録のみ）：42秒前に 3連単換算×底値オッズ が基準以上の車を記録
+            HA = cfg().get('strategy_H_auto')
+            if x['snap'] == 3 and HA:
+                try:
+                    import strategy_h_auto
+                    xa, hitA = strategy_h_auto.evaluate(x.get('hist', {}), x['pc'], f"{x['dl']:%H:%M}", float(HA.get('th', 0.9)))
+                    if xa is not None:
+                        append_csv('h_auto_log.csv', 'time,pc,place,R,deadline,car,odds,p3,votes,pred_odds,s70_odds,s70_ev,buy',
+                                   [[f'{now():%H:%M:%S}', x['pc'], APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", int(r.car), od.get(int(r.car), 0), round(r.q3, 4), votes,
+                                     round(r.pred_odds, 1), round(r.s70_odds, 1), round(r.s70_ev, 3), int(int(r.car) in hitA)] for r in xa.itertuples()])
+                        if hitA:
+                            log(f"【H】オート {tag}（記録のみ） " + ' / '.join(f'{c}号車' for c in hitA))
+                except Exception:
+                    log('オート版s70 NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     pe = strat_e.auto_parse(bd)
