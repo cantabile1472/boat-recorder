@@ -486,6 +486,7 @@ def kyotei_main():
                     s3x, h3x = f3.result()
                     if s5 == 200 and s3x == 200:
                         rowsI = k_info(x['jcd'], x['R'], h3x, h5)
+                        x['info'] = {int(r[2]): (r[3], r[4], r[7]) for r in rowsI}   # 戦略H用（級別・全国勝率・展示タイム）
                         append_csv('kyotei_info.csv', 'jcd,R,boat,cls,nat,loc,mot,tenji,ws,wv,wtemp', rowsI)
                         if not os.path.exists(os.path.join(DDIR, 'kyotei_racelist_sample.html')):
                             open(os.path.join(DDIR, 'kyotei_racelist_sample.html'), 'w', encoding='utf-8').write(h3x)
@@ -532,6 +533,7 @@ def kyotei_main():
             p3 = p3_of(inv, act)
             prm = cfg()['kyotei_A']
             upd = k_upd(h1)
+            x.setdefault('hist', {})[x['snap']] = {'od': dict(od), 'p3': dict(p3), 'upd': upd}   # 戦略H用
             if not debug_saved and x['snap'] >= 3:
                 open(os.path.join(DDIR, 'kyotei_oddstf_sample.html'), 'w', encoding='utf-8').write(h1)
                 debug_saved = True
@@ -614,6 +616,25 @@ def kyotei_main():
                             pool.submit(send_order, 'kyotei', x['jcd'], x['R'], '単勝', '1', x['dl'], len(hitG) >= nstar, od.get(1, 0), f"G{len(hitG)} " + ' / '.join(h.split(' ')[0] for h in hitG))
                 except Exception:
                     log('戦略G NG ' + traceback.format_exc().splitlines()[-1])
+            # 戦略H：s70（締切オッズの70%点＝底値の予想）で 3連単換算×底値オッズ が基準以上の艇。40秒前に判定、全艇対象
+            prmH = cfg().get('strategy_H')
+            if x['snap'] == 3 and prmH:
+                try:
+                    import strategy_h
+                    xh, hitH = strategy_h.evaluate(x.get('hist', {}), x.get('info', {}), x['jcd'], f"{x['dl']:%H:%M}", float(prmH.get('th', 0.85)))
+                    if xh is not None:
+                        append_csv('h_log.csv', 'time,jcd,place,R,deadline,boat,odds,p3,pred_odds,s70_odds,s70_ev,buy',
+                                   [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", int(r.boat), od.get(int(r.boat), 0), round(r.q3, 4),
+                                     round(r.pred_odds, 1), round(r.s70_odds, 1), round(r.s70_ev, 3), int(int(r.boat) in hitH)] for r in xh.itertuples()])
+                        if hitH and not x.get('h_sent'):
+                            x['h_sent'] = True
+                            rr = {int(r.boat): r for r in xh.itertuples()}
+                            lines = [f"{b}号艇 単勝 今{od.get(b, 0):.1f}倍 → 底値{rr[b].s70_odds:.1f}倍（締切予想{rr[b].pred_odds:.1f}倍） 3連単換算{rr[b].q3*100:.0f}% s70のEV{rr[b].s70_ev:.2f}" for b in hitH]
+                            log(f"【H】競艇 {tag} " + ' / '.join(f'{b}号艇 EV{rr[b].s70_ev:.2f}' for b in hitH))
+                            if prmH.get('notify'):
+                                pool.submit(notify, f"【H】競艇 {tag}（40秒前）", '\n'.join(lines), False)
+                except Exception:
+                    log('戦略H NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()

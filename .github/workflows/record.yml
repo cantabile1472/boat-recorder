@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: '*/30 23,0-14 * * *'   # 日本時間 8:00〜23:30 に30分おき（動いている間は待機して、止まっていたら起動する）
   push:
-    paths: ['recorder.py', 'tools/strat_e.py', 'tools/nar_recorder.py', 'tools/keirin_recorder.py', '.github/workflows/record.yml']
+    paths: ['recorder.py', 'tools/strat_e.py', 'tools/strategy_h.py', 'models/s70_3.pkl', 'tools/nar_recorder.py', 'tools/keirin_recorder.py', '.github/workflows/record.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -22,6 +22,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: 戦略H用のライブラリ（モデルの保存時と同じ版）
+        run: pip install -q scikit-learn==1.9.1 pandas numpy
       - name: git の設定
         run: |
           git config user.name "recorder-bot"

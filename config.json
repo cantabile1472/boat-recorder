@@ -128,5 +128,11 @@
   "pmin": 0.05,
   "pmax": 0.3,
   "star_max": 0.15
+ },
+ "strategy_H": {
+  "notify": false,
+  "th": 0.85,
+  "snap": 3,
+  "model": "s70"
  }
 }
