@@ -1,7 +1,7 @@
 # 締切オッズ予想の特徴作り（close_ml.py から切り出し）。build(S, days=None) → (x, F)
 import pandas as pd, numpy as np, glob, sys, datetime
 
-def build(S, day_min=None, day_max=None):
+def build(S, day_min=None, day_max=None, min_boats=6):
     rows = []
     for f in sorted(glob.glob('data/2026*/kyotei_log.csv')):
         day = f.split('/')[1]; c = f.replace('kyotei_log', 'kyotei_close')
@@ -28,7 +28,8 @@ def build(S, day_min=None, day_max=None):
     ok = (x[f'odds{S}'] > 0) & (x.odds_close > 0) & (x[f'p3{S}'] > 0)
     for k in range(1, S):
         x.loc[~(x[f'odds{k}'] > 0), f'odds{k}'] = np.nan; x.loc[~(x[f'p3{k}'] > 0), f'p3{k}'] = np.nan
-    cnt = x[ok].groupby(['day', 'jcd', 'R']).boat.transform('count'); x = x[ok][cnt == 6].copy()
+    cnt = x[ok].groupby(['day', 'jcd', 'R']).boat.transform('count'); x = x[ok][cnt >= min_boats].copy()   # 単勝の票が0の艇（オッズなし）は除いて、残りの艇で扱う
+    x['nb'] = x.groupby(['day', 'jcd', 'R']).boat.transform('count')
     K = ['day', 'jcd', 'R']; g = lambda c: x.groupby(K)[c]
     for k in list(range(1, S + 1)) + ['_close']:
         o = f'odds{k}'; p = f'p3{k}' if k != '_close' else 'p3_close'
