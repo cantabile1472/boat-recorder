@@ -137,8 +137,9 @@
   "exclude_boats": [
    6
   ],
-  "mode": "second",
-  "th2": 0.75
+  "mode": "all",
+  "th2": 0.75,
+  "note": "11/11 12:30〜 旧H（全艇EV0.85以上・6号艇除外）で固定。新H（2番目・th2）は記録のみ"
  },
  "strategy_H_auto": {
   "notify": false,
