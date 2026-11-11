@@ -1,6 +1,7 @@
 # 試験中の戦略（記録のみ）の答え合わせ：オート
 #  戦略X1＝オート単勝・a70のEV0.9以上・42秒前
 #  戦略X2＝オート単勝・1号車・3連単換算の1着率5〜30%・a70のEV0.75以上・42秒前
+#  戦略X3＝オート単勝・1〜4号車・42秒前のオッズ50倍以下・a70のEV0.85以上
 #  data/YYYYMMDD/h_auto_log.csv（全車のa70のEV）× auto_close.csv（結果）
 #  python tools/x_eval.py [開始日YYYYMMDD]
 import sys, glob, os
@@ -18,12 +19,13 @@ for f in sorted(glob.glob('data/2026*/h_auto_log.csv')):
     h['pay'] = ((h.winner == h.car) * h.payout).fillna(0); h['done'] = h.winner.notna()
     rows.append(h[h.s70_ev >= 0.9].assign(rule='戦略X1'))
     rows.append(h[(h.car == 1) & (h.p3 >= 0.05) & (h.p3 < 0.3) & (h.s70_ev >= 0.75)].assign(rule='戦略X2'))
+    rows.append(h[(h.car <= 4) & (h.odds <= 50) & (h.odds > 0) & (h.s70_ev >= 0.85)].assign(rule='戦略X3'))
 if not rows:
     print('試験中の戦略：まだ記録なし'); sys.exit()
 P = pd.concat(rows, ignore_index=True); P.to_csv('data/x_picks.csv', index=False)
 done = P[P.done]
 print(f'# 試験中の戦略（オート・記録のみ） {start}〜')
-for rule, nm in (('戦略X1', 'a70のEV0.9以上'), ('戦略X2', '1号車・1着率5〜30%・a70のEV0.75以上')):
+for rule, nm in (('戦略X1', 'a70のEV0.9以上'), ('戦略X2', '1号車・1着率5〜30%・a70のEV0.75以上'), ('戦略X3', '1〜4号車・50倍以下・a70のEV0.85以上')):
     g = done[done.rule == rule]
     if g.empty:
         print(f'{rule}（{nm}）: なし'); continue
