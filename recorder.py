@@ -473,6 +473,7 @@ def kyotei_main():
                         if not os.path.exists(pth):
                             open(pth, 'w', encoding='utf-8').write(hx)
                 append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
+                x.setdefault('full', {})[x['snap'] + 1] = {'3t': k_points(h2), 'tf': k_points(h1) if s1 == 200 else None}   # 戦略H複勝（f70）用
                 try:
                     rowsB = []
                     for kb, fb in fbc:
@@ -616,32 +617,51 @@ def kyotei_main():
                             pool.submit(send_order, 'kyotei', x['jcd'], x['R'], '単勝', '1', x['dl'], len(hitG) >= nstar, od.get(1, 0), f"G{len(hitG)} " + ' / '.join(h.split(' ')[0] for h in hitG))
                 except Exception:
                     log('戦略G NG ' + traceback.format_exc().splitlines()[-1])
-            # 戦略H：s70（締切オッズの70%点＝底値の予想）で 3連単換算×底値オッズ が基準以上の艇。40秒前に判定、全艇対象
+            # 戦略H（40秒前）：単勝＝s70のEV0.85以上・6号艇除外 ／ 複勝＝f70のEV0.7以上・1号艇除外。戦略H2（2番目ルール）は h_log から後で集計
             prmH = cfg().get('strategy_H')
             if x['snap'] == 3 and prmH:
+                lines, logtxt, hitH, hitF = [], [], [], []
                 try:
                     import strategy_h
                     xh, hitH = strategy_h.evaluate(x.get('hist', {}), x.get('info', {}), x['jcd'], f"{x['dl']:%H:%M}", float(prmH.get('th', 0.85)))
-                    if xh is not None and prmH.get('mode') == 'second':   # 基準は th2
-                        # 2番目ルール：レース内で s70のEV が2番目に高い艇が基準以上なら、その艇だけ
-                        b2 = xh.sort_values('s70_ev', ascending=False).iloc[1]
-                        hitH = [int(b2.boat)] if b2.s70_ev >= float(prmH.get('th2', 0.75)) else []
-                    hitH = [b for b in hitH if b not in prmH.get('exclude_boats', [])]   # 除外する号艇（6号艇）
+                    hitH = [b for b in hitH if b not in prmH.get('exclude_boats', [6])]
                     if xh is not None:
                         append_csv('h_log.csv', 'time,jcd,place,R,deadline,boat,odds,p3,pred_odds,s70_odds,s70_ev,buy',
                                    [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", int(r.boat), od.get(int(r.boat), 0), round(r.q3, 4),
                                      round(r.pred_odds, 1), round(r.s70_odds, 1), round(r.s70_ev, 3), int(int(r.boat) in hitH)] for r in xh.itertuples()])
-                        if hitH and not x.get('h_sent'):
-                            x['h_sent'] = True
-                            rr = {int(r.boat): r for r in xh.itertuples()}
-                            lines = [f"{b}号艇 単勝 今{od.get(b, 0):.1f}倍 → 底値{rr[b].s70_odds:.1f}倍（締切予想{rr[b].pred_odds:.1f}倍） 3連単換算{rr[b].q3*100:.0f}% s70のEV{rr[b].s70_ev:.2f}" for b in hitH]
-                            log(f"【H】競艇 {tag} " + ' / '.join(f'{b}号艇 EV{rr[b].s70_ev:.2f}' for b in hitH))
-                            if prmH.get('notify'):
-                                pool.submit(notify, f"【H】競艇 {tag}（40秒前）", '\n'.join(lines), False)
-                                append_csv('h_notify.csv', 'time,jcd,place,R,deadline,boat,odds,s70_odds,s70_ev',
-                                           [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, od.get(b, 0), round(rr[b].s70_odds, 1), round(rr[b].s70_ev, 3)] for b in hitH])
+                        rr = {int(r.boat): r for r in xh.itertuples()}
+                        for b in hitH:
+                            lines.append(f"単勝 {b}号艇　今{od.get(b, 0):.1f}倍 → 底値{rr[b].s70_odds:.1f}倍　1着率{rr[b].q3*100:.0f}%　EV{rr[b].s70_ev:.2f}")
+                            logtxt.append(f'単勝{b} EV{rr[b].s70_ev:.2f}')
                 except Exception:
-                    log('戦略H NG ' + traceback.format_exc().splitlines()[-1])
+                    log('戦略H単勝 NG ' + traceback.format_exc().splitlines()[-1])
+                PF = prmH.get('fuku') or {}
+                if PF:
+                    try:
+                        import strategy_hf
+                        xf, hitF = strategy_hf.evaluate(x.get('full', {}), (x.get('hist', {}).get(3) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}",
+                                                        float(PF.get('th', 0.7)), tuple(PF.get('exclude_boats', [1])))
+                        if xf is not None:
+                            append_csv('hf_log.csv', 'time,jcd,place,R,deadline,boat,fuku_lo,q2,f70_odds,f70_ev,buy',
+                                       [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", int(r.boat), r.f3, round(r.q3, 4),
+                                         round(r.f70_odds, 2), round(r.f70_ev, 3), int(int(r.boat) in hitF)] for r in xf.itertuples()])
+                            rf = {int(r.boat): r for r in xf.itertuples()}
+                            for b in hitF:
+                                lines.append(f"複勝 {b}号艇　今{rf[b].f3:.1f}倍〜 → 底値{rf[b].f70_odds:.1f}倍　2着以内率{rf[b].q3*100:.0f}%　EV{rf[b].f70_ev:.2f}")
+                                logtxt.append(f'複勝{b} EV{rf[b].f70_ev:.2f}')
+                    except Exception:
+                        log('戦略H複勝 NG ' + traceback.format_exc().splitlines()[-1])
+                if lines and not x.get('h_sent'):
+                    x['h_sent'] = True
+                    log(f"【H】競艇 {tag} " + ' / '.join(logtxt))
+                    if prmH.get('notify'):
+                        pool.submit(notify, f"【H】競艇 {tag}（40秒前）", '\n'.join(lines), False)
+                        if hitH:
+                            append_csv('h_notify.csv', 'time,jcd,place,R,deadline,boat,odds,s70_odds,s70_ev',
+                                       [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, od.get(b, 0), round(rr[b].s70_odds, 1), round(rr[b].s70_ev, 3)] for b in hitH])
+                        if hitF:
+                            append_csv('hf_notify.csv', 'time,jcd,place,R,deadline,boat,fuku_lo,f70_odds,f70_ev',
+                                       [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, rf[b].f3, round(rf[b].f70_odds, 2), round(rf[b].f70_ev, 3)] for b in hitF])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()

@@ -30,6 +30,9 @@ def picks():
     if os.path.exists(f'{D}/h_notify.csv'):   # 戦略H（〜11/11朝: s70のEV0.85以上 / 11/11〜: レース内2番目の艇がEV0.75以上。40秒前・6号艇除外）
         for r in csv.DictReader(open(f'{D}/h_notify.csv', encoding='utf-8')):
             out.append(['競艇H', r['jcd'].zfill(2), r['place'], int(r['R']), f"単勝{r['boat']}", float(r['odds'] or 0), 0])
+    if os.path.exists(f'{D}/hf_notify.csv'):   # 戦略H 複勝（f70のEV0.7以上・1号艇除外）
+        for r in csv.DictReader(open(f'{D}/hf_notify.csv', encoding='utf-8')):
+            out.append(['競艇H複勝', r['jcd'].zfill(2), r['place'], int(r['R']), f"複勝{r['boat']}", float(r['fuku_lo'] or 0), 0])
     if os.path.exists(f'{D}/g_nar_log.csv'):
         for r in csv.DictReader(open(f'{D}/g_nar_log.csv', encoding='utf-8')):
             if len([x for x in r['rules'].split(' / ') if x]) >= 2 and r['time'][:5] >= T0 and f"{HD} {r['time'][:5]}" < NA_END:
@@ -92,6 +95,16 @@ if __name__ == '__main__':
         if sport == '競艇':
             u = f"https://www.boatrace.jp/owpc/pc/race/raceresult?rno={R}&jcd={code}&hd={HD}"
             if u in pages: res = result_kyotei(code, R, pages[u])
+        elif sport == '競艇H複勝':   # 複勝の払戻は公開データ（boatracecsv の payouts）
+            fp = f"/home/claude/boatracecsv/boatracecsv.github.io/data/results/payouts/{HD[:4]}/{HD[4:6]}/{HD[6:]}.csv"
+            if os.path.exists(fp):
+                for c in csv.DictReader(open(fp, encoding='utf-8')):
+                    if int(c['レースコード'][8:10]) == int(code) and int(c['レースコード'][10:12]) == R:
+                        want_ = int(sel.replace('複勝', '')); got = 0
+                        for k_ in ('1', '2', '3'):
+                            if (c.get(f'複勝_{k_}着_艇番') or '').strip() == str(want_):
+                                got = int(float(c[f'複勝_{k_}着_払戻金'] or 0))
+                        res = (want_ if got else 0, got)
         elif sport == '競艇H':   # 結果はレコーダーの kyotei_close.csv から（1着艇と単勝払戻）
             if os.path.exists(f'{D}/kyotei_close.csv'):
                 for c in csv.DictReader(open(f'{D}/kyotei_close.csv', encoding='utf-8')):
@@ -104,7 +117,7 @@ if __name__ == '__main__':
             if u in pages: res = result_nar(pages[u])
         else:
             res = result_auto(code, R)
-        want = int(sel.replace('単勝', ''))
+        want = int(sel.replace('単勝', '').replace('複勝', ''))
         if res is None:
             win, pay = '', ''
         else:
@@ -121,7 +134,7 @@ if __name__ == '__main__':
         st = sum(int(r[7]) for r in rs); py = sum(int(r[9]) for r in rs if r[9] != ''); n = len(rs); h = sum(1 for r in rs if r[9] not in ('', '0', 0) and int(r[9]) > 0)
         return n, h, st, py
     print(f"# 出資記録 {HD}")
-    for sp in ('競艇', '競艇H', '地方', 'オート'):
+    for sp in ('競艇', '競艇H', '競艇H複勝', '地方', 'オート'):
         n, h, st, py = summ([r for r in rows if r[1] == sp])
         if n: print(f"{sp}: {n}件 的中{h} 出資{st:,}円 払戻{py:,}円 回収率{py/st*100:.0f}%")
     n, h, st, py = summ(rows); print(f"本日合計: {n}件 的中{h} 出資{st:,}円 払戻{py:,}円 収支{py-st:+,}円 回収率{py/st*100 if st else 0:.0f}%")
