@@ -119,12 +119,12 @@
   "min_odds": 2.0
  },
  "strategy_G_nar": {
-  "notify": true,
+  "notify": false,
   "min_rules": 2,
   "star_rules": 3
  },
  "strategy_G_auto": {
-  "notify": true,
+  "notify": false,
   "pmin": 0.05,
   "pmax": 0.3,
   "star_max": 0.15

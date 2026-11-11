@@ -6,6 +6,7 @@ HD = sys.argv[1]; D = f'data/{HD}'; STAKE = 100
 START = {'20261109': '12:33'}   # 出資を始めた時刻（その日のそれ以前の通知は対象外）
 T0 = START.get(HD, '00:00')
 G_END = '20261110 16:55'        # 競艇の戦略Gの通知を止めた時刻（これ以降は戦略Hの通知 h_notify.csv が対象）
+NA_END = '20261111 12:20'       # 地方・オートの戦略Gの通知を止めた時刻（これ以降は対象外）
 KNAME = {'01': '桐生', '02': '戸田', '03': '江戸川', '04': '平和島', '05': '多摩川', '06': '浜名湖', '07': '蒲郡', '08': '常滑', '09': '津', '10': '三国', '11': 'びわこ', '12': '住之江',
          '13': '尼崎', '14': '鳴門', '15': '丸亀', '16': '児島', '17': '宮島', '18': '徳山', '19': '下関', '20': '若松', '21': '芦屋', '22': '福岡', '23': '唐津', '24': '大村'}
 BJ = {'船橋': '19', '浦和': '18', '川崎': '21', '大井': '20', '園田': '27', '笠松': '23', '名古屋': '24', '水沢': '11', '盛岡': '10', '金沢': '22', '高知': '31', '佐賀': '32', '門別': '36', '姫路': '28'}
@@ -31,12 +32,12 @@ def picks():
             out.append(['競艇H', r['jcd'].zfill(2), r['place'], int(r['R']), f"単勝{r['boat']}", float(r['odds'] or 0), 0])
     if os.path.exists(f'{D}/g_nar_log.csv'):
         for r in csv.DictReader(open(f'{D}/g_nar_log.csv', encoding='utf-8')):
-            if len([x for x in r['rules'].split(' / ') if x]) >= 2 and r['time'][:5] >= T0:
+            if len([x for x in r['rules'].split(' / ') if x]) >= 2 and r['time'][:5] >= T0 and f"{HD} {r['time'][:5]}" < NA_END:
                 out.append(['地方', BJ.get(r['place'], ''), r['place'], int(r['R']), f"単勝{r['num']}", float(r['tan'] or 0), int(len(r['rules'].split(' / ')) >= 3)])
     if os.path.exists(f'{D}/g_auto_log.csv'):
         H = ['snap', 'time', 'pc', 'place', 'R', 'deadline', 'odds', 'p3', 'votes', 'hit']
         for row in csv.reader(open(f'{D}/g_auto_log.csv', encoding='utf-8')):
-            if len(row) == 10 and row[9] == '1' and row[0] != 'snap' and row[1][:5] >= T0:
+            if len(row) == 10 and row[9] == '1' and row[0] != 'snap' and row[1][:5] >= T0 and f"{HD} {row[1][:5]}" < NA_END:
                 r = dict(zip(H, row)); out.append(['オート', r['pc'], r['place'], int(r['R']), '単勝1', float(r['odds'] or 0), int(float(r['p3']) < 0.15)])
     skip = set()
     if os.path.exists('data/ledger_skip.txt'):
