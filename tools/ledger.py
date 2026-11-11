@@ -26,7 +26,7 @@ def picks():
             if r.get('odds') and float(r['odds']) and float(r['odds']) < 2.0 and HD >= '20261109':
                 continue
             out.append(['競艇', j, r['place'], int(R), '単勝1', float(r['odds'] or 0), int(r['n'] >= 4)])
-    if os.path.exists(f'{D}/h_notify.csv'):   # 戦略H（s70のEV0.85以上・40秒前・6号艇除外）
+    if os.path.exists(f'{D}/h_notify.csv'):   # 戦略H（〜11/11朝: s70のEV0.85以上 / 11/11〜: レース内2番目の艇がEV0.75以上。40秒前・6号艇除外）
         for r in csv.DictReader(open(f'{D}/h_notify.csv', encoding='utf-8')):
             out.append(['競艇H', r['jcd'].zfill(2), r['place'], int(r['R']), f"単勝{r['boat']}", float(r['odds'] or 0), 0])
     if os.path.exists(f'{D}/g_nar_log.csv'):

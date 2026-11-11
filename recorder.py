@@ -622,6 +622,10 @@ def kyotei_main():
                 try:
                     import strategy_h
                     xh, hitH = strategy_h.evaluate(x.get('hist', {}), x.get('info', {}), x['jcd'], f"{x['dl']:%H:%M}", float(prmH.get('th', 0.85)))
+                    if xh is not None and prmH.get('mode') == 'second':   # 基準は th2
+                        # 2番目ルール：レース内で s70のEV が2番目に高い艇が基準以上なら、その艇だけ
+                        b2 = xh.sort_values('s70_ev', ascending=False).iloc[1]
+                        hitH = [int(b2.boat)] if b2.s70_ev >= float(prmH.get('th2', 0.75)) else []
                     hitH = [b for b in hitH if b not in prmH.get('exclude_boats', [])]   # 除外する号艇（6号艇）
                     if xh is not None:
                         append_csv('h_log.csv', 'time,jcd,place,R,deadline,boat,odds,p3,pred_odds,s70_odds,s70_ev,buy',

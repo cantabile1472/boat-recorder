@@ -136,7 +136,9 @@
   "model": "s70",
   "exclude_boats": [
    6
-  ]
+  ],
+  "mode": "second",
+  "th2": 0.75
  },
  "strategy_H_auto": {
   "notify": false,
