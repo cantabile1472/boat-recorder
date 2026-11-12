@@ -1,4 +1,2 @@
-https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-11-11&conditions%5Brace_date%5D%5Bto%5D=2026-11-11&kachishiki_id=4&display_num=ONE_HUNDRED_TWENTY&sort_order=desc
-https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-08-01&conditions%5Brace_date%5D%5Bto%5D=2026-08-01&kachishiki_id=1&display_num=ONE_HUNDRED_TWENTY&sort_order=desc
-https://kyotei.murao111.net/
-https://kyoteibiyori.com/race_shusso.php?place_no=2&race_no=2&hiduke=20261112&slider=6
+https://kyoteibiyori.com/js/race_shusso.js?244
+https://kyoteibiyori.com/js/common.js?42
