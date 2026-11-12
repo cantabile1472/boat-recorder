@@ -1,8 +1,4 @@
-0 200 59095 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=08&hd=20261110 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Tue, 10 Nov 2026 12:42:10 GMT
-1 200 58650 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=8&jcd=10&hd=20261110 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Tue, 10 Nov 2026 12:42:40 GMT
-2 200 58784 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=2&jcd=07&hd=20261110 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Tue, 10 Nov 2026 12:43:10 GMT
-3 200 92561 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&k_raceNo=5&k_babaCode=24 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Tue, 10 Nov 2026 12:43:31 GMT
-4 200 93992 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&k_raceNo=6&k_babaCode=24 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Tue, 10 Nov 2026 12:43:51 GMT
-5 200 84314 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&k_raceNo=2&k_babaCode=22 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Tue, 10 Nov 2026 12:44:12 GMT
-6 200 108545 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&k_raceNo=7&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Tue, 10 Nov 2026 12:44:32 GMT
-7 200 79025 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&k_raceNo=8&k_babaCode=22 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Tue, 10 Nov 2026 12:44:53 GMT
+0 ERR 28 https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-11-11&conditions%5Brace_date%5D%5Bto%5D=2026-11-11&kachishiki_id=4&display_num=ONE_HUNDRED_TWENTY&sort_order=desc | 
+1 ERR 28 https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-08-01&conditions%5Brace_date%5D%5Bto%5D=2026-08-01&kachishiki_id=1&display_num=ONE_HUNDRED_TWENTY&sort_order=desc | 
+2 ERR 28 https://kyotei.murao111.net/ | 
+3 200 121145 https://kyoteibiyori.com/race_shusso.php?place_no=2&race_no=2&hiduke=20261112&slider=6 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 02:23:49 GMT
