@@ -899,14 +899,27 @@ def auto_main():
     for row in read_csv('auto_log.csv'):
         k = (int(row['pc']), int(row['R']))
         done_snaps[k] = max(done_snaps.get(k, 0), int(row['snap']))
+    apub = set()
+    p_ = os.path.join(DDIR, 'auto_pub.jsonl')
+    if os.path.exists(p_):
+        for l in open(p_, encoding='utf-8'):
+            try:
+                d = json.loads(l); apub.add((int(d['pc']), int(d['R']), d['label']))
+            except Exception:
+                pass
     for x in races:
         x['snap'] = done_snaps.get((x['pc'], x['R']), 0)
+        x['pubd'] = {lb for (p, r, lb) in apub if p == x['pc'] and r == x['R']}
         if x['snap'] >= len(SN):
             x['st'] = 'past'
+    amorning = [x for x in races if x['st'] == 'wait' and not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
+    alast = 0.0
     log(f"オート: 開催 {'・'.join(sorted({APL[x['pc']] for x in races}))} / これから締切 {len(races)}レース")
     while time.time() - T0 < RUN_MIN * 60:
         n = now()
         busy = False
+        if amorning and time.time() - alast >= 2:
+            xm = amorning.pop(0); xm['pubd'].add('朝一'); alast = time.time(); a_pub(A, xm, '朝一')
         for x in races:
             if x['st'] != 'wait':
                 continue
@@ -914,6 +927,11 @@ def auto_main():
             if sec < 2:
                 x['st'] = 'past'
                 continue
+            for ps, lb in PS:
+                if lb not in x['pubd'] and ps - 25 < sec <= ps:
+                    x['pubd'].add(lb); a_pub(A, x, lb)
+                elif lb not in x['pubd'] and sec <= ps - 25:
+                    x['pubd'].add(lb)
             if x['snap'] >= len(SN) or sec > SN[x['snap']]:
                 if x['snap'] < len(SN) and sec - SN[x['snap']] < 7:
                     busy = True
@@ -1006,6 +1024,21 @@ def auto_main():
 
 
 AKEYS = ['tnsOddsList', 'fnsOddsList', 'rtwOddsList', 'rfwOddsList', 'widOddsList', 'rt3OddsList', 'rf3OddsList', 'salesInfo']
+
+
+def a_pub(A, x, label):
+    """公開データベース用：オートの全賭式を1回分記録（auto_pub.jsonl）"""
+    try:
+        bd = A.post('Odds', x['pc'], x['R'])
+        if not bd:
+            return
+        rec = {'label': label, 'sec': int((x['dl'] - now()).total_seconds()), 'time': f'{now():%H:%M:%S}', 'pc': x['pc'], 'place': APL.get(x['pc'], ''), 'R': x['R'], 'deadline': f"{x['dl']:%H:%M}"}
+        rec.update({k: bd.get(k) for k in AKEYS})
+        with LOCK:
+            with open(os.path.join(DDIR, 'auto_pub.jsonl'), 'a', encoding='utf-8') as f:
+                f.write(json.dumps(rec, ensure_ascii=False, separators=(',', ':')) + '\n')
+    except Exception as e:
+        log(f'オート公開用の記録エラー {x.get("pc")} {x.get("R")}R {label}: {e!r}')
 
 
 def auto_save_full(snap, pc, R_, bd, extra=None):

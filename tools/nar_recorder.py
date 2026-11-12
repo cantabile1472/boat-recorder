@@ -57,6 +57,28 @@ def races_today():
             rs.append({'bc': bc, 'R': rn, 'post': post, 'snap': 0})
             time.sleep(0.2)
     return babas, rs
+PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前'), (300, '5分前'), (180, '3分前'), (120, '2分前'), (60, '1分前')]   # 締切（発走2分前）の何秒前
+
+
+def pub(x, label):
+    """公開データベース用：全券種を1回分記録（nar_pub.jsonl）。締切は発走の2分前として扱う"""
+    try:
+        q = f"?k_raceDate={DS}&k_raceNo={x['R']}&k_babaCode={x['bc']}"
+        close = x['post'] - datetime.timedelta(minutes=2)
+        rec = {'label': label, 'sec': int((close - now()).total_seconds()), 'time': f'{now():%H:%M:%S}', 'bc': x['bc'], 'place': BABA.get(str(int(x['bc'])), x['bc']),
+               'R': x['R'], 'post': f"{x['post']:%H:%M}", 'deadline': f"{close:%H:%M}"}
+        with ThreadPoolExecutor(2) as ex:
+            res = dict(zip(PAGES, ex.map(lambda p: get(B + PAGES[p] + q), PAGES)))
+        rec['tf'] = tanfuku(res['tf'])
+        for k in ('wide', 'q', 'ex', 'tri', 'tri3'): rec[k] = rank_table(res[k])
+        if rec['tf']:
+            with LOCK:
+                with open(os.path.join(DDIR, 'nar_pub.jsonl'), 'a', encoding='utf-8') as f:
+                    f.write(json.dumps(rec, ensure_ascii=False, separators=(',', ':')) + '\n')
+    except Exception as e:
+        log(f"公開用の記録NG {x.get('bc')} {x.get('R')}R {label} {e!r}")
+
+
 def snap(x):
     q = f"?k_raceDate={DS}&k_raceNo={x['R']}&k_babaCode={x['bc']}"
     rec = {'snap': x['snap'], 'time': f'{now():%H:%M:%S}', 'bc': x['bc'], 'R': x['R'], 'post': f"{x['post']:%H:%M}"}
@@ -178,9 +200,29 @@ def main():
             except Exception: pass
     for x in rs:
         x['snap'] = max([s for (b, r, s) in done if b == x['bc'] and r == x['R']] + [0])
+    pd_ = set(); pp = os.path.join(DDIR, 'nar_pub.jsonl')
+    if os.path.exists(pp):
+        for l in open(pp, encoding='utf-8'):
+            try:
+                d = json.loads(l); pd_.add((d['bc'], d['R'], d['label']))
+            except Exception: pass
+    PR = [dict(x, pubd={lb for (b, r, lb) in pd_ if b == x['bc'] and r == x['R']}) for x in rs if x['post'] - datetime.timedelta(minutes=2) > now()]
+    morning = [x for x in PR if not x['pubd'] and (x['post'] - now()).total_seconds() > 3820]
+    for x in morning: x['pubd'].add('朝一')
     rs = [x for x in rs if x['post'] > now() + datetime.timedelta(seconds=150)]
-    log(f'開催 {len(babas)}場 / これから {len(rs)}レース')
-    while time.time() - T0 < RUN_MIN * 60 and rs:
+    log(f'開催 {len(babas)}場 / これから {len(rs)}レース（公開用 {len(PR)}レース・朝一 {len(morning)}）')
+    while time.time() - T0 < RUN_MIN * 60 and (rs or PR):
+        if morning:
+            pub(morning.pop(0), '朝一')
+        for x in list(PR):
+            sec = (x['post'] - now()).total_seconds() - 120
+            if sec < 30:
+                PR.remove(x); continue
+            for ps, lb in PS:
+                if lb not in x['pubd'] and ps - 25 < sec <= ps:
+                    x['pubd'].add(lb); pub(x, lb)
+                elif lb not in x['pubd'] and sec <= ps - 25:
+                    x['pubd'].add(lb)
         for x in list(rs):
             sec = (x['post'] - now()).total_seconds()
             if x['snap'] >= len(SN) or sec < 30:

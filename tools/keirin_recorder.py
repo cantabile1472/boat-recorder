@@ -172,6 +172,22 @@ def e_eval(x, rec):
             log(f"【E】{x['name']}{x['R']}R " + ' / '.join(le))
 
 
+PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前'), (300, '5分前'), (180, '3分前'), (120, '2分前'), (60, '1分前')]
+
+
+def pub(x, label):
+    """公開データベース用（記録のみ・公開は未定）：keirin_pub.jsonl"""
+    try:
+        h = get(f"{B}{x['v']}/racedetail/{x['id']}/?pageType=odds&kakeshikiType=wide")
+        if not h:
+            return
+        m = re.search(r'id="JS_ODDSSTATUS_wide">\s*<p class="time">([^<]*)</p>', h)
+        save({'label': label, 'sec': int((x['dl'] - now()).total_seconds()), 'time': f'{now():%H:%M:%S}', 'v': x['v'], 'name': x['name'], 'id': x['id'], 'R': x['R'],
+              'deadline': f"{x['dl']:%H:%M}", 'upd': m.group(1) if m else '', 't3': parse_3t(h), 'wide': parse_2(h, 'wide'), 'ex': parse_2(h, '2shatan'), 'q': parse_2(h, '2shahuku')}, 'keirin_pub.jsonl')
+    except Exception as e:
+        log(f"公開用の記録NG {x.get('name')}{x.get('R')}R {label} {e!r}")
+
+
 def main():
     if now().hour < 7:
         return
@@ -193,10 +209,29 @@ def main():
         x['closed'] = (x['id'] + 'close') in done
         x['res'] = (x['id'] + 'result') in done
     rs = [x for x in rs if x['dl'] > now() - datetime.timedelta(minutes=30)]
+    pd_ = set(); pp = os.path.join(DDIR, 'keirin_pub.jsonl')
+    if os.path.exists(pp):
+        for l in open(pp, encoding='utf-8'):
+            try:
+                d = json.loads(l); pd_.add((d['id'], d['label']))
+            except Exception:
+                pass
+    for x in rs:
+        x['pubd'] = {lb for (i, lb) in pd_ if i == x['id']}
+    morning = [x for x in rs if not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
+    for x in morning:
+        x['pubd'].add('朝一')
     log(f"開催 {'・'.join(sorted({x['name'] for x in rs}))} / これから {len(rs)}レース")
     while time.time() - T0 < RUN_MIN * 60 and rs:
+        if morning:
+            pub(morning.pop(0), '朝一')
         for x in list(rs):
             sec = (x['dl'] - now()).total_seconds()
+            for ps, lb in PS:
+                if lb not in x['pubd'] and ps - 25 < sec <= ps:
+                    x['pubd'].add(lb); pub(x, lb)
+                elif lb not in x['pubd'] and sec <= ps - 25:
+                    x['pubd'].add(lb)
             try:
                 if x['snap'] < len(SN) and 3 < sec <= SN[x['snap']]:
                     while x['snap'] + 1 < len(SN) and sec <= SN[x['snap'] + 1]:
