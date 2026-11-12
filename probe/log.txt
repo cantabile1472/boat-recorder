@@ -1,2 +1,1 @@
-0 200 251906 https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=wide | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 04:59:20 GMT
-1 200 251970 https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=3renpuku | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 04:59:40 GMT
+0 200 233031 https://keirin.kdreams.jp/fukui/racedetail/5120261111020009/?pageType=odds&kakeshikiType=wide | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 05:07:33 GMT
