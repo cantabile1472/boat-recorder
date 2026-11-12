@@ -946,7 +946,7 @@ def auto_main():
                         if hitX3 and PX3.get('notify') and not x.get('x3_sent'):
                             x['x3_sent'] = True
                             rx = {int(r.car): r for r in xa.itertuples()}
-                            pool.submit(notify, f"【X3】オート {tag}（42秒前・単勝）", '\n'.join(f"単勝 {c}号車　今{od.get(c, 0):.1f}倍 → 底値{rx[c].s70_odds:.1f}倍　1着率{rx[c].q3*100:.0f}%　EV{rx[c].s70_ev:.2f}" for c in hitX3), False)
+                            notify(f"【X3】オート {tag}（42秒前・単勝）", '\n'.join(f"単勝 {c}号車　今{od.get(c, 0):.1f}倍 → 底値{rx[c].s70_odds:.1f}倍　1着率{rx[c].q3*100:.0f}%　EV{rx[c].s70_ev:.2f}" for c in hitX3), False)
                             append_csv('x3_notify.csv', 'time,pc,place,R,deadline,car,odds,s70_odds,s70_ev', [[f'{now():%H:%M:%S}', x['pc'], APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", c, od.get(c, 0), round(rx[c].s70_odds, 1), round(rx[c].s70_ev, 3)] for c in hitX3])
                 except Exception:
                     log('オート版s70 NG ' + traceback.format_exc().splitlines()[-1])
