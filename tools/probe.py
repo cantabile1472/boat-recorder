@@ -3,7 +3,10 @@ import os, gzip, urllib.request
 os.makedirs('probe', exist_ok=True)
 for i, u in enumerate(open('probe_urls.txt', encoding='utf-8').read().split()):
     try:
-        rq = urllib.request.Request(u, headers={'User-Agent': os.environ.get('UA', 'Mozilla/5.0'), 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja'})
+        body = None
+        if '|' in u:
+            u, body = u.split('|', 1); body = body.encode()
+        rq = urllib.request.Request(u, data=body, headers={'User-Agent': os.environ.get('UA', 'Mozilla/5.0'), 'Accept-Encoding': 'gzip', 'Accept-Language': 'ja', **({'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Referer': 'https://kyoteibiyori.com/'} if body else {})})
         with urllib.request.urlopen(rq, timeout=30) as r:
             b = r.read()
             if r.headers.get('Content-Encoding') == 'gzip': b = gzip.decompress(b)
