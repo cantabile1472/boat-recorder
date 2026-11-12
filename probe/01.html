@@ -1,1 +1,2407 @@
-<HTTPError 403: 'Forbidden'>
+var m_RaceKekkaHaitou = [];
+var m_Chart;
+var CommonPlaceName = ["桐生","戸田","江戸川","平和島","多摩川","浜名湖","蒲郡",
+			"常滑","津","三国","びわこ","住之江","尼崎",
+			"鳴門","丸亀","児島","宮島","徳山","下関",
+			"若松","芦屋","福岡","唐津","大村"];
+function GetRaceKekka(place_no,race_no,hiduke,flg_move){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_race_kekka.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				SetRaceKekka(place_no,race_no,hiduke,data,flg_move);
+				SetRaceReplay(place_no,race_no,hiduke,data);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function SetRaceReplay(place_no,race_no,hiduke,data){
+	var isKekka = false;
+	$.each(data, function(index, value) {
+		if(Number(value.rank) != 0){
+			isKekka = true;
+		}
+	});
+	if (isKekka == false){
+		return;
+	}
+	// レースライブ直接埋め込み　中止
+	//var liveIframeURL = '<h4 class="race_data_title">レースリプレイ</h4><div class="center race_live"><iframe src="https://smart.jlc.ne.jp/tbsp/streamer/streamer.php?jo=' + ('0' + place_no).slice(-2) + '&race=' + race_no + '&date=' + hiduke + '&m=1" width="500" height="300" frameborder="0" style="border:0" allowfullscreen></iframe></div><p style="color:red">※表示される映像の著作権は配信元にあります。</p>'
+
+	// レースリンクへ変更
+	var liveURL = getkekkaUrl(hiduke,m_Place_no,race_no);
+	if(typeof m_IsSP !== 'undefined' && m_IsSP == 0){
+		liveURL = getkekkaUrl(hiduke,m_Place_no,race_no);
+	}
+	var liveIframeURL = "";
+	if(typeof m_Iskakin !== 'undefined' && m_Iskakin > 0){
+		liveIframeURL = '<h4 class="race_data_title">レースリプレイ</h4><p><a class="btnColor4" style="padding: 5px;" id="btnRaceReplay">レースリプレイはこちら</a></p>';
+	}else{
+		liveIframeURL = '<h4 class="race_data_title" id="btnViewRace">レースリプレイ</h4><p><a class="btnColor4" style="padding: 5px;" href="' + liveURL + '" target="_blank">レースリプレイはこちら</a></p>';
+		//liveIframeURL = '<h4 class="race_data_title"><a href="https://jlcapi.jlc.ne.jp/new_bb/Streamer/GetBoatraceReplay.php?VODType=2&HoldingDay=' + hiduke + '&StudiumNo=' + ('0' + place_no).slice(-2) + '&RaceNo==' + ('0' + race_no).slice(-2) + '" target="_blank">レースリプレイ</a></h4><p><a class="btnColor4" style="padding: 5px;" href="' + liveURL + '" target="_blank">レースリプレイはこちら</a></p>';
+	}
+
+	liveIframeURL = liveIframeURL + '<p><a class="btnColor4" style="padding: 5px;" id="btnRace1marktenkai">1マーク展開動画</a></p>';
+
+	$("#kekka4").html(liveIframeURL);
+	if(typeof m_Iskakin !== 'undefined' && m_Iskakin > 0){
+		$('#btnRaceReplay').on('click', function(){
+			GetReplayVideo(hiduke,place_no,race_no,1);
+		});
+	}
+	$('#btnRace1marktenkai').on('click', function(){
+		GetReplay1markTenkaiVideo(hiduke,place_no,race_no,3);
+	});
+	$('#btnViewRace').on('click', function(){
+		replayView(hiduke,place_no,race_no);
+	});
+}
+function getTenjiUrl(hiduke,place_no,race_no) {
+  const placeName = getPlaceNameCom(place_no);
+  return 'https://front.player.boatrace-cdn.jp/player/vod?service=boatcast&stadium=' + placeName + '&raceType=exhibition&raceDate=' + hiduke + '&raceNumber=' + race_no + '&autoplay=0&bitrate=low';
+}
+function getkekkaUrl(hiduke,place_no,race_no) {
+  const placeName = getPlaceNameCom(place_no);
+  return 'https://front.player.boatrace-cdn.jp/player/vod?service=boatcast&stadium=' + placeName + '&raceType=race&raceDate=' + hiduke + '&raceNumber=' + race_no + '&autoplay=0&bitrate=low';
+}
+function getPlaceNameCom(place_no) {
+  switch (Number(place_no)) {
+    case 1:  return "01kiryu";
+    case 2:  return "02toda";
+    case 3:  return "03edogawa";
+    case 4:  return "04heiwajima";
+    case 5:  return "05tamagawa";
+    case 6:  return "06hamanako";
+    case 7:  return "07gamagori";
+    case 8:  return "08tokoname";
+    case 9:  return "09tsu";
+    case 10: return "10mikuni";
+    case 11: return "11biwako";
+    case 12: return "12suminoe";
+    case 13: return "13amagasaki";
+    case 14: return "14naruto";
+    case 15: return "15marugame";
+    case 16: return "16kojima";
+    case 17: return "17miyajima";
+    case 18: return "18tokuyama";
+    case 19: return "19shimonoseki";
+    case 20: return "20wakamatsu";
+    case 21: return "21ashiya";
+    case 22: return "22fukuoka";
+    case 23: return "23karatsu";
+    case 24: return "24omura";
+    default: return "";
+  }
+}
+function replayView(hiduke,place_no,race_no){
+	// player_on();
+	// var place_name = CommonPlaceName[place_no - 1];
+	// $("#modal_player_title").html(String(hiduke).substr(0,4) + '年' +String(hiduke).substr(4,2) + '月' + String(hiduke).substr(6,2) + '日' + ' ' + place_name + race_no + 'R');
+	// var data = '<div class="center race_live"><iframe src="https://livebb.jlc.ne.jp/bb_top/new_bb/streamer/streamer.php?md=V&ymd=' + formatHiduke(hiduke) + '&jo=' + ('0' + place_no).slice(-2) + '&race=' + ('0' + race_no).slice(-2) + '" width="500" height="300" frameborder="0" style="border:0" allowfullscreen></iframe></div><p style="font-size:8px;color:red">※表示される映像の著作権は配信元にあります。</p>'
+	// $("#player_detail1").html(data);
+	var race_result = new Object();
+	race_result.hiduke = hiduke;
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	var reqdata = JSON.stringify(race_result);
+	modal_on();
+	$.ajax({
+		type: "post",
+		url: "/tools/replay_video.php", 
+		data:{"data":reqdata},
+		dataType: "html",
+		success: function(data){
+			modal_off();
+			player_on();
+			$("#player_detail1").html(data);
+		},
+		error:function(data)
+		{
+		} 
+	});
+}
+function formatHiduke(hiduke) {
+  const s = String(hiduke);
+  if (s.length !== 8) return "";
+
+  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+}
+function GetReplay1markTenkaiVideo(hiduke,place_no,race_no,mode){
+	var race_result = new Object();
+	race_result.hiduke = hiduke;
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.mode = mode;
+	race_result.isSP = m_IsSP;
+	var reqdata = JSON.stringify(race_result);
+	modal_on();
+	$.ajax({
+			type: "post",
+			url: "/api/video_data.php", 
+			data:{"data":reqdata},
+			dataType: "html",
+			success: function(data){
+				modal_off();
+				player_on();
+				var place_name = CommonPlaceName[place_no - 1];
+				$("#modal_player_title").html(String(hiduke).substr(0,4) + '年' +String(hiduke).substr(4,2) + '月' + String(hiduke).substr(6,2) + '日' + ' ' + place_name + race_no + 'R');
+				$("#player_detail1").html(data);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetReplayVideo(hiduke,place_no,race_no,mode){
+	var race_result = new Object();
+	race_result.hiduke = hiduke;
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.mode = mode;
+	race_result.isSP = m_IsSP;
+	var reqdata = JSON.stringify(race_result);
+	modal_on();
+	$.ajax({
+			type: "post",
+			url: "/api/video_data.php", 
+			data:{"data":reqdata},
+			dataType: "html",
+			success: function(data){
+				modal_off();
+				if(data == ""){
+					if(mode == 0){
+						var liveURL = 'https://race.boatcast.jp/boatcastpc/streamer/streamer.php?md=T&jo=' + ('0' + place_no).slice(-2) + '&ymd=' + hiduke + '&race=' + ('0' + race_no).slice(-2);
+						if(m_IsSP == 0){
+							liveURL = 'https://race.boatcast.jp/boatcastpc/streamer/streamer.php?md=T&jo=' + ('0' + place_no).slice(-2) + '&ymd=' + hiduke + '&race=' + ('0' + race_no).slice(-2);
+						}
+					}else if(mode == 1){
+						var liveURL = 'https://race.boatcast.jp/boatcastpc/streamer/streamer.php?md=V&jo=' + ('0' + place_no).slice(-2) + '&ymd=' + hiduke + '&race=' + ('0' + race_no).slice(-2);
+						if(typeof m_IsSP !== 'undefined' && m_IsSP == 0){
+							liveURL = 'https://race.boatcast.jp/boatcastpc/streamer/streamer.php?md=V&jo=' + ('0' + place_no).slice(-2) + '&ymd=' + hiduke + '&race=' + ('0' + race_no).slice(-2);
+						}
+					}else if(mode == 2){
+						player_on();
+						$("#player_detail1").html("<p>データがありません</p>");
+						return;
+					}
+					window.open(liveURL, '_blank');
+				}else{
+					player_on();
+					var place_name = CommonPlaceName[place_no - 1];
+					$("#modal_player_title").html(String(hiduke).substr(0,4) + '年' +String(hiduke).substr(4,2) + '月' + String(hiduke).substr(6,2) + '日' + ' ' + place_name + race_no + 'R');
+					$("#player_detail1").html(data);
+				}
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function SetRaceKekka(place_no,race_no,hiduke,data, flg_move){
+	var isKekka = false;
+	var isJunen = false;
+	$.each(data, function(index, value) {
+		if(Number(value.rank) != 0){
+			isKekka = true;
+		}
+		if(Number(value.kaisai_flag) == 0){
+			isJunen = true;
+		}
+	});
+	if (isKekka == false){
+		if(isJunen){
+			$("#kekka").html('<p style="color:red;">レース中止');
+		}else{
+			$("#kekka").html("<p>レース結果はまだありません。</p>");
+		}
+		$("#kekka2").html("");
+		$("#kekka3").html("");
+		$("#kekka4").html("");
+		$("#kekka_image").html("");
+		m_RaceKekkaHaitou = [];
+		return;
+	}
+	var jiko_player = [];
+	var shussoHyou = '<table>';
+	shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">'
+													+	'<td>着</td>'
+													+	'<td>枠</td>'
+													+	'<td>進入</td>'
+													+	'<td>名称</td>'
+													+	'<td>ST</td>'
+													+	'<td>タイム</td>'
+													+ '</tr>';
+	$.each(data, function(index, value) {
+		if(Number(value.rank) > 0){
+			shussoHyou = shussoHyou + '<tr class="font100 center">';
+			shussoHyou = shussoHyou + '<td>' + value.rank + '</td>';
+			var tmpNo = Number(value.course);
+			shussoHyou = shussoHyou + '<td class="course' + tmpNo + '">' + value.course + '</td>';
+			shussoHyou = shussoHyou + '<td>' + value.shinnyuu + '</td>';
+			shussoHyou = shussoHyou + '<td>';
+			if(value.seibetsu == 2){
+				shussoHyou = shussoHyou + '<img src="img/joshi.png" height="12px">';
+			}
+			shussoHyou = shussoHyou + value.player_name;
+			shussoHyou = shussoHyou + '</td>';
+			shussoHyou = shussoHyou + '<td>' + value.start + '</td>';
+			shussoHyou = shussoHyou + '<td>' + value.time + '</td>';
+			shussoHyou = shussoHyou + '</tr>';
+		}else{
+			jiko_player.push(value);
+		}
+	});
+	$.each(jiko_player, function(index, value) {
+		var tmpRank = '-';
+		if(Number(value.rank) == -1){
+			tmpRank = 'F';
+		}else if(Number(value.rank) == -2){
+			tmpRank = '転';
+		}else if (Number(value.rank) == -3){
+			tmpRank = 'エ';
+		}else if (Number(value.rank) == -4){
+			tmpRank = '欠';	
+		}else if (Number(value.rank) == -5){
+			tmpRank = '妨';
+		}else if (Number(value.rank) == -6){
+			tmpRank = '落';
+		}else if (Number(value.rank) == -7){
+			tmpRank = '不';
+		}else if (Number(value.rank) == -8){
+			tmpRank = '沈';
+		}else if (Number(value.rank) == -9){
+			tmpRank = 'Ｌ';
+		}else if (Number(value.rank) == -10){
+			tmpRank = '失';
+		}
+		shussoHyou = shussoHyou + '<tr class="font100 center">';
+		shussoHyou = shussoHyou + '<td>' + tmpRank + '</td>';
+		var tmpNo = Number(value.course);
+		shussoHyou = shussoHyou + '<td class="course' + tmpNo + '">' + value.course + '</td>';
+		shussoHyou = shussoHyou + '<td>' + value.shinnyuu + '</td>';
+		shussoHyou = shussoHyou + '<td>';
+		if(value.seibetsu == 2){
+			shussoHyou = shussoHyou + '<img src="img/joshi.png" height="12px">';
+		}
+		shussoHyou = shussoHyou + value.player_name + '</td>';
+		shussoHyou = shussoHyou + '<td>' + value.start + '</td>';
+		shussoHyou = shussoHyou + '<td>' + value.time + '</td>';
+		shussoHyou = shussoHyou + '</tr>';
+	});
+
+	shussoHyou = shussoHyou + '</table>';
+	shussoHyou = shussoHyou + '<hr class="style1">';
+	$("#kekka").html(shussoHyou);
+	
+	var commonData;
+	$.each(data,
+		function(index, value) 
+		{
+			commonData = value;
+		}
+	);
+	var wind_str = "";
+	var weather_str = "";
+	if (Number(commonData.wind) == 0){
+		wind_str = "/img/icon_wind1_5.png";
+	}else if(Number(commonData.wind) == 1){
+		wind_str = "/img/icon_wind1_7.png";
+	}else if(Number(commonData.wind) == 2){
+		wind_str = "/img/icon_wind1_9.png";
+	}else if(Number(commonData.wind) == 3){
+		wind_str = "/img/icon_wind1_11.png";
+	}else if(Number(commonData.wind) == 4){
+		wind_str = "/img/icon_wind1_13.png";
+	}else if(Number(commonData.wind) == 5){
+		wind_str = "/img/icon_wind1_15.png";
+	}else if(Number(commonData.wind) == 6){
+		wind_str = "/img/icon_wind1_1.png";
+	}else if(Number(commonData.wind) == 7){
+		wind_str = "/img/icon_wind1_3.png";
+	}
+	
+	if (Number(commonData.weather) == 0){
+		weather_str = "晴れ"
+	}else if (Number(commonData.weather) == 1){
+		weather_str = "雨"
+	}else if (Number(commonData.weather) == 2){
+		weather_str = "曇り"
+	}
+	var kion = commonData.kion;
+	if (kion == null){
+		kion = '-'
+	}
+	var suion = commonData.suion;
+	if (suion == null){
+		suion = '-'
+	}
+	shussoHyou = '<table>';
+	shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">'
+													+	'<td>気温</td>'
+													+	'<td>天気</td>'
+													+	'<td>風速</td>'
+													+	'<td>風向</td>'
+													+	'<td>水温</td>'
+													+	'<td>波高</td>'
+													+ '</tr>'
+													+ '<tr class="font100 center">'
+													+	'<td>'
+													+ kion + "℃"
+													+ '</td>'
+													+	'<td>'
+													+ weather_str
+													+ '</td>'
+													+	'<td>'
+													+ commonData.wind_speed + "m"
+													+ '</td>'
+													+	'<td>'
+													+ '<img src="' + wind_str + '">'
+													+ '</td>'
+													+	'<td>'
+													+ suion + "℃"
+													+ '</td>'
+													+	'<td>'
+													+ commonData.wave + "cm"
+													+ '</td>'
+													+ '</tr>';
+	shussoHyou = shussoHyou + '</table>';
+	shussoHyou = shussoHyou + '<hr class="style1">';
+	$("#kekka2").html(shussoHyou);
+	if (flg_move == true){
+		$("html,body").animate({scrollTop:$('#kekka').offset().top});
+	}
+	// 直前画像作成
+	for (var i = 0; i < data.length -1; i++) {
+		for (var j = data.length -1; j >= i + 1; j--) {
+			if(data[j].shinnyuu < data[j-1].shinnyuu){
+			  var tmp = data[j];
+			  data[j] = data[j-1];
+			  data[j-1]= tmp;
+			}
+		}
+	}
+	var startImage = CreateCurseImage(data,'スタート情報');
+	GetRentanThree(place_no,race_no,hiduke);
+	startImage = startImage + '<hr class="style1">';
+	$("#kekka_image").html(startImage);
+
+}
+function GetRentanThree(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	m_RaceKekkaHaitou = [];
+	$.ajax({
+			type: "post",
+			url: "request_rentan_three.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				if(data.length == 0){
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					shussoHyou = shussoHyou + '<td>3連単</td>';
+					shussoHyou = shussoHyou + '<td>不成立</td>';
+					shussoHyou = shussoHyou + '<td>100円</td>';
+					shussoHyou = shussoHyou + '<td>-</td>';
+					shussoHyou = shussoHyou + '</tr>';	
+				}
+				$.each(data, function(index, value) {
+					
+					shussoHyou = shussoHyou + '<tr class="font100 center">';
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">3連単</td>';
+					}
+					
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course1) + '">'
+									+ Number(value.course1)
+									+ '</span>'
+									+ '-'
+									+ '<span class="course_box course' + Number(value.course2) + '">'
+									+ Number(value.course2)
+									+ '</span>'
+									+ '-'
+									+ '<span class="course_box course' + Number(value.course3) + '">'
+									+ Number(value.course3)
+									+ '</span>';
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>';
+					shussoHyou = shussoHyou + '<td>' + value.ninki + '</td>';
+					shussoHyou = shussoHyou + '</tr>';
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetRenfukuThree(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetRenfukuThree(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_renfuku_three.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				if(data.length == 0){
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					shussoHyou = shussoHyou + '<td>3連複</td>';
+					shussoHyou = shussoHyou + '<td>不成立</td>';
+					shussoHyou = shussoHyou + '<td>100円</td>';
+					shussoHyou = shussoHyou + '<td>-</td>';
+					shussoHyou = shussoHyou + '</tr>';	
+				}
+				$.each(data, function(index, value) {
+					
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">3連複</td>'
+					}
+					
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course1) + '">'
+									+ Number(value.course1)
+									+ '</span>'
+									+ '='
+									+ '<span class="course_box course' + Number(value.course2) + '">'
+									+ Number(value.course2)
+									+ '</span>'
+									+ '='
+									+ '<span class="course_box course' + Number(value.course3) + '">'
+									+ Number(value.course3)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td>' + value.ninki + '</td>'
+					shussoHyou = shussoHyou + '</tr>'	
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetRenTanTwo(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetRenTanTwo(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_rentan_two.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				$.each(data, function(index, value) {
+					
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">2連単</td>'
+					}
+					
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course1) + '">'
+									+ Number(value.course1)
+									+ '</span>'
+									+ '-'
+									+ '<span class="course_box course' + Number(value.course2) + '">'
+									+ Number(value.course2)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td>' + value.ninki + '</td>'
+					shussoHyou = shussoHyou + '</tr>'	
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetRenFukuTwo(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetRenFukuTwo(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_renfuku_two.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				$.each(data, function(index, value) {
+					
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">2連複</td>'
+					}
+					
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course1) + '">'
+									+ Number(value.course1)
+									+ '</span>'
+									+ '='
+									+ '<span class="course_box course' + Number(value.course2) + '">'
+									+ Number(value.course2)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td>' + value.ninki + '</td>'
+					shussoHyou = shussoHyou + '</tr>'	
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetKakurenFuku(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetKakurenFuku(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_kakurenfuku.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				$.each(data, function(index, value) {
+					
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">拡連複</td>'
+					}
+					
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course1) + '">'
+									+ Number(value.course1)
+									+ '</span>'
+									+ '='
+									+ '<span class="course_box course' + Number(value.course2) + '">'
+									+ Number(value.course2)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td>' + value.ninki + '</td>'
+					shussoHyou = shussoHyou + '</tr>'	
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetTansho(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetTansho(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_tansho.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				$.each(data, function(index, value) {
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">単勝</td>'
+					}
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course) + '">'
+									+ Number(value.course)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td></td>'
+					shussoHyou = shussoHyou + '</tr>'
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				GetFukusho(place_no,race_no,hiduke);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetFukusho(place_no,race_no,hiduke){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.race_no = race_no;
+	race_result.hiduke = hiduke;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_fukusho.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = "";
+				$.each(data, function(index, value) {
+					shussoHyou = shussoHyou + '<tr class="font100 center">'
+					if (index == 0){
+						shussoHyou = shussoHyou + '<td rowspan="' + data.length +'">複勝</td>'
+					}
+					shussoHyou = shussoHyou + '<td>'
+									+ '<span class="course_box course' + Number(value.course) + '">'
+									+ Number(value.course)
+									+ '</span>'
+					shussoHyou = shussoHyou + '</td>'
+					shussoHyou = shussoHyou + '<td>' + separate(value.kingaku) + '円</td>'
+					shussoHyou = shussoHyou + '<td></td>'
+					shussoHyou = shussoHyou + '</tr>'
+				});
+				m_RaceKekkaHaitou.push(shussoHyou);
+				shussoHyou = '<table>';
+				var chkTmp = "";
+				$.each(m_RaceKekkaHaitou, function(i, value) {
+					chkTmp = chkTmp + value;
+				});
+				if(chkTmp == ""){
+					$("#kekka3").html("");
+					return;
+				}
+				shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">'
+												+	'<td>勝式</td>'
+												+	'<td>組番</td>'
+												+	'<td>払戻金</td>'
+												+	'<td>人気</td>'
+												+ '</tr>';
+				$.each(m_RaceKekkaHaitou, function(i, value) {
+					shussoHyou = shussoHyou + value;
+				});
+				shussoHyou = shussoHyou + '</table>';
+				$("#kekka3").html(shussoHyou);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function separate(num){
+	return String(num).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+}
+function yyyymmdd(y, m, d) {
+	var y0 = ('000' + y).slice(-4);
+	var m0 = ('0' + m).slice(-2);
+	var d0 = ('0' + d).slice(-2);
+	return y0 + m0 + d0;
+}
+function CreateShoritsuChart(data,course,course2)
+{
+	var ctx = document.getElementById("shoritsuChart");
+	 var player_data = data[course - 1];
+	 var one_konki = 0;
+	 var one_ippan = 0;
+	 var one_SG = 0;
+	 var one_saikin = 0;
+	 var konki2 = 0;
+	 var ippan2 = 0;
+	 var SG2 = 0;
+	 var saikin2 = 0;
+	 var konki3 = 0;
+	 var ippan3 = 0;
+	 var SG3 = 0;
+	 var saikin3 = 0;
+	 if (course2 == 1){
+		one_ippan = (player_data.course1_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course1_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course1_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course1_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course1_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course1_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course1_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course1_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course1_3_ave * 100).toFixed(1);
+	 }else if (course2 == 2){
+		one_ippan = (player_data.course2_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course2_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course2_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course2_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course2_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course2_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course2_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course2_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course2_3_ave * 100).toFixed(1);
+	}else if (course2 == 3){
+		one_ippan = (player_data.course3_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course3_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course3_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course3_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course3_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course3_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course3_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course3_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course3_3_ave * 100).toFixed(1);
+	}else if (course2 == 4){
+		one_ippan = (player_data.course4_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course4_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course4_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course4_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course4_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course4_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course4_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course4_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course4_3_ave * 100).toFixed(1);
+	}else if (course2 == 5){
+		one_ippan = (player_data.course5_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course5_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course5_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course5_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course5_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course5_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course5_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course5_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course5_3_ave * 100).toFixed(1);
+	}else if (course2 == 6){
+		one_ippan = (player_data.course6_1_ave_nomal * 100).toFixed(1);
+		one_SG = (player_data.course6_1_ave_sg * 100).toFixed(1);
+		one_saikin = (player_data.course6_1_ave * 100).toFixed(1);
+		ippan2 = (player_data.course6_2_ave_nomal * 100).toFixed(1);
+		SG2 = (player_data.course6_2_ave_sg * 100).toFixed(1);
+		saikin2 = (player_data.course6_2_ave * 100).toFixed(1);
+		ippan3 = (player_data.course6_3_ave_nomal * 100).toFixed(1);
+		SG3 = (player_data.course6_3_ave_sg * 100).toFixed(1);
+		saikin3 = (player_data.course6_3_ave * 100).toFixed(1);
+	 }
+	 if( m_Chart ){
+		m_Chart.destroy();
+	}
+	 m_Chart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+		labels: ['1着率', '2連対率', '3連対率'],
+		datasets: [
+			{
+			label: '一般戦',
+			data: [one_ippan, ippan2, ippan3],
+			backgroundColor: "rgba(130,201,169,0.5)"
+			},{
+			label: 'SG/G1',
+			data: [one_SG, SG2, SG3],
+			backgroundColor: "rgba(255,183,76,0.5)"
+			},{
+			label: '直近3カ月',
+			data: [one_saikin, saikin2, saikin3],
+			backgroundColor: "rgba(161,192,255,0.5)"
+			}
+		]
+		},
+		options: {
+			maintainAspectRatio: false,
+		title: {
+			display: true,
+			text: '枠別勝率'
+		},
+		scales: {
+			yAxes: [{
+			ticks: {
+				suggestedMax: 100,
+				suggestedMin: 0,
+				stepSize: 10,
+				callback: function(value, index, values){
+				return  value +  '%'
+				}
+			}
+			}]
+		},
+		}
+	});
+}
+function GetPlayer(no){
+	var race_result = new Object();
+	race_result.no = no;
+	race_result.season = m_Searson;
+	race_result.term = m_Term;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_result.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var IsSession = false;
+				var player_name = "";
+				$.each(data,
+					function(index, value) 
+					{
+						IsSession = value.IsSession;
+						player_name = value.name;
+					}
+				);	
+				var shussoHyou = '<h3 class="race-subtitle">基本情報</h3><div class="shusso">';
+				if(IsSession){
+					shussoHyou  = shussoHyou + '<span id="okiniiri" data-odds="' + no +  '" data-name="' + player_name +  '" class="common_btn">お気に入りに追加</span>';
+				}
+				shussoHyou = shussoHyou + '<table class="player_table">'
+				$.each(data,
+					function(index, value) 
+					{
+						var seinengappi = "";
+						if(value.nengo == 'S'){
+							seinengappi = "昭和";
+						}else if(value.nengo == 'H'){
+							seinengappi = "平成";
+						}
+						seinengappi = seinengappi + String(value.birthday).substr(0,2) + '年' +　String(value.birthday).substr(2,2) + '月' + String(value.birthday).substr(4,2) + '日';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						//shussoHyou = shussoHyou + '<td rowspan="6">';
+						//shussoHyou = shussoHyou +  '<img src="/player/' +  value.player_no + '.jpg">';
+						//shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">名前</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + value.name + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">カナ</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + value.name_kana + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">登録番号</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + value.no + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">生年月日</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + seinengappi + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">身長</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + value.shincho + 'cm</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="bgcolorBlue" colspan="2">体重</td>';
+						shussoHyou = shussoHyou + '<td colspan="2">' + value.taijyu + 'kg</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '</table>';
+						shussoHyou = shussoHyou + '<table>';
+						shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+						shussoHyou = shussoHyou + '<td>血液型</td>';
+						shussoHyou = shussoHyou + '<td>支部</td>';
+						shussoHyou = shussoHyou + '<td>出身</td>';
+						shussoHyou = shussoHyou + '<td>登録期</td>';
+						shussoHyou = shussoHyou + '<td>級別</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td>' + value.blood + '型</td>';
+						shussoHyou = shussoHyou + '<td>' + value.shibu + '支部</td>';
+						shussoHyou = shussoHyou + '<td>' + value.shusshin + '</td>';
+						shussoHyou = shussoHyou + '<td>' + value.yousei_kikan + '期</td>';
+						shussoHyou = shussoHyou + '<td>' + value.rank + '級</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '</table>';
+						shussoHyou = shussoHyou + '<h3 class="race-subtitle">期別成績</h3>';
+						shussoHyou = shussoHyou + '<table>';
+						shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+						shussoHyou = shussoHyou + '<td>勝率</td>';
+						shussoHyou = shussoHyou + '<td>2連対率</td>';
+						shussoHyou = shussoHyou + '<td>出走回数</td>';
+						shussoHyou = shussoHyou + '<td>優出回数</td>';
+						shussoHyou = shussoHyou + '<td>優勝回数</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td>' + (parseFloat(value.shoritsu) / 100).toFixed(2) +'</td>';
+						shussoHyou = shussoHyou + '<td>' + (parseFloat(value.fukusho) / 10).toFixed(2) +'%</td>';
+						shussoHyou = shussoHyou + '<td>' + value.shussou +'回</td>';
+						shussoHyou = shussoHyou + '<td>' + value.yushutsu +'回</td>';
+						shussoHyou = shussoHyou + '<td>' + value.yusho +'回</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+						shussoHyou = shussoHyou + '<td>平均ST</td>';
+						shussoHyou = shussoHyou + '<td>前期能力指数</td>';
+						shussoHyou = shussoHyou + '<td>今期能力指数</td>';
+						shussoHyou = shussoHyou + '<td>1着</td>';
+						shussoHyou = shussoHyou + '<td>2着</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td>' + (parseFloat(value.ave_start) / 100).toFixed(2) +'</td>';
+						shussoHyou = shussoHyou + '<td>' + value.zenki_nouryoku_shisuu / 100 +'</td>';
+						shussoHyou = shussoHyou + '<td>' + value.konki_nouryoku_shisuu / 100 +'</td>';
+						shussoHyou = shussoHyou + '<td>' + value.kaisuuOne +'回</td>';
+						shussoHyou = shussoHyou + '<td>' + value.kaisuuTwo +'回</td>';
+						shussoHyou = shussoHyou + '</tr>';
+					}
+				);
+				shussoHyou = shussoHyou + '</table>';
+				shussoHyou = shussoHyou + '</div>';
+				$("#player_detail1").html(shussoHyou);
+				$('#okiniiri').on('click', function(){
+					var player_no = $('#okiniiri').data('odds');
+					var player_name = $('#okiniiri').data('name');
+					TourokuOkiniiri(player_no,player_name);
+				});
+				GetPlayerCourse(no);
+				GetPlayerKakoSetsu(no);
+				GetPlayerPlaceKaiseki(no);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function TourokuOkiniiri(player_no,player_name){
+	var race_result = new Object();
+	race_result.mode = 1;
+	race_result.player_no = player_no;
+	race_result.player_name = player_name;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_user_okiniiri.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				alert('お気に入りに登録しました。');
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetPlayerPlaceKaiseki(no){
+	var race_result = new Object();
+	race_result.no = no;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_place_kaiseki.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = '<h3 class="race-subtitle">競艇場別成績</h3><div class="shusso"><table>';
+				shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+				shussoHyou = shussoHyou + '<td>場所</td>';
+				shussoHyou = shussoHyou + '<td>進入</td>';
+				shussoHyou = shussoHyou + '<td>勝率</td>';
+				shussoHyou = shussoHyou + '<td>複勝率</td>';
+				shussoHyou = shussoHyou + '<td>3連率</td>';
+				shussoHyou = shussoHyou + '<td>平均ST</td>';
+				shussoHyou = shussoHyou + '</tr>';
+				for (var i = 1; i <= 24; i++) {
+					var placeData = GetPlaceData(data,i);
+					var place_name = CommonPlaceName[i - 1];
+					var shinnyu = 0;
+					var shoritsu = "-";
+					var fukusho = "-";
+					var sanren = "-";
+					var start = "-";
+					if(placeData != null){
+						shinnyu = placeData.shinnyu;
+						shoritsu = parseFloat(placeData.shoritsu).toFixed(2);
+						fukusho = (parseFloat(placeData.fukusho) * 100 ).toFixed(1) + '%';
+						sanren = (parseFloat(placeData.sanren) * 100 ).toFixed(1) + '%';
+						start  = parseFloat(placeData.start_ave).toFixed(2);
+					}
+					shussoHyou = shussoHyou + '<tr class="font100 center">';
+					shussoHyou = shussoHyou + '<td class="bgcolorBlue">';
+					shussoHyou = shussoHyou + place_name;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + shinnyu;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + shoritsu;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + fukusho;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + sanren;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + start;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '</tr>';
+				}
+				shussoHyou = shussoHyou +'</table></div>';
+				for (var i = 1; i <= 24; i++) {
+					var placeData = GetPlaceData(data,i);
+					var place_name = CommonPlaceName[i - 1];
+					shussoHyou = shussoHyou + '<div class="shusso">';
+					shussoHyou = shussoHyou + '<p style="padding: .5em 1em;margin:0em"><b>';
+					shussoHyou = shussoHyou + place_name + '競艇場';
+					shussoHyou = shussoHyou + '</b></p>';
+					if(placeData == null){
+						shussoHyou = shussoHyou + '<p>出走データがありません。</p>';
+					}else{
+						shussoHyou = shussoHyou + '<table>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td></td>';
+						for (var j = 1; j <= 6; j++) {
+							shussoHyou = shussoHyou + '<td class="course' + j + '">' + j + '</td>'
+						}
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">平均ST</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start1_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start2_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start3_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start4_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start5_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + parseFloat(placeData.start6_ave).toFixed(2) + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">1着率</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course1_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course2_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course3_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course4_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course5_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course6_1_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">2連率</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course1_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course2_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course3_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course4_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course5_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course6_2_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">3連率</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course1_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course2_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course3_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course4_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course5_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '<td class="font100 center">' + (parseFloat(placeData.course6_3_ave) * 100).toFixed(1) + '%</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '</table>';
+					}
+					shussoHyou = shussoHyou + '</div>';
+				}
+				$("#player_detail5").html(shussoHyou);
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetPlaceData(data,no){
+var res = null
+$.each(data,
+	function(index, value) 
+	{
+		if(value.place_no == no){
+			res = value;
+		}
+	}
+);
+return res;
+}
+function GetPlayerCourseAll(no,raceArray){
+	var race_result = new Object();
+	race_result.no = no;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_course_result_all.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+　				var playerData = data[0];
+				var shussoHyou = '<h3 class="race-subtitle">コース別成績</h3><div class="shusso"><table>';
+				
+				shussoHyou = shussoHyou + GetPlayerCourseMidashi('1着率');
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td></td>';
+				for (var i=1; i<=6; i++) {
+					shussoHyou = shussoHyou + '<td class="course' + i + '">' + i + '</td>';
+				}
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">今期</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>-</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + ((parseFloat(value.kaisuuOne) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%<br>(' + value.shinnyu + ')</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近3ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_1_ave_choku3,playerData.course1_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_1_ave_choku3,playerData.course2_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_1_ave_choku3,playerData.course3_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_1_ave_choku3,playerData.course4_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_1_ave_choku3,playerData.course5_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_1_ave_choku3,playerData.course6_shinnyu_choku3);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近1ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_1_ave_choku1,playerData.course1_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_1_ave_choku1,playerData.course2_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_1_ave_choku1,playerData.course3_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_1_ave_choku1,playerData.course4_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_1_ave_choku1,playerData.course5_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_1_ave_choku1,playerData.course6_shinnyu_choku1);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">一般戦</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_1_ave_nomal,playerData.course1_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_1_ave_nomal,playerData.course2_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_1_ave_nomal,playerData.course3_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_1_ave_nomal,playerData.course4_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_1_ave_nomal,playerData.course5_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_1_ave_nomal,playerData.course6_shinnyu_nomal);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">SG|G1</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_1_ave_sg,playerData.course1_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_1_ave_sg,playerData.course2_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_1_ave_sg,playerData.course3_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_1_ave_sg,playerData.course4_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_1_ave_sg,playerData.course5_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_1_ave_sg,playerData.course6_shinnyu_sg);
+				shussoHyou = shussoHyou + '</tr>';
+				if (playerData.seibetsu == 2){
+					shussoHyou = shussoHyou + '<tr class="font100 center">';
+					shussoHyou = shussoHyou + '<td class="font100 center shusso_title_woman">女子戦</td>';
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_1_ave_woman,playerData.course1_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_1_ave_woman,playerData.course2_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_1_ave_woman,playerData.course3_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_1_ave_woman,playerData.course4_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_1_ave_woman,playerData.course5_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_1_ave_woman,playerData.course6_shinnyu_woman);
+				shussoHyou = shussoHyou + '</tr>';
+				}
+
+				shussoHyou = shussoHyou + GetPlayerCourseMidashi('2連対率');
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td></td>';
+				for (var i=1; i<=6; i++) {
+					shussoHyou = shussoHyou + '<td class="course' + i + '">' + i + '</td>';
+				}
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">今期</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>-</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + (((parseFloat(value.kaisuuOne) + parseFloat(value.kaisuuTwo)) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%<br>(' + value.shinnyu + ')</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近3ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_2_ave_choku3,playerData.course1_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_2_ave_choku3,playerData.course2_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_2_ave_choku3,playerData.course3_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_2_ave_choku3,playerData.course4_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_2_ave_choku3,playerData.course5_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_2_ave_choku3,playerData.course6_shinnyu_choku3);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近1ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_2_ave_choku1,playerData.course1_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_2_ave_choku1,playerData.course2_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_2_ave_choku1,playerData.course3_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_2_ave_choku1,playerData.course4_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_2_ave_choku1,playerData.course5_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_2_ave_choku1,playerData.course6_shinnyu_choku1);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">一般戦</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_2_ave_nomal,playerData.course1_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_2_ave_nomal,playerData.course2_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_2_ave_nomal,playerData.course3_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_2_ave_nomal,playerData.course4_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_2_ave_nomal,playerData.course5_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_2_ave_nomal,playerData.course6_shinnyu_nomal);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">SG|G1</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_2_ave_sg,playerData.course1_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_2_ave_sg,playerData.course2_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_2_ave_sg,playerData.course3_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_2_ave_sg,playerData.course4_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_2_ave_sg,playerData.course5_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_2_ave_sg,playerData.course6_shinnyu_sg);
+				shussoHyou = shussoHyou + '</tr>';
+				if (playerData.seibetsu == 2){
+					shussoHyou = shussoHyou + '<tr class="font100 center">';
+					shussoHyou = shussoHyou + '<td class="font100 center shusso_title_woman">女子戦</td>';
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_2_ave_woman,playerData.course1_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_2_ave_woman,playerData.course2_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_2_ave_woman,playerData.course3_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_2_ave_woman,playerData.course4_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_2_ave_woman,playerData.course5_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_2_ave_woman,playerData.course6_shinnyu_woman);
+				shussoHyou = shussoHyou + '</tr>';
+				}
+				
+				shussoHyou = shussoHyou + GetPlayerCourseMidashi('3連対率');
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td></td>';
+				for (var i=1; i<=6; i++) {
+					shussoHyou = shussoHyou + '<td class="course' + i + '">' + i + '</td>';
+				}
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">今期</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>-</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + (((parseFloat(value.kaisuuOne) + parseFloat(value.kaisuuTwo) + parseFloat(value.kaisuuThree)) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%<br>(' + value.shinnyu + ')</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近3ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_3_ave_choku3,playerData.course1_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_3_ave_choku3,playerData.course2_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_3_ave_choku3,playerData.course3_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_3_ave_choku3,playerData.course4_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_3_ave_choku3,playerData.course5_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_3_ave_choku3,playerData.course6_shinnyu_choku3);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近1ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_3_ave_choku1,playerData.course1_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_3_ave_choku1,playerData.course2_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_3_ave_choku1,playerData.course3_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_3_ave_choku1,playerData.course4_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_3_ave_choku1,playerData.course5_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_3_ave_choku1,playerData.course6_shinnyu_choku1);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">一般戦</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_3_ave_nomal,playerData.course1_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_3_ave_nomal,playerData.course2_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_3_ave_nomal,playerData.course3_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_3_ave_nomal,playerData.course4_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_3_ave_nomal,playerData.course5_shinnyu_nomal);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_3_ave_nomal,playerData.course6_shinnyu_nomal);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">SG|G1</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_3_ave_sg,playerData.course1_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_3_ave_sg,playerData.course2_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_3_ave_sg,playerData.course3_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_3_ave_sg,playerData.course4_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_3_ave_sg,playerData.course5_shinnyu_sg);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_3_ave_sg,playerData.course6_shinnyu_sg);
+				shussoHyou = shussoHyou + '</tr>';
+				if (playerData.seibetsu == 2){
+					shussoHyou = shussoHyou + '<tr class="font100 center">';
+					shussoHyou = shussoHyou + '<td class="font100 center shusso_title_woman">女子戦</td>';
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course1_3_ave_woman,playerData.course1_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course2_3_ave_woman,playerData.course2_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course3_3_ave_woman,playerData.course3_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course4_3_ave_woman,playerData.course4_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course5_3_ave_woman,playerData.course5_shinnyu_woman);
+					shussoHyou = shussoHyou +  ChangePlayerCourseData(playerData.course6_3_ave_woman,playerData.course6_shinnyu_woman);
+				shussoHyou = shussoHyou + '</tr>';
+				}
+
+				shussoHyou = shussoHyou + GetPlayerCourseMidashi('平均ST');
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td></td>';
+				for (var i=1; i<=6; i++) {
+					shussoHyou = shussoHyou + '<td class="course' + i + '">' + i + '</td>';
+				}
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">今期</td>';
+				$.each(raceArray, function(index, value) {
+					shussoHyou = shussoHyou + '<td>' + (parseFloat(value.ave_start) / 100).toFixed(2) +'</td>';
+				});
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近3ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start1_ave_choku3,playerData.course1_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start2_ave_choku3,playerData.course2_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start3_ave_choku3,playerData.course3_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start4_ave_choku3,playerData.course4_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start5_ave_choku3,playerData.course5_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start6_ave_choku3,playerData.course6_shinnyu_choku3);
+				shussoHyou = shussoHyou + '</tr>';
+				
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近1ヶ月</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start1_ave_choku1,playerData.course1_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start2_ave_choku1,playerData.course2_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start3_ave_choku1,playerData.course3_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start4_ave_choku1,playerData.course4_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start5_ave_choku1,playerData.course5_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.start6_ave_choku1,playerData.course6_shinnyu_choku1);
+				shussoHyou = shussoHyou + '</tr>';
+				
+				shussoHyou = shussoHyou + GetPlayerCourseMidashi('ST順位');
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td></td>';
+				for (var i=1; i<=6; i++) {
+					shussoHyou = shussoHyou + '<td class="course' + i + '">' + i + '</td>';
+				}
+				shussoHyou = shussoHyou + '</tr>';
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近3ヶ月1</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_1_choku3,playerData.course1_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_2_choku3,playerData.course2_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_3_choku3,playerData.course3_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_4_choku3,playerData.course4_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_5_choku3,playerData.course5_shinnyu_choku3);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_6_choku3,playerData.course6_shinnyu_choku3);
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">直近1ヶ月1</td>';
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_1_choku1,playerData.course1_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_2_choku1,playerData.course2_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_3_choku1,playerData.course3_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_4_choku1,playerData.course4_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_5_choku1,playerData.course5_shinnyu_choku1);
+				shussoHyou = shussoHyou +  ChangePlayerCourseData2(playerData.st_junban_6_choku1,playerData.course6_shinnyu_choku1);
+				shussoHyou = shussoHyou + '</tr>';
+				$("#player_detail2").html(shussoHyou);
+
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function ChangePlayerCourseData(data,shinnyuu){
+	var shussoHyou = "";
+	if(data == null){
+		shussoHyou = '<td>-</td>';	
+	} else {
+		shussoHyou = '<td>' + (parseFloat(data) * 100).toFixed(1) + '%<br>(' + shinnyuu + ')</td>';
+	}
+	return shussoHyou;
+}
+function ChangePlayerCourseData2(data,shinnyuu){
+	var shussoHyou = "";
+	if(data == null){
+		shussoHyou = '<td>-</td>';	
+	} else {
+		shussoHyou = '<td>' + (parseFloat(data)).toFixed(2) + '<br>(' + shinnyuu + ')</td>';
+	}
+	return shussoHyou;
+}
+function GetPlayerCourseMidashi(val){
+	var shussoHyou = "";
+	shussoHyou = shussoHyou + '<tr>';
+	shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue3" colspan="7">' + val + '</td>'
+	shussoHyou = shussoHyou + '</tr>';
+	return shussoHyou;
+}
+function GetPlayerCourse(no){
+	var race_result = new Object();
+	race_result.no = no;
+	race_result.season = m_Searson;
+	race_result.term = m_Term;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_course_result.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var raceArray = [];
+				$.each(data,
+					function(index, value) 
+					{
+						raceArray.push(value);
+					}
+				);
+				var shussoHyou = '<h3 class="race-subtitle">コース別成績</h3><div class="shusso"><table>';
+				shussoHyou = shussoHyou + GetPlayerTitle('平均ST', raceArray);
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">平均ST</td>';
+				$.each(raceArray, function(index, value) {
+					shussoHyou = shussoHyou + '<td>' + (parseFloat(value.ave_start) / 100).toFixed(2) +'</td>';
+				});
+				shussoHyou = shussoHyou + '</tr>';
+
+				//shussoHyou = shussoHyou + GetPlayerTitle('1着率', raceArray);
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">1着率</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>' + 0 + '%</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + ((parseFloat(value.kaisuuOne) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+
+				//shussoHyou = shussoHyou + GetPlayerTitle('2着率', raceArray);
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">2連対率</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>' + 0 + '%</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + (((parseFloat(value.kaisuuOne) + parseFloat(value.kaisuuTwo)) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+
+				//shussoHyou = shussoHyou + GetPlayerTitle('3着率', raceArray);
+				shussoHyou = shussoHyou + '<tr class="font100 center">';
+				shussoHyou = shussoHyou + '<td class="font100 center bgcolorBlue">3連対率</td>';
+				$.each(raceArray, function(index, value) {
+					if (Number(value.shinnyu) == 0)
+					{
+						shussoHyou = shussoHyou + '<td>' + 0 + '%</td>'
+					}else {
+						shussoHyou = shussoHyou + '<td>' + (((parseFloat(value.kaisuuOne) + parseFloat(value.kaisuuTwo) + parseFloat(value.kaisuuThree)) / parseFloat(value.shinnyu)) * 100).toFixed(1) + '%</td>';
+					}
+				});
+				shussoHyou = shussoHyou + '</tr>';
+
+				shussoHyou = shussoHyou +'</table></div>';
+				//$("#player_detail2").html(shussoHyou);
+				SetTodayPlayerRace(no);
+				GetPlayerCourseAll(no,raceArray)
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function SetTodayPlayerRace(no){
+	var race_result = new Object();
+	race_result.no = no;
+	var now = new Date();
+	race_result.hiduke = yyyymmdd(now.getFullYear(),now.getMonth() + 1,now.getDate());
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_race_detail.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = '<h3 class="race-subtitle">本日出走予定</h3><div class="shusso"><table>';
+				if(data.length == 0){
+					shussoHyou = shussoHyou +'</table>本日の出走予定はありません。</div>';
+					$("#player_detail3").html(shussoHyou);
+					$("html,body").animate({scrollTop:$('#player_detail1').offset().top});
+					return
+				}
+				var raceArray = [];
+				$.each(data,
+					function(index, value) 
+					{
+						raceArray.push(value);
+					}
+				);
+				shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+				shussoHyou = shussoHyou + '<td>日付</td>';
+				shussoHyou = shussoHyou + '<td>場所</td>';
+				shussoHyou = shussoHyou + '<td>競争名</td>';
+				shussoHyou = shussoHyou + '<td>レース番号</td>';
+				shussoHyou = shussoHyou + '<td>コース</td>';
+				shussoHyou = shussoHyou + '</tr>';
+				$.each(raceArray, function(index, value) {
+					var strageStr = value.race_year + ',' + value.race_name + ',' + value.place_no + ',' + value.race_date + ',' + value.race_no + ',' + value.hiduke + ',' + value.place_name;
+					shussoHyou = shussoHyou + '<tr class="font100 center btnTodayRace" id="' + strageStr + '">';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + String(value.hiduke).substr(0,4) + '年' + String(value.hiduke).substr(4,2) + '月' + String(value.hiduke).substr(6,2) + '日';
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + value.place_name;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + value.race_name;
+					shussoHyou = shussoHyou + '</td>';
+					shussoHyou = shussoHyou + '<td>';
+					shussoHyou = shussoHyou + value.race_no;
+					shussoHyou = shussoHyou + 'R</td>';
+					shussoHyou = shussoHyou + '<td><span class="course_box course' + value.course + '">';
+					shussoHyou = shussoHyou + value.course;
+					shussoHyou = shussoHyou + '</span></td>';
+					shussoHyou = shussoHyou + '</tr>';
+				});
+				shussoHyou = shussoHyou +'</table></div>';
+				$("#player_detail3").html(shussoHyou);
+				$("html,body").animate({scrollTop:$('#player_detail1').offset().top});
+				$('.btnTodayRace').on('click', function(){
+					var id =  $(this).attr("id");
+					var info = id.split(',');
+					var param = '?place_no=' + info[2] + '&race_no=' + info[4] + '&hiduke='+ info[5]
+					window.location.href = "/race_shusso.php" + param;
+				});
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetPlayerKakoSetsu(player_no){
+	var jikan= new Date();
+	jikan.setFullYear(jikan.getFullYear() - 1);
+	var nowDate = yyyymmdd(jikan.getFullYear(),jikan.getMonth() + 1,jikan.getDate());
+	var race_result = new Object();
+	race_result.hiduke = nowDate;
+	race_result.player_no = player_no;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_player_kako_setsu.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				var shussoHyou = '<h3 class="race-subtitle">過去レース</h3>';
+				$.each(data,
+					function(index, value) 
+					{
+						shussoHyou = shussoHyou + '<h4>';
+						shussoHyou = shussoHyou + String(value.start_hiduke).substr(0,4) + '年' +　String(value.start_hiduke).substr(4,2) + '月' + String(value.start_hiduke).substr(6,2) 
+									+ '日' + '～'
+									+ String(value.end_hiduke).substr(0,4) + '年' +　String(value.end_hiduke).substr(4,2) + '月' + String(value.end_hiduke).substr(6,2) + '日';
+						shussoHyou = shussoHyou + '<br>';
+						var strGrade = "一般戦";
+						if(value.grade == 0 ){
+							strGrade = "SG"
+						}else if(value.grade == 1 ){
+							strGrade = "G1"
+						}else if(value.grade == 2 ){
+							strGrade = "G2"
+						}else if(value.grade == 3 ){
+							strGrade = "G3"
+						}
+						shussoHyou = shussoHyou + strGrade + '|';
+						shussoHyou = shussoHyou + value.race_name + '|' + value.place_name;
+						shussoHyou = shussoHyou + '</h4>';
+						shussoHyou = shussoHyou + '<div class="shusso">';
+						shussoHyou = shussoHyou + '<table class="table_fixed">';
+						shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '1着率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '2連対率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '3連対率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '平均ST';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '平均展示';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '<tr class="font100 center">';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + (parseFloat(value.rank1) * 100).toFixed(2) + '%';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + (parseFloat(value.fukusho) * 100).toFixed(2) + '%';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + (parseFloat(value.sanren) * 100).toFixed(2) + '%';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + (parseFloat(value.start_ave)).toFixed(2);
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + (parseFloat(value.display_ave)).toFixed(2);
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						shussoHyou = shussoHyou + '</table>';
+						shussoHyou = shussoHyou + '<table class="table_fixed mt1">';
+						shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+						shussoHyou = shussoHyou + '<td style="width:20px;">';
+						shussoHyou = shussoHyou + '日';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td style="width:20px;">';
+						shussoHyou = shussoHyou + 'R';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td style="width:100px;">';
+						shussoHyou = shussoHyou + '名称';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '枠';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '進入';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '順位';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + 'スタート';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + '展示';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						$.each(value.detail_array,
+							function(index, value) 
+							{
+								var strageStr = value.race_year + ',' + value.race_name + ',' + value.place_no + ',' + value.race_date + ',' + value.race_no + ',' + value.hiduke + ',' + value.place_name;
+								shussoHyou = shussoHyou + '<tr class="font100 center btnKakoRace" id="' + strageStr + '">';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.race_date;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.race_no;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.race_rank;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td><span class="course_box course' + value.course + '">';
+								shussoHyou = shussoHyou + value.course;
+								shussoHyou = shussoHyou + '</span></td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.shinnyuu;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								var tmprank = value.rank;
+								if(Number(tmprank) == -1){
+									tmprank = 'F';
+								}else if (Number(tmprank) == -2){
+									tmprank = '転';
+								}else if (Number(tmprank) == -3){
+									tmprank = 'エ';
+								}else if (Number(tmprank) == -4){
+									tmprank = '欠';
+								}else if (Number(tmprank) == -5){
+									tmprank = '妨';
+								}else if (Number(tmprank) == -6){
+									tmprank = '落';
+								}else if (Number(tmprank) == -7){
+									tmprank = '不';
+								}else if (Number(tmprank) == -8){
+									tmprank = '沈';
+								}else if (Number(tmprank) == -9){
+									tmprank = 'Ｌ';
+								}else if (Number(tmprank) == -10){
+									tmprank = '失';
+								}else if(Number(tmprank) == 0){
+									tmprank = '&nbsp;';
+								}
+								shussoHyou = shussoHyou + tmprank;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + (parseFloat(value.start)).toFixed(2);
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + (parseFloat(value.display)).toFixed(2);
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '</tr>';
+							}
+						);
+						shussoHyou = shussoHyou + '</table>';
+						shussoHyou = shussoHyou + '</div>';
+					}
+				);
+				$("#player_detail4").html(shussoHyou);
+				$('.btnKakoRace').on('click', function(){
+					var id =  $(this).attr("id");
+					var info = id.split(',');
+					var param = '?place_no=' + info[2] + '&race_no=' + info[4] + '&hiduke='+ info[5]
+					window.location.href = "/race_shusso.php" + param;
+				});
+			},
+			error:function(data)
+			{
+			} 
+	});
+}
+function GetPlayerTitle(titleName,raceArray){
+	var shussoHyou = "";
+	//shussoHyou = shussoHyou + '<tr class="font100 center bgcolorBlue">';
+	//shussoHyou = shussoHyou + '<td colspan="6">' + titleName + '</td>';
+	//shussoHyou = shussoHyou + '</tr>';
+	shussoHyou = shussoHyou + '<tr class="font100 center">';
+	shussoHyou = shussoHyou + '<td></td>';
+	$.each(raceArray, function(index, value) {
+		var tmpNo = Number(index) + 1;
+		shussoHyou = shussoHyou + '<td class="course' + tmpNo + '">' + tmpNo + '</td>'
+	});
+	shussoHyou = shussoHyou + '</tr>';
+	return shussoHyou;
+}
+function CreateCurseImage(raceArray,title){
+	var startImage = '<table class="startTable">';
+	startImage = startImage + GetStarImageHeader(title);
+	startImage = startImage + '<tbody>';
+	$.each(raceArray, function(index, value) {
+		var imageNo = value.course;
+		if(value.shinnyuu > 0){
+			startImage = startImage + GetStartCourseImage(imageNo,value.start,value.rank,value.kimete,value);
+		}
+	});
+	startImage = startImage + '</tbody>';
+	startImage = startImage + '</table>';
+	return startImage;
+}
+function GetStartCourseImage(no,st,rank,kimete,value){
+	var isF = false;
+	var tmpSt = st;
+	if(st.indexOf('F') > -1){
+		isF = true;
+		tmpSt = st.replace("F", "0");
+	}
+	stNo = Number(tmpSt) * 100;
+	if(isF){
+		stNo = 118 + (stNo * 2);
+	}else{
+		stNo = 118 - (stNo * 2);
+	}
+	var startImage = '<tr>';
+	startImage = startImage + '<td class="course' + no + ' course_box course_img">' + no + '</td>';
+	startImage = startImage + '<td>';
+	if(Object.keys(value).indexOf('slow_dash') !== -1 && value.slow_dash > 0){
+		var tmpSD = "";
+		if(value.slow_dash == 1){
+			tmpSD = "S";
+		}else if(value.slow_dash == 2){
+			tmpSD = "D";
+		}
+		startImage = startImage + '<span style="color:black"><b>'+ tmpSD + '</b></span>';
+		// 位置調整
+		stNo = Number(tmpSt) * 100;
+		if(isF){
+			stNo = 107 + (stNo * 2);
+		}else{
+			stNo = 107 - (stNo * 2);
+		}
+	}
+	startImage = startImage + '<span class="sapn_course_img_bak">　<span class="sapn_course_img" style="left:' + stNo + 'px;top: 2px;">'
+				+ '<img src="img/boat_' + no + '.png"></span></span>';
+
+	if(Object.keys(value).indexOf('fukasa') !== -1 && value.fukasa == 2){
+		var fukasa_str = "深";
+		if(value.fukasa == 1){
+			fukasa_str = "少深";
+		}
+		startImage = startImage + '<span style="color:black;padding-right: 10px;"><b>' + fukasa_str + '</b></span>';
+	}
+	if(rank == 1){
+		startImage = startImage + '<span style="color:white"><b>' + kimete + '</b></span>';
+	}
+	startImage = startImage + '</td>';
+	
+	if(isF){
+		startImage = startImage + '<td class="course_img_time_F">';
+		startImage = startImage + st.replace("0F","F");
+	}else{
+		startImage = startImage + '<td class="course_img_time">';
+		startImage = startImage + st;
+	}
+	startImage = startImage + '</td>';
+	startImage = startImage + '</tr>';
+	return startImage;
+}
+function GetStarImageHeader(title){
+	var startImageHeader = '<colgroup>';
+	startImageHeader = startImageHeader + '<col style="width:30px">';
+	startImageHeader = startImageHeader + '<col style="width:220px">';
+	startImageHeader = startImageHeader + '<col style="width:50px">';
+	startImageHeader = startImageHeader + '</colgroup>';
+	startImageHeader = startImageHeader + '<thead>';
+	startImageHeader = startImageHeader + '<tr>';
+	startImageHeader = startImageHeader + '<th colspan="3" class="kyocho_bottom">' + title + '</th>';
+	startImageHeader = startImageHeader + '</tr>';
+	startImageHeader = startImageHeader + '<tr class="kyocho_bottom">';
+	startImageHeader = startImageHeader + '<th>枠</th>';
+	startImageHeader = startImageHeader + '<th class="kyocho_left">並び</th>';
+	startImageHeader = startImageHeader + '<th class="kyocho_left">ST</th>';
+	startImageHeader = startImageHeader + '</tr>';
+	startImageHeader = startImageHeader + '</thead>';
+	return startImageHeader;
+}
+function IsNullShoritsuData(value){
+	if(value == null){
+		return "-";
+	}
+	return GetDisplayKakuritsu(parseFloat(value) * 100) + '%';
+}
+function IsNullTenjiData(value){
+	if(value == null){
+		return "-";
+	}
+	return (parseFloat(value)).toFixed(2);
+}
+function GetDisplayKakuritsu(value){
+	var kirisute = 0
+	if(!Number.isInteger(value)){
+		kirisute = 1
+	}
+	return value.toFixed(kirisute);
+}
+function GetDisplayTenji(value){
+	if(value == null || value == "" || Number(value) < 0){
+		return "-";
+	}
+	return (parseFloat(value) / 100).toFixed(2);
+}
+function IsOriginalTenji(place_no){
+	switch (Number(place_no)){
+		case 1:
+		case 2:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+		case 16:
+		case 17:
+		case 18:
+		case 19:
+		case 20:
+		case 21:
+		case 22:
+		case 23:
+		case 24:
+			return true;
+			break;
+		default:
+			return false;
+	}
+	return false;
+}
+function GetMotorKako(place_no,hiduke,motor){
+	GetMotorKakoFromTo(place_no,hiduke,null,13,motor);
+}
+function GetMotorKakoFromTo(place_no,hiduke,hidukeTo,race_no,motor){
+	var race_result = new Object();
+	race_result.place_no = place_no;
+	race_result.hiduke = hiduke;
+	race_result.hidukeTo = hidukeTo;
+	race_result.race_no = race_no;
+	race_result.motor = motor;
+	var reqdata = JSON.stringify(race_result);
+	$.ajax({
+			type: "post",
+			url: "request_motor_kako.php", 
+			data:{"data":reqdata},
+			dataType: "json",
+			success: function(data){
+				// 簡易バージョン表示
+				var motor_hrml = "";
+				motor_hrml = motor_hrml + '<div style="display:flex;">';
+				motor_hrml = motor_hrml + '<p style="margin:2px 0px;width:100px;background-color:rgb(30,60,120);color:white;" class="common_btn btnMotorChart">グラフ表示</p>';
+				motor_hrml = motor_hrml + '<p style="margin:2px 0px;width:100px;background-color:#e89d5a;color:white;margin-left:5px;" class="common_btn btnkimariteChart">決まり手率</p>';
+				motor_hrml = motor_hrml + '<p style="margin:2px 0px;width:100px;background-color:#4c58fc;color:white;margin-left:5px;" class="common_btn btnKaniChart">簡易表示</p>';
+				motor_hrml = motor_hrml + '<p style="margin:2px 0px;width:100px;background-color:#4c58fc;color:white;margin-left:5px;" class="common_btn btnKoukan">部品交換</p>';
+				motor_hrml = motor_hrml + '</div>';
+				if(IsOriginalTenji(place_no)){
+					// オリジナル展示タイムがある場合
+					motor_hrml = motor_hrml + '<h4 class="raceNaiyou raceNaiyou2">モータ履歴一覧</h4>';
+					motor_hrml = motor_hrml + '<p style="color:red;font-size:.6em;margin:0px;">カッコの中身はモータ使用までの選手直近6ヶ月成績</p>';
+					motor_hrml = motor_hrml + '<table class="table_fixed">';
+					motor_hrml = motor_hrml + '<tr class="center bgcolorBlue" style="font-size:0.6em;">';
+					motor_hrml = motor_hrml + '<td width="15%">使用選手</td>';
+					motor_hrml = motor_hrml + '<td width="9%">勝率</td>';
+					motor_hrml = motor_hrml + '<td width="11%">1着率</td>';
+					motor_hrml = motor_hrml + '<td width="11%">2連率</td>';
+					motor_hrml = motor_hrml + '<td width="11%">3連率</td>';
+					motor_hrml = motor_hrml + '<td width="8%">平均<br class="mobile">展示</td>';
+					motor_hrml = motor_hrml + '<td width="10%">平均<br class="mobile">周回</td>';
+					motor_hrml = motor_hrml + '<td width="10%">平均<br class="mobile">周足</td>';
+					motor_hrml = motor_hrml + '<td width="8%">平均<br class="mobile">直線</td>';
+					motor_hrml = motor_hrml + '<td width="8%">結果</td>';
+					motor_hrml = motor_hrml + '</tr>';
+					$.each(data,
+						function(index, value) 
+						{
+							motor_hrml = motor_hrml + '<tr class="center" style="font-size:0.6em;">';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + value.player_name + '<br>(' + value.kyubetsu + ')';
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullTenjiData(value.shoritsu);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.shoritsu / 100).toFixed(2) + ')';}
+							motor_hrml = motor_hrml + '</td>';;
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.rank1);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + parseFloat(value.player_data.rank1).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.fukusho);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.fukusho / 10).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.sanren);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.sanren / 10).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullTenjiData(value.display_ave);
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + GetDisplayTenji(value.shukai_ave);
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + GetDisplayTenji(value.mawariashi_ave);
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + GetDisplayTenji(value.chokusen_ave);
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							var setsu_kekka = "-";
+							if(value.isYushutsu == 1){
+								setsu_kekka = "優出";
+							}
+							if(value.isYusho == 1){
+								setsu_kekka = "優勝";
+							}
+							motor_hrml = motor_hrml + setsu_kekka;
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '</tr>';
+						}
+					);
+					motor_hrml = motor_hrml + '</table>';
+				}else{
+					// オリジナル展示タイムがない場合
+					motor_hrml = motor_hrml + '<h4 class="raceNaiyou raceNaiyou2">モータ履歴一覧</h4>';
+					motor_hrml = motor_hrml + '<p style="color:red;font-size:.6em;margin:0px;">カッコの中身はモータ使用までの選手直近6ヶ月成績</p>';
+					motor_hrml = motor_hrml + '<table class="table_fixed">';
+					motor_hrml = motor_hrml + '<tr class="center bgcolorBlue" style="font-size:0.6em;">';
+					motor_hrml = motor_hrml + '<td width="30%">使用選手</td>';
+					motor_hrml = motor_hrml + '<td width="12%">勝率</td>';
+					motor_hrml = motor_hrml + '<td width="12%">1着率</td>';
+					motor_hrml = motor_hrml + '<td width="12%">2連率</td>';
+					motor_hrml = motor_hrml + '<td width="12%">3連率</td>';
+					motor_hrml = motor_hrml + '<td width="12%">平均<br class="mobile">展示</td>';
+					motor_hrml = motor_hrml + '<td width="10%">結果</td>';
+					motor_hrml = motor_hrml + '</tr>';
+					$.each(data,
+						function(index, value) 
+						{
+							motor_hrml = motor_hrml + '<tr class="center" style="font-size:0.6em;">';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + value.player_name + '(' + value.kyubetsu + ')';
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullTenjiData(value.shoritsu);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.shoritsu / 100).toFixed(2) + ')';}
+							motor_hrml = motor_hrml + '</td>';;
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.rank1);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + parseFloat(value.player_data.rank1).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.fukusho);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.fukusho / 10).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullShoritsuData(value.sanren);
+							if(value.player_data != null){motor_hrml = motor_hrml + '<br>(' + (value.player_data.sanren / 10).toFixed(1) + '%)';}
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							motor_hrml = motor_hrml + IsNullTenjiData(value.display_ave);
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '<td>';
+							var setsu_kekka = "-";
+							if(value.isYushutsu == 1){
+								setsu_kekka = "優出";
+							}
+							if(value.isYusho == 1){
+								setsu_kekka = "優勝";
+							}
+							motor_hrml = motor_hrml + setsu_kekka;
+							motor_hrml = motor_hrml + '</td>';
+							motor_hrml = motor_hrml + '</tr>';
+						}
+					);
+					motor_hrml = motor_hrml + '</table>';
+
+				}
+				
+				motor_hrml = motor_hrml + '<h4 class="raceNaiyou raceNaiyou2">モーター使用履歴詳細</h4>'
+				var chukan_seibi_list_tmp = [];
+				var shussoHyou = '<h3 class="center">モーターNo' + motor + '使用履歴</h3>' + motor_hrml;
+				// 本日の中間整備を追加する
+				var chukan_html = "";
+				$.each(data,function(index, value) {
+					$.each(value.chukan_seibi_list,	function(index, seibi) {
+						chukan_seibi_list_tmp.push(seibi);
+						chukan_html = chukan_html + '<tr style="font-size:0.6em;">';
+						chukan_html = chukan_html + '<td class="center">';
+						chukan_html = chukan_html + String(seibi.kaisai_key).substr(0,4) + '年' + String(seibi.kaisai_key).substr(4,2) + '月' + String(seibi.kaisai_key).substr(6,2) + '日';
+						chukan_html = chukan_html + '</td>';
+						chukan_html = chukan_html + '<td class="center">';
+						chukan_html = chukan_html + seibi.koukan;
+						chukan_html = chukan_html + '</td>';
+						chukan_html = chukan_html + '</tr>';
+					});
+					return false;
+				});
+				if(chukan_html != ""){
+					chukan_html = '<table class="table_fixed" style="margin-top:10px;">' 
+									+ '<tr style="font-size:0.6em;">'
+									+ '<td class="center bgcolorBlue" colspan="2">中間整備</td>'
+									+ '</tr>'
+									+ chukan_html
+									+ '</table>';
+					if(Number(hiduke) < 20220513){
+						chukan_html = chukan_html + '<p style="color:red;font-size:.6em;margin:0px;">※中間整備は2022年5月13日以降のデータのみ対応しております。</p>';
+					}
+				}
+				shussoHyou = shussoHyou + chukan_html;
+				$.each(data,
+					function(index, value) 
+					{
+						shussoHyou = shussoHyou + '<h4 style="font-size:0.6em;vertical-align: middle;">';
+						shussoHyou = shussoHyou + String(value.start_hiduke).substr(0,4) + '年' + String(value.start_hiduke).substr(4,2) + '月' + String(value.start_hiduke).substr(6,2) 
+									+ '日' + '～'
+									+ String(value.end_hiduke).substr(0,4) + '年' + String(value.end_hiduke).substr(4,2) + '月' + String(value.end_hiduke).substr(6,2) + '日';
+						shussoHyou = shussoHyou + '<br>';
+						var strGrade = '<img src="img/icon_ippan.png" height="24px" style="vertical-align: middle;">';
+						if(value.grade == 0 ){
+							strGrade = '<img src="img/icon_sg.png" height="24px" style="vertical-align: middle;">';
+						}else if(value.grade == 1 ){
+							strGrade = '<img src="img/icon_g1.png" height="24px" style="vertical-align: middle;">';
+						}else if(value.grade == 2 ){
+							strGrade = '<img src="img/icon_g2.png" height="24px" style="vertical-align: middle;">';
+						}else if(value.grade == 3 ){
+							strGrade = '<img src="img/icon_g3.png" height="24px" style="vertical-align: middle;">';
+						}else if(value.grade == 4 ){
+							strGrade = '<img src="img/icon_g1_a.png" height="24px" style="vertical-align: middle;">';
+						}
+						shussoHyou = shussoHyou + strGrade + " ";
+						shussoHyou = shussoHyou + value.race_name;
+						shussoHyou = shussoHyou + '</h4>';
+						shussoHyou = shussoHyou + '<p style="color:red;font-size:.6em;margin:0px;">カッコの中身はモータ使用までの選手直近6ヶ月成績</p>';
+						shussoHyou = shussoHyou + '<table class="table_fixed">';
+						shussoHyou = shussoHyou + '<tr class="center bgcolorBlue" style="font-size:0.8em;">';
+						shussoHyou = shussoHyou + '<td width="25%">';
+						shussoHyou = shussoHyou + '使用選手';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="12%">';
+						shussoHyou = shussoHyou + '勝率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="15%">';
+						shussoHyou = shussoHyou + '1着率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="15%">';
+						shussoHyou = shussoHyou + '2連率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="15%">';
+						shussoHyou = shussoHyou + '3連率';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="12%">';
+						if(IsOriginalTenji(place_no)){
+							shussoHyou = shussoHyou + '';
+						}else{
+							shussoHyou = shussoHyou + '展示';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '結果';
+						}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+
+						var setsu_kekka = "-";
+						if(value.isYushutsu == 1){
+							setsu_kekka = "優出";
+						}
+						if(value.isYusho == 1){
+							setsu_kekka = "優勝";
+						}
+						shussoHyou = shussoHyou + '<tr class="center" style="font-size:0.8em;">';
+						if(IsOriginalTenji(place_no)){
+							shussoHyou = shussoHyou + '<td rowspan="3">';
+						}else{
+							shussoHyou = shussoHyou + '<td>';
+						}
+						shussoHyou = shussoHyou + value.player_name + '<br>(' + value.kyubetsu + ')';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + IsNullTenjiData(value.shoritsu);
+						if(value.player_data != null){shussoHyou = shussoHyou + '<br>(' + (value.player_data.shoritsu / 100).toFixed(2) + ')';}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + IsNullShoritsuData(value.rank1);
+						if(value.player_data != null){shussoHyou = shussoHyou + '<br>(' + parseFloat(value.player_data.rank1).toFixed(1) + '%)';}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + IsNullShoritsuData(value.fukusho);
+						if(value.player_data != null){shussoHyou = shussoHyou + '<br>(' + (value.player_data.fukusho / 10).toFixed(1) + '%)';}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						shussoHyou = shussoHyou + IsNullShoritsuData(value.sanren);
+						if(value.player_data != null){shussoHyou = shussoHyou + '<br>(' + (value.player_data.sanren / 10).toFixed(1) + '%)';}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td>';
+						if(IsOriginalTenji(place_no)){
+							shussoHyou = shussoHyou + '';
+						}else{
+							shussoHyou = shussoHyou + IsNullTenjiData(value.display_ave);
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + setsu_kekka;
+						}
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '</tr>';
+						
+						if(IsOriginalTenji(place_no)){
+							shussoHyou = shussoHyou + '<tr class="center bgcolorBlue" style="font-size:0.8em;">';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '展示';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '周回';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '周足';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '直線';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="12%">';
+							shussoHyou = shussoHyou + '結果';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '</tr>';
+
+							shussoHyou = shussoHyou + '<tr class="center" style="font-size:0.8em;">';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + IsNullTenjiData(value.display_ave);
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + GetDisplayTenji(value.shukai_ave);
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + GetDisplayTenji(value.mawariashi_ave);
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + GetDisplayTenji(value.chokusen_ave);
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td>';
+							shussoHyou = shussoHyou + setsu_kekka;
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '</tr>';
+						}
+
+						shussoHyou = shussoHyou + '</table>';
+						// 中間整備
+						var str_chukan_koukan = "";
+						$.each(value.chukan_seibi_list,function(index, seibi) {
+								if(value.start_hiduke == String(seibi.kaisai_key).substr(0,8)){
+									str_chukan_koukan = seibi.koukan;
+								}
+						});
+						if(str_chukan_koukan.trim() != ""){
+							shussoHyou = shussoHyou + '<table class="table_fixed" style="margin-top:10px;">';
+							shussoHyou = shussoHyou + '<tr style="font-size:0.6em;">';
+							shussoHyou = shussoHyou + '<td class="center bgcolorBlue" width="30%">';
+							shussoHyou = shussoHyou + '中間整備';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td class="center" width="70%">';
+							shussoHyou = shussoHyou + str_chukan_koukan;
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '</tr>';
+							shussoHyou = shussoHyou + '</table>';
+						}
+						// 交換履歴
+						var str_koukan = "";
+						var koukan_cnt = 0;
+						$.each(value.detail_array,
+							function(index, value) 
+							{
+								if(value.koukan == null || value.koukan.trim() == ""){return true;}
+								if(koukan_cnt == 0){
+									str_koukan = str_koukan + value.koukan;
+								}else{
+									str_koukan = str_koukan + "/" + value.koukan;
+								}
+								koukan_cnt = koukan_cnt + 1;
+							}
+						);
+						if(koukan_cnt >0){
+							shussoHyou = shussoHyou + '<table class="table_fixed" style="margin-top:10px;">';
+							shussoHyou = shussoHyou + '<tr style="font-size:0.6em;">';
+							shussoHyou = shussoHyou + '<td class="center bgcolorBlue" width="30%">';
+							shussoHyou = shussoHyou + '部品交換';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td class="center" width="70%">';
+							shussoHyou = shussoHyou + str_koukan;
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '</tr>';
+							shussoHyou = shussoHyou + '</table>';
+						}
+						shussoHyou = shussoHyou + '<table class="table_fixed" style="margin-top:10px;">';
+						shussoHyou = shussoHyou + '<tr class="center bgcolorBlue" style="font-size:0.6em;">';
+						shussoHyou = shussoHyou + '<td width="10%">';
+						shussoHyou = shussoHyou + '日';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="8%">';
+						shussoHyou = shussoHyou + 'R';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="8%">';
+						shussoHyou = shussoHyou + '枠';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="10%">';
+						shussoHyou = shussoHyou + '進入';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="10%">';
+						shussoHyou = shussoHyou + '順位';
+						shussoHyou = shussoHyou + '</td>';
+						shussoHyou = shussoHyou + '<td width="19%">';
+						shussoHyou = shussoHyou + '展示(順)';
+						shussoHyou = shussoHyou + '</td>';
+						if(IsOriginalTenji(place_no)){
+							shussoHyou = shussoHyou + '<td width="15%">';
+							shussoHyou = shussoHyou + '周回';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="15%">';
+							shussoHyou = shussoHyou + '周足';
+							shussoHyou = shussoHyou + '</td>';
+							shussoHyou = shussoHyou + '<td width="15%">';
+							shussoHyou = shussoHyou + '直線';
+							shussoHyou = shussoHyou + '</td>';
+						}
+						shussoHyou = shussoHyou + '</tr>';
+						$.each(value.detail_array,
+							function(index, value) 
+							{
+								if(value.rank == 0){
+									return true;
+								}
+								shussoHyou = shussoHyou + '<tr class="center" style="font-size:0.8em;">';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.race_date;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								var tmplinkData = '/race_shusso.php?place_no='
+											+ place_no
+											+ '&race_no=' + value.race_no
+											+ '&hiduke=' + value.hiduke
+											+ '&slider=7';
+								shussoHyou = shussoHyou + '<a href="'+ tmplinkData + '" target="_blank" style="color:blue;text-decoration:underline;">' + value.race_no + '</a>';
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td><span class="course_box course' + value.course + '">';
+								shussoHyou = shussoHyou + value.course;
+								shussoHyou = shussoHyou + '</span></td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + value.shinnyuu;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								var tmprank = value.rank;
+								if(Number(tmprank) == -1){
+									tmprank = 'F';
+								}else if (Number(tmprank) == -2){
+									tmprank = '転';
+								}else if (Number(tmprank) == -3){
+									tmprank = 'エ';
+								}else if (Number(tmprank) == -4){
+									tmprank = '欠';
+								}else if (Number(tmprank) == -5){
+									tmprank = '妨';
+								}else if (Number(tmprank) == -6){
+									tmprank = '落';
+								}else if (Number(tmprank) == -7){
+									tmprank = '不';
+								}else if (Number(tmprank) == -8){
+									tmprank = '沈';
+								}else if (Number(tmprank) == -9){
+									tmprank = 'Ｌ';
+								}else if (Number(tmprank) == -10){
+									tmprank = '失';
+								}else if(Number(tmprank) == 0){
+									tmprank = '&nbsp;';
+								}
+								shussoHyou = shussoHyou + tmprank;
+								shussoHyou = shussoHyou + '</td>';
+								shussoHyou = shussoHyou + '<td>';
+								shussoHyou = shussoHyou + (parseFloat(value.display)).toFixed(2);
+								shussoHyou = shussoHyou + "(" + value.display_junban + ")";
+								shussoHyou = shussoHyou + '</td>';
+								if(IsOriginalTenji(place_no)){
+									shussoHyou = shussoHyou + '<td>';
+									shussoHyou = shussoHyou + GetDisplayTenji(value.shukai);
+									shussoHyou = shussoHyou + '</td>';
+									shussoHyou = shussoHyou + '<td>';
+									shussoHyou = shussoHyou + GetDisplayTenji(value.mawariashi);
+									shussoHyou = shussoHyou + '</td>';
+									shussoHyou = shussoHyou + '<td>';
+									shussoHyou = shussoHyou + GetDisplayTenji(value.chokusen);
+									shussoHyou = shussoHyou + '</td>';
+								}
+								shussoHyou = shussoHyou + '</tr>';
+							}
+						);
+						shussoHyou = shussoHyou + '</table>';
+					}
+				);
+				$("#modal_motor_detail").html(shussoHyou);
+				$('.btnMotorChart').on('click', function(){
+					modal_motor_chart_on(0);
+					create_motor_chart_html(data);
+					return;
+				});
+				$('.btnKaniChart').on('click', function(){
+					modal_motor_chart_on(1);
+					create_motor_kani_html(data,place_no,hiduke,hidukeTo,race_no,motor);
+					return;
+				});
+				$('.btnKoukan').on('click', function(){
+					modal_motor_chart_on(1);
+					create_motor_koukan_html(place_no,hiduke,hidukeTo,race_no,motor,chukan_seibi_list_tmp);
+					return;
+				});
+				$('.btnkimariteChart').on('click', function(){
+					create_motor_kimarite_chart(place_no,hiduke,hidukeTo,race_no,motor);
+					return;
+				});
+				
+			},
+			error:function(data)
+			{
+			} 
+	});
+}

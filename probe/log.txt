@@ -1,4 +1,2 @@
-0 ERR 28 https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-11-11&conditions%5Brace_date%5D%5Bto%5D=2026-11-11&kachishiki_id=4&display_num=ONE_HUNDRED_TWENTY&sort_order=desc | 
-1 ERR 28 https://kyotei.murao111.net/oddses?conditions%5Brace_date%5D%5Bfrom%5D=2026-08-01&conditions%5Brace_date%5D%5Bto%5D=2026-08-01&kachishiki_id=1&display_num=ONE_HUNDRED_TWENTY&sort_order=desc | 
-2 ERR 28 https://kyotei.murao111.net/ | 
-3 200 121145 https://kyoteibiyori.com/race_shusso.php?place_no=2&race_no=2&hiduke=20261112&slider=6 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 02:23:49 GMT
+0 200 786640 https://kyoteibiyori.com/js/race_shusso.js?244 | LM=Tue, 20 Oct 2026 00:10:48 GMT ET="c00d0-65e3a766dea13-gzip" CT=application/javascript Date=Thu, 12 Nov 2026 02:24:56 GMT
+1 200 106852 https://kyoteibiyori.com/js/common.js?42 | LM=Mon, 19 Oct 2026 23:59:47 GMT ET="1a164-65e3a4f12848f-gzip" CT=application/javascript Date=Thu, 12 Nov 2026 02:25:17 GMT
