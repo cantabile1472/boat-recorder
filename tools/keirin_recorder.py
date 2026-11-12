@@ -68,6 +68,42 @@ def parse_3t(h):
     return out
 
 
+def parse_3f(h):
+    """3連複：スマホ版は横に並ぶ表（行頭の見出し＝1車目、列ごとの縦見出し＝2車目、各セル＝3車目）。パソコン版の形にも対応"""
+    sec = section(h, '3renhuku')
+    out = {}
+    m = re.search(r'<table class="odds_table">(.*?)</table>', sec, re.S)
+    if m and 'num_' in m.group(1):
+        first = None; second = {}
+        tk = re.compile(r'<th rowspan="\d+" class="num_\d+">(\d+)</th>|<th class="num_\d+">(\d+)</th>\s*<td><span>([^<]*)</span></td>|<td colspan="(\d+)">')
+        for row in re.findall(r'<tr>(.*?)</tr>', m.group(1), re.S):
+            toks = list(tk.finditer(row)); slot = 0
+            for n, t in enumerate(toks):
+                if t.group(1):
+                    if n + 1 < len(toks) and toks[n + 1].group(1):
+                        first = t.group(1)
+                    else:
+                        second[slot] = t.group(1)
+                elif t.group(2):
+                    if first and slot in second:
+                        out[f'{first}-{second[slot]}-{t.group(2)}'] = t.group(3).strip()
+                    slot += 1
+                elif t.group(4):
+                    slot += int(t.group(4)) // 3
+        return out
+    for tb in re.findall(r'<table class="odds_table">(.*?)</table>', sec, re.S):
+        m = re.search(r'<th class="n\d+" colspan="3">(\d+)</th>', tb)
+        if not m:
+            continue
+        a = m.group(1); b = None
+        for tok in re.finditer(r'<th class="n\d+" rowspan="\d+">(\d+)</th>|<th class="n\d+">(\d+)</th>\s*<td>([^<]*)</td>', tb):
+            if tok.group(1):
+                b = tok.group(1)
+            elif b:
+                out[f'{a}-{b}-{tok.group(2)}'] = tok.group(3).strip()
+    return out
+
+
 def parse_2(h, key):
     """ワイド・2車単・2車複：列ごとに『縦にまたがる見出し（1車目）→見出し（2車目）→値』"""
     sec = section(h, key)
@@ -149,7 +185,7 @@ def snap(x, tag):
     m = re.search(r'id="JS_ODDSSTATUS_wide">\s*<p class="time">([^<]*)</p>', h)
     rec = {'snap': tag, 'time': f'{now():%H:%M:%S}', 'v': x['v'], 'name': x['name'], 'id': x['id'], 'R': x['R'],
            'dl': f"{x['dl']:%H:%M}", 'upd': m.group(1) if m else '',
-           't3': parse_3t(h), 'wide': parse_2(h, 'wide'), 'ex': parse_2(h, '2shatan'), 'q': parse_2(h, '2shahuku')}
+           't3': parse_3t(h), 'wide': parse_2(h, 'wide'), 'ex': parse_2(h, '2shatan'), 'q': parse_2(h, '2shahuku'), 't3f': parse_3f(h)}
     save(rec)
     return rec
 
@@ -183,7 +219,7 @@ def pub(x, label):
             return
         m = re.search(r'id="JS_ODDSSTATUS_wide">\s*<p class="time">([^<]*)</p>', h)
         save({'label': label, 'sec': int((x['dl'] - now()).total_seconds()), 'time': f'{now():%H:%M:%S}', 'v': x['v'], 'name': x['name'], 'id': x['id'], 'R': x['R'],
-              'deadline': f"{x['dl']:%H:%M}", 'upd': m.group(1) if m else '', 't3': parse_3t(h), 'wide': parse_2(h, 'wide'), 'ex': parse_2(h, '2shatan'), 'q': parse_2(h, '2shahuku')}, 'keirin_pub.jsonl')
+              'deadline': f"{x['dl']:%H:%M}", 'upd': m.group(1) if m else '', 't3': parse_3t(h), 'wide': parse_2(h, 'wide'), 'ex': parse_2(h, '2shatan'), 'q': parse_2(h, '2shahuku'), 't3f': parse_3f(h)}, 'keirin_pub.jsonl')
     except Exception as e:
         log(f"公開用の記録NG {x.get('name')}{x.get('R')}R {label} {e!r}")
 
