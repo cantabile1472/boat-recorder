@@ -1,2 +1,5 @@
-0 200 786640 https://kyoteibiyori.com/js/race_shusso.js?244 | LM=Tue, 20 Oct 2026 00:10:48 GMT ET="c00d0-65e3a766dea13-gzip" CT=application/javascript Date=Thu, 12 Nov 2026 02:24:56 GMT
-1 200 106852 https://kyoteibiyori.com/js/common.js?42 | LM=Mon, 19 Oct 2026 23:59:47 GMT ET="1a164-65e3a4f12848f-gzip" CT=application/javascript Date=Thu, 12 Nov 2026 02:25:17 GMT
+0 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:26:44 GMT
+1 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:05 GMT
+2 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:26 GMT
+3 200 120401 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:47 GMT
+4 200 54 https://kyoteibiyori.com/request_odds_shousai.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:28:07 GMT
