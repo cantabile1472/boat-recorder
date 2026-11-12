@@ -1,5 +1,2 @@
-0 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:26:44 GMT
-1 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:05 GMT
-2 200 2 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:26 GMT
-3 200 120401 https://kyoteibiyori.com/request/request_odds_custom.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:27:47 GMT
-4 200 54 https://kyoteibiyori.com/request_odds_shousai.php | LM=None ET=None CT=text/javascript; charset=utf-8 Date=Thu, 12 Nov 2026 02:28:07 GMT
+0 200 251906 https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=wide | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 04:59:20 GMT
+1 200 251970 https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=3renpuku | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 04:59:40 GMT
