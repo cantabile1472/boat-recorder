@@ -1,5 +1,2 @@
-https://kyoteibiyori.com/request/request_odds_custom.php|data=%7B%22place_no%22%3A2%2C%22race_no%22%3A2%2C%22hiduke%22%3A%2220261111%22%7D
-https://kyoteibiyori.com/request/request_odds_custom.php|data=%7B%22place_no%22%3A2%2C%22race_no%22%3A5%2C%22hiduke%22%3A%2220260801%22%7D
-https://kyoteibiyori.com/request/request_odds_custom.php|data=%7B%22place_no%22%3A12%2C%22race_no%22%3A8%2C%22hiduke%22%3A%2220250601%22%7D
-https://kyoteibiyori.com/request/request_odds_custom.php|data=%7B%22place_no%22%3A2%2C%22race_no%22%3A1%2C%22hiduke%22%3A%2220261112%22%7D
-https://kyoteibiyori.com/request_odds_shousai.php|data=%7B%22place_no%22%3A2%2C%22race_no%22%3A2%2C%22hiduke%22%3A%2220261111%22%7D
+https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=wide
+https://keirin.kdreams.jp/fukui/racedetail/5120261111020008/?pageType=odds&kakeshikiType=3renpuku
