@@ -247,6 +247,28 @@ def k_upd(html):
 
 
 XS = [150, 120, 80, 60, 30, 25, 12]   # 締切オッズ予想用の細かい記録（単勝・複勝・ワイド・3連単）
+# 公開データベース用：分刻みの時点で全賭式を記録（kyotei_pub.csv）。40秒前など秒単位の記録は公開しない
+PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前'), (300, '5分前'), (180, '3分前'), (120, '2分前'), (60, '1分前')]
+PUB_KINDS = [('tf', 'oddstf'), ('2tf', 'odds2tf'), ('k', 'oddsk'), ('3t', 'odds3t'), ('3f', 'odds3f')]
+
+
+def k_pub(w, x, label):
+    """公開データベース用：単勝・複勝／2連単・2連複／ワイド／3連単／3連複を1回分まとめて記録"""
+    try:
+        q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
+        with ThreadPoolExecutor(2) as ex:
+            fs = [(kd, ex.submit(w.req, KB + pg + q)) for kd, pg in PUB_KINDS]
+        t = f'{now():%H:%M:%S}'; sec = int((x['dl'] - now()).total_seconds()); rows = []
+        for kd, f in fs:
+            st, h = f.result()
+            if st == 200:
+                pts = k_points(h)
+                if pts:
+                    rows.append([label, sec, t, x['jcd'], x['R'], f"{x['dl']:%H:%M}", k_upd(h), kd, ' '.join(pts)])
+        if rows:
+            append_csv('kyotei_pub.csv', 'label,sec,time,jcd,R,deadline,upd,kind,values', rows)
+    except Exception as e:
+        log(f'公開用の記録エラー {x.get("jcd")} {x.get("R")}R {label}: {e!r}')
 
 
 def k_points(html):
@@ -411,17 +433,24 @@ def kyotei_main():
         done_snaps[k] = max(done_snaps.get(k, 0), int(row['snap']))
         if row['snap'] == '1':
             s1map.setdefault(k, {})[int(row['boat'])] = (float(row['odds']), float(row['p3']))
+    pub_done = {(r['jcd'], int(r['R']), r['label']) for r in read_csv('kyotei_pub.csv')}
     for x in races:
         x['snap'] = done_snaps.get((x['jcd'], x['R']), 0)
         x['s1'] = s1map.get((x['jcd'], x['R']), {})
+        x['pubd'] = {lb for (j, r, lb) in pub_done if j == x['jcd'] and r == x['R']}
         if x['dl'] < now() + datetime.timedelta(seconds=10) or x['snap'] >= len(SN):
             x['st'] = 'past'
     left = sum(1 for x in races if x['st'] == 'wait')
     log(f'競艇: 開催{len(jcds)}場 / これから締切 {left}レース')
     debug_saved = os.path.exists(os.path.join(DDIR, 'kyotei_oddstf_sample.html'))
     pool = ThreadPoolExecutor(8)
+    morning = [x for x in races if x['st'] == 'wait' and not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
+    last_morning = 0.0
     while time.time() - T0 < RUN_MIN * 60:
         n = now()
+        if morning and time.time() - last_morning >= 2:
+            xm = morning.pop(0); xm['pubd'].add('朝一'); last_morning = time.time()
+            pool.submit(k_pub, w, dict(xm), '朝一')
         busy = False
         for x in races:
             if x['st'] != 'wait':
@@ -437,6 +466,11 @@ def kyotei_main():
                 pool.submit(k_fine, w, dict(x))
                 xi += 1
             x['xi'] = xi
+            for ps, lb in PS:
+                if lb not in x['pubd'] and ps - 25 < sec <= ps:
+                    x['pubd'].add(lb); pool.submit(k_pub, w, dict(x), lb)
+                elif lb not in x['pubd'] and sec <= ps - 25:
+                    x['pubd'].add(lb)   # 取り逃した時点は飛ばす（起動が遅れた時など）
             if x['snap'] >= len(SN) or sec > SN[x['snap']]:
                 if x['snap'] < len(SN) and sec - SN[x['snap']] < 7:
                     busy = True
