@@ -709,7 +709,10 @@ def kyotei_main():
                         if hitY:
                             ry = {r.c: r for r in xy.itertuples()}
                             log(f"【Y】競艇 {tag} 3連複 " + ' / '.join(hitY))
-                            if prmY.get('notify'):
+                            mx = prmY.get('max_notify') or 99
+                            if prmY.get('notify') and len(hitY) > mx:
+                                log(f"【Y】{tag} 買い目{len(hitY)}点のため通知なし（{mx}点まで）")
+                            elif prmY.get('notify'):
                                 pool.submit(notify, f"【Y】競艇 {tag}（40秒前・3連複）", '\n'.join(f"3連複 {c}　今{ry[c].o3:.1f}倍　EV{ry[c].ev:.2f}" for c in hitY), False)
                 except Exception:
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
