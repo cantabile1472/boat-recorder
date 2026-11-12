@@ -1,7 +1,10 @@
 # 調査用：URL一覧を取ってきて probe/ に保存する（ヘッダも記録）
 import os, gzip, urllib.request
 os.makedirs('probe', exist_ok=True)
-for i, u in enumerate(open('probe_urls.txt', encoding='utf-8').read().split()):
+_L = open('probe_urls.txt', encoding='utf-8').read().split('\n')
+if _L and _L[0].startswith('UA:'):
+    os.environ['UA'] = _L.pop(0)[3:].strip()
+for i, u in enumerate(' '.join(_L).split()):
     try:
         body = None
         if '|' in u:
