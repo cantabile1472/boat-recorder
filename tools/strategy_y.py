@@ -127,3 +127,64 @@ if __name__ == '__main__':
     for d, t in P.groupby('day'):
         print(f"  {d}: {t.groupby(['jcd', 'R']).ngroups}R {len(t)}点 的中{int((t.pay > 0).sum())} 出資{len(t)*100:,}円 払戻{int(t.pay.sum()):,}円 回収{t.pay.mean():.0f}%")
     print(f"戦略Y 累計: {len(P)}点 的中{int((P.pay > 0).sum())} 出資{len(P)*100:,}円 払戻{int(P.pay.sum()):,}円 収支{int(P.pay.sum()) - len(P)*100:+,}円 回収{P.pay.mean():.0f}%")
+
+
+# ---------------- レコーダーから呼ぶ：その場で判定 ----------------
+_M = {}
+
+
+def _snap(t3s, f3s, ks):
+    t3 = np.array([num(v) for v in (t3s or [])]); f3 = np.array([num(v) for v in (f3s or [])])
+    if len(t3) != 120 or len(f3) != 20:
+        return None
+    inv = np.where(t3 > 0, 1 / np.where(t3 > 0, t3, 1), 0)
+    if inv.sum() <= 0:
+        return None
+    q = inv / inv.sum(); tri = {}
+    for (a, b, c), v in zip(P3, q):
+        kk = tuple(sorted((a, b, c))); tri[kk] = tri.get(kk, 0) + v
+    kw = [num(v) for v in (ks or [])]
+    wi = {pr: (1 / o if o > 0 else 1e-4) for pr, o in zip(PAIR, kw)} if len(kw) == 15 else {pr: np.nan for pr in PAIR}
+    wsc = np.array([np.log(wi[(kk[0], kk[1])]) + np.log(wi[(kk[0], kk[2])]) + np.log(wi[(kk[1], kk[2])]) for kk in TRI])
+    return f3, np.array([tri[kk] for kk in TRI]), wsc
+
+
+def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2):
+    """full = {スナップ: {'3t': [...], '3f': [...], 'k': [...]}}。戻り値 (20組の表, 買い目の組リスト)"""
+    if 'm' not in _M:
+        _M['m'] = pickle.load(open(MODEL, 'rb')) if os.path.exists(MODEL) else None
+    M = _M['m']
+    if M is None:
+        return None, []
+    sn = {}
+    for s in (1, 2, 3):
+        v = full.get(s) or {}
+        z = _snap(v.get('3t'), v.get('3f'), v.get('k'))
+        if z is not None:
+            sn[str(s)] = z
+    if '3' not in sn:
+        return None, []
+    rows = []
+    for i, kk in enumerate(TRI):
+        o3 = sn['3'][0][i]
+        if o3 <= 0:
+            continue
+        r = dict(c='-'.join(map(str, kk)), a=kk[0], b=kk[1], c3=kk[2], jcd=int(jcd), hour=int(str(deadline)[:2]), stale=mins(upd, deadline))
+        for s in ('1', '2', '3'):
+            if s in sn:
+                o = sn[s][0][i]; r[f'o{s}'] = o if o > 0 else np.nan; r[f'q{s}'] = sn[s][1][i]; r[f'w{s}'] = sn[s][2][i]
+            else:
+                r[f'o{s}'] = r[f'q{s}'] = r[f'w{s}'] = np.nan
+        rows.append(r)
+    X = pd.DataFrame(rows)
+    if X.empty:
+        return None, []
+    for s in ('1', '2', '3'):
+        X[f's{s}'] = (1 / X[f'o{s}']) / (1 / X[f'o{s}']).sum()
+    X['lo'] = np.log(X.o3); X['lq'] = np.log(X.q3); X['gap'] = np.log(X.q3 / X.s3); X['lw'] = X.w3; X['dw'] = X.w3 - X.w2
+    for a in ('1', '2'):
+        X[f'do{a}'] = np.log(X.o3 / X[f'o{a}']); X[f'dq{a}'] = np.log(X.q3 / X[f'q{a}'])
+    X['rk_o'] = X.o3.rank(); X['rk_gap'] = X.gap.rank(ascending=False); X['has1'] = (X.a == 1).astype(int); X['has6'] = (X.c3 == 6).astype(int)
+    z = X[['lq', 'lw']].values @ M['w']; e = np.exp(z - np.nanmax(z)); X['qb'] = e / np.nansum(e)
+    X['o80'] = X.o3 * np.exp(M['q80'].predict(X[M['F']])); X['ev'] = X.qb * X.o80
+    return X, list(X.c[(X.o3 > lo) & (X.o3 <= hi) & (X.ev >= ev_lo) & (X.ev < ev_hi)])

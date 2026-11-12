@@ -473,7 +473,7 @@ def kyotei_main():
                         if not os.path.exists(pth):
                             open(pth, 'w', encoding='utf-8').write(hx)
                 append_csv('kyotei_odds_full.csv', 'snap,time,jcd,R,kind,values', rowsF)
-                x.setdefault('full', {})[x['snap'] + 1] = {'3t': k_points(h2), 'tf': k_points(h1) if s1 == 200 else None}   # 戦略H複勝（f70）用
+                x.setdefault('full', {})[x['snap'] + 1] = {r_[4]: r_[5].split() for r_ in rowsF}   # 戦略H複勝（f70）・戦略Y（3連複）用
                 try:
                     rowsB = []
                     for kb, fb in fbc:
@@ -662,6 +662,23 @@ def kyotei_main():
                         if hitF:
                             append_csv('hf_notify.csv', 'time,jcd,place,R,deadline,boat,fuku_lo,f70_odds,f70_ev',
                                        [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, rf[b].f3, round(rf[b].f70_odds, 2), round(rf[b].f70_ev, 3)] for b in hitF])
+            # 戦略Y（3連複・40秒前に10〜50倍・EV1.0〜1.2）
+            prmY = cfg().get('strategy_Y')
+            if x['snap'] == 3 and prmY and not x.get('y_done'):
+                x['y_done'] = True
+                try:
+                    import strategy_y
+                    xy, hitY = strategy_y.evaluate(x.get('full', {}), (x.get('hist', {}).get(3) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}")
+                    if xy is not None:
+                        append_csv('y_log.csv', 'time,jcd,place,R,deadline,combo,odds,q,o80,ev,buy',
+                                   [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", r.c, r.o3, round(r.qb, 4), round(r.o80, 1), round(r.ev, 3), int(r.c in hitY)] for r in xy.itertuples()])
+                        if hitY:
+                            ry = {r.c: r for r in xy.itertuples()}
+                            log(f"【Y】競艇 {tag} 3連複 " + ' / '.join(hitY))
+                            if prmY.get('notify'):
+                                pool.submit(notify, f"【Y】競艇 {tag}（40秒前・3連複）", '\n'.join(f"3連複 {c}　今{ry[c].o3:.1f}倍　EV{ry[c].ev:.2f}" for c in hitY), False)
+                except Exception:
+                    log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()
@@ -923,6 +940,14 @@ def auto_main():
                                      round(r.pred_odds, 1), round(r.s70_odds, 1), round(r.s70_ev, 3), int(int(r.car) in hitA)] for r in xa.itertuples()])
                         if hitA:
                             log(f"【H】オート {tag}（記録のみ） " + ' / '.join(f'{c}号車' for c in hitA))
+                        # 戦略X3（オート単勝・1〜4号車・50倍以下・a70のEV0.85以上）
+                        PX3 = cfg().get('strategy_X3') or {}
+                        hitX3 = [int(r.car) for r in xa.itertuples() if int(r.car) <= 4 and 0 < od.get(int(r.car), 0) <= 50 and r.s70_ev >= 0.85]
+                        if hitX3 and PX3.get('notify') and not x.get('x3_sent'):
+                            x['x3_sent'] = True
+                            rx = {int(r.car): r for r in xa.itertuples()}
+                            pool.submit(notify, f"【X3】オート {tag}（42秒前・単勝）", '\n'.join(f"単勝 {c}号車　今{od.get(c, 0):.1f}倍 → 底値{rx[c].s70_odds:.1f}倍　1着率{rx[c].q3*100:.0f}%　EV{rx[c].s70_ev:.2f}" for c in hitX3), False)
+                            append_csv('x3_notify.csv', 'time,pc,place,R,deadline,car,odds,s70_odds,s70_ev', [[f'{now():%H:%M:%S}', x['pc'], APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", c, od.get(c, 0), round(rx[c].s70_odds, 1), round(rx[c].s70_ev, 3)] for c in hitX3])
                 except Exception:
                     log('オート版s70 NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):

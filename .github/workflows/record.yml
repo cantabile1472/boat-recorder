@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: '*/30 23,0-14 * * *'   # 日本時間 8:00〜23:30 に30分おき（動いている間は待機して、止まっていたら起動する）
   push:
-    paths: ['recorder.py', 'tools/strat_e.py', 'tools/strategy_h.py', 'models/s70_3.pkl', 'tools/strategy_hf.py', 'models/f70_3.pkl', 'tools/strategy_h_auto.py', 'models/s70_auto_3.pkl', 'tools/nar_recorder.py', 'tools/keirin_recorder.py', '.github/workflows/record.yml']
+    paths: ['recorder.py', 'tools/strat_e.py', 'tools/strategy_h.py', 'models/s70_3.pkl', 'tools/strategy_hf.py', 'models/f70_3.pkl', 'tools/strategy_y.py', 'models/y_trio.pkl', 'tools/strategy_h_auto.py', 'models/s70_auto_3.pkl', 'tools/nar_recorder.py', 'tools/keirin_recorder.py', '.github/workflows/record.yml']
   workflow_dispatch:
 permissions:
   contents: write
