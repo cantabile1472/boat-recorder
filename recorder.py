@@ -92,6 +92,39 @@ def notify(title, body, high=False):
         log('通知NG ' + repr(e))
 
 
+BSKY_ID = os.environ.get('BSKY_HANDLE', '').strip(); BSKY_PW = os.environ.get('BSKY_APP_PASSWORD', '').strip()
+_BSKY = {}
+
+
+def bsky_post(text):
+    """Bluesky に投稿（戦略Yの買い目）。ハッシュタグはタップできる形にする。設定が無ければ何もしない"""
+    if not (BSKY_ID and BSKY_PW):
+        return
+    def api(path, body, tok=None):
+        h = {'Content-Type': 'application/json'}
+        if tok:
+            h['Authorization'] = 'Bearer ' + tok
+        rq = urllib.request.Request('https://bsky.social/xrpc/' + path, data=json.dumps(body).encode('utf-8'), headers=h)
+        return json.loads(urllib.request.urlopen(rq, timeout=15).read() or b'{}')
+    b = text.encode('utf-8'); facets = []
+    for m in re.finditer(r'#(\S+)', text):
+        st = len(text[:m.start()].encode('utf-8')); en = st + len(m.group(0).encode('utf-8'))
+        facets.append({'index': {'byteStart': st, 'byteEnd': en}, 'features': [{'$type': 'app.bsky.richtext.facet#tag', 'tag': m.group(1)}]})
+    rec = {'$type': 'app.bsky.feed.post', 'text': text, 'createdAt': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z', 'langs': ['ja'], 'facets': facets}
+    for attempt in range(2):
+        try:
+            with LOCK:
+                if 'tok' not in _BSKY or attempt:
+                    s_ = api('com.atproto.server.createSession', {'identifier': BSKY_ID, 'password': BSKY_PW})
+                    _BSKY.update(tok=s_['accessJwt'], did=s_['did'])
+            api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, _BSKY['tok'])
+            append_csv('bsky_posts.csv', 'time,text', [[f'{now():%H:%M:%S}', text.replace('\n', ' / ')]])
+            return
+        except Exception as e:
+            if attempt:
+                log('Bluesky投稿NG ' + repr(e))
+
+
 ORDER_TOPIC = os.environ.get('ORDER_TOPIC', '').strip()   # 自動投票の注文を流す秘密のトピック（VPS 側が購読）
 
 
@@ -714,6 +747,8 @@ def kyotei_main():
                                 log(f"【Y】{tag} 買い目{len(hitY)}点のため通知なし（{mx}点まで）")
                             elif prmY.get('notify'):
                                 pool.submit(notify, f"【Y】競艇 {tag}（40秒前・3連複）", '\n'.join(f"3連複 {c}　今{ry[c].o3:.1f}倍　EV{ry[c].ev:.2f}" for c in hitY), False)
+                                if prmY.get('bsky'):
+                                    pool.submit(bsky_post, f"{KNAME[x['jcd']]} {x['R']}R（締切{x['dl']:%H:%M}）\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
                 except Exception:
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):

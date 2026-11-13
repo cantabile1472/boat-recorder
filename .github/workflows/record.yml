@@ -34,6 +34,8 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           ORDER_TOPIC: ${{ secrets.ORDER_TOPIC }}
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
           START_NOTIFY: '1'
         run: |
           python tools/nar_recorder.py > nar_log.txt 2>&1 &

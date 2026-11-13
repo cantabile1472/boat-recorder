@@ -157,7 +157,8 @@
   "strategy_Y": {
     "notify": true,
     "note": "競艇3連複・40秒前に10〜50倍・3連単＋ワイドの確率×80%点予想でEV1.0〜1.2（記録＋通知、出資記録には入れない） / 1Rの買い目が4点以上のときは通知しない（記録は続ける）",
-    "max_notify": 3
+    "max_notify": 3,
+    "bsky": true
   },
   "strategy_X3": {
     "notify": true,
