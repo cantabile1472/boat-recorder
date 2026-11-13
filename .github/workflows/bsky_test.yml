@@ -1,0 +1,46 @@
+name: Bluesky テスト投稿
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: '投稿する文'
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - env:
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+          TEXT: ${{ github.event.inputs.text }}
+        run: |
+          python - <<'PY'
+          import os, sys, json, urllib.request, urllib.error
+          sys.path.insert(0, '.')
+          ok = bool(os.environ.get('BSKY_HANDLE')) and bool(os.environ.get('BSKY_APP_PASSWORD'))
+          print('ID入力あり:', bool(os.environ.get('BSKY_HANDLE')), '/ パスワード入力あり:', bool(os.environ.get('BSKY_APP_PASSWORD')))
+          if not ok: sys.exit(1)
+          def api(path, body, tok=None):
+              h = {'Content-Type': 'application/json'}
+              if tok: h['Authorization'] = 'Bearer ' + tok
+              rq = urllib.request.Request('https://bsky.social/xrpc/' + path, data=json.dumps(body).encode(), headers=h)
+              try:
+                  return json.loads(urllib.request.urlopen(rq, timeout=20).read() or b'{}')
+              except urllib.error.HTTPError as e:
+                  print('エラー', e.code, e.read().decode()[:300]); sys.exit(1)
+          s = api('com.atproto.server.createSession', {'identifier': os.environ['BSKY_HANDLE'], 'password': os.environ['BSKY_APP_PASSWORD']})
+          print('ログインOK:', s.get('handle'))
+          import datetime, re
+          text = os.environ['TEXT'].replace('\\n', '\n')
+          facets = []
+          for m in re.finditer(r'#(\S+)', text):
+              st = len(text[:m.start()].encode()); en = st + len(m.group(0).encode())
+              facets.append({'index': {'byteStart': st, 'byteEnd': en}, 'features': [{'$type': 'app.bsky.richtext.facet#tag', 'tag': m.group(1)}]})
+          rec = {'$type': 'app.bsky.feed.post', 'text': text, 'langs': ['ja'], 'facets': facets, 'createdAt': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}
+          r = api('com.atproto.repo.createRecord', {'repo': s['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, s['accessJwt'])
+          print('投稿OK:', r.get('uri'))
+          PY
