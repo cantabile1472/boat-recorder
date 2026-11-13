@@ -819,7 +819,7 @@ def kyotei_main():
                         if hitP:
                             append_csv('y_pre.csv', 'time,jcd,place,R,deadline,combos', [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", ' / '.join(hitP)]])
                             if len(hitP) <= (prmY.get('max_notify') or 99):
-                                pool.submit(notify, f"【Y候補】競艇 {tag}（1分半前）", '3連複 ' + ' / '.join(hitP) + '\n※40秒前に確定の通知', False)
+                                pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitP), f"候補（戦略Y・1分半前）締切{x['dl']:%H:%M}\n40秒前に確定の通知が来ます", False)
                 except Exception:
                     log('戦略Y候補 NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] == 3 and prmY and not x.get('y_done'):
@@ -837,7 +837,7 @@ def kyotei_main():
                             if prmY.get('notify') and len(hitY) > mx:
                                 log(f"【Y】{tag} 買い目{len(hitY)}点のため通知なし（{mx}点まで）")
                             elif prmY.get('notify'):
-                                pool.submit(notify, f"【Y】競艇 {tag}（40秒前・3連複）", '\n'.join(f"3連複 {c}　今{ry[c].o3:.1f}倍　EV{ry[c].ev:.2f}" for c in hitY), False)
+                                pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitY), f"確定（戦略Y・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　今{ry[c].o3:.1f}倍" for c in hitY), False)
                                 if prmY.get('bsky'):
                                     append_csv('bsky_y.csv', 'time,jcd,R,combos', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(hitY)]])
                                     pool.submit(bsky_post, f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
@@ -1131,7 +1131,7 @@ def auto_main():
                         if hitX3 and PX3.get('notify') and not x.get('x3_sent'):
                             x['x3_sent'] = True
                             rx = {int(r.car): r for r in xa.itertuples()}
-                            notify(f"【X3】オート {tag}（42秒前・単勝）", '\n'.join(f"単勝 {c}号車　今{od.get(c, 0):.1f}倍 → 底値{rx[c].s70_odds:.1f}倍　1着率{rx[c].q3*100:.0f}%　EV{rx[c].s70_ev:.2f}" for c in hitX3), False)
+                            notify(f"オート {APL[x['pc']]}{x['R']}R 単勝 " + ' / '.join(f"{c}号車" for c in hitX3), f"確定（戦略X3・42秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}号車　今{od.get(c, 0):.1f}倍" for c in hitX3), False)
                             append_csv('x3_notify.csv', 'time,pc,place,R,deadline,car,odds,s70_odds,s70_ev', [[f'{now():%H:%M:%S}', x['pc'], APL[x['pc']], x['R'], f"{x['dl']:%H:%M}", c, od.get(c, 0), round(rx[c].s70_odds, 1), round(rx[c].s70_ev, 3)] for c in hitX3])
                 except Exception:
                     log('オート版s70 NG ' + traceback.format_exc().splitlines()[-1])
