@@ -106,6 +106,7 @@ def notify(title, body, high=False):
 
 BSKY_ID = os.environ.get('BSKY_HANDLE', '').strip(); BSKY_PW = os.environ.get('BSKY_APP_PASSWORD', '').strip()
 _BSKY = {}
+KY_LAST = [None]   # 今日の競艇の最終レースの締切（開催予定から）
 
 
 def bsky_post(text, quote=None):
@@ -491,16 +492,11 @@ def y_settle(k, html):
 
 def y_summary():
     """その日の最終レースの結果がそろったら、本日と投稿開始からの成績を1回だけ投稿"""
-    flag = os.path.join(DDIR, 'bsky_summary_done')
+    flag = os.path.join(DDIR, 'bsky_summary_posted')
     if os.path.exists(flag) or not (cfg().get('strategy_Y') or {}).get('bsky'):
         return
     try:
-        logrows = read_csv('kyotei_log.csv')
-        if not logrows:
-            return
-        last = max(r['deadline'] for r in logrows)
-        hh, mm = map(int, last.split(':'))
-        if now() < TODAY.replace(hour=hh, minute=mm, second=0, microsecond=0) + datetime.timedelta(minutes=10):
+        if KY_LAST[0] is None or now() < KY_LAST[0] + datetime.timedelta(minutes=10):   # その日の開催予定の最終レース
             return
         posted = read_csv('bsky_y.csv'); res = {(r['jcd'], str(r['R'])): r for r in read_csv('bsky_y_result.csv')}
         if any((r['jcd'], str(r['R'])) not in res for r in posted) and now().hour < 23:
@@ -563,6 +559,7 @@ def kyotei_main():
     left = sum(1 for x in races if x['st'] == 'wait')
     log(f'競艇: 開催{len(jcds)}場 / これから締切 {left}レース')
     debug_saved = os.path.exists(os.path.join(DDIR, 'kyotei_oddstf_sample.html'))
+    KY_LAST[0] = max((x['dl'] for x in races), default=None)
     pool = ThreadPoolExecutor(8)
     pubpool = ThreadPoolExecutor(2); wp = Web()   # 公開用の記録は別の通り道で（判定用の取得を待たせない）
     morning = [x for x in races if x['st'] == 'wait' and not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
