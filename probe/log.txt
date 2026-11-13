@@ -1,1 +1,1 @@
-0 200 233031 https://keirin.kdreams.jp/fukui/racedetail/5120261111020009/?pageType=odds&kakeshikiType=wide | LM=None ET=None CT=text/html; charset=UTF-8 Date=Thu, 12 Nov 2026 05:07:33 GMT
+0 200 54209 https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=20261114 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 01:17:54 GMT
