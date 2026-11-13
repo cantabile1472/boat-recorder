@@ -808,6 +808,20 @@ def kyotei_main():
                                        [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", b, rf[b].f3, round(rf[b].f70_odds, 2), round(rf[b].f70_ev, 3)] for b in hitF])
             # 戦略Y（3連複・40秒前に10〜50倍・EV1.0〜1.2）
             prmY = cfg().get('strategy_Y')
+            # 戦略Yの「候補」：1分35秒前のオッズで同じ判定をして、先に知らせる（確定は40秒前）
+            if x['snap'] == 2 and prmY and prmY.get('pre_notify') and not x.get('yp_done'):
+                x['yp_done'] = True
+                try:
+                    import strategy_y
+                    fu = x.get('full', {})
+                    if fu.get(2):
+                        _, hitP = strategy_y.evaluate({1: fu.get(1), 2: fu.get(1), 3: fu.get(2)}, (x.get('hist', {}).get(2) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}")
+                        if hitP:
+                            append_csv('y_pre.csv', 'time,jcd,place,R,deadline,combos', [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", ' / '.join(hitP)]])
+                            if len(hitP) <= (prmY.get('max_notify') or 99):
+                                pool.submit(notify, f"【Y候補】競艇 {tag}（1分半前）", '3連複 ' + ' / '.join(hitP) + '\n※40秒前に確定の通知', False)
+                except Exception:
+                    log('戦略Y候補 NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] == 3 and prmY and not x.get('y_done'):
                 x['y_done'] = True
                 try:
