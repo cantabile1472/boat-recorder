@@ -96,6 +96,9 @@ def read_csv(name):
 def notify(title, body, high=False):
     if not TOPIC:
         return
+    until = str(cfg().get('notify_until') or '')   # この時刻以降はスマホへの通知を出さない（記録・Blueskyは続ける）
+    if until and f'{now():%H:%M}' >= until:
+        return
     try:
         rq = urllib.request.Request('https://ntfy.sh/' + TOPIC, data=(title + '\n' + body).encode('utf-8'),
                                     headers={'Priority': 'high' if high else 'default'})
