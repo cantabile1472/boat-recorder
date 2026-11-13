@@ -1,19 +1,17 @@
-<!-- resources/views/home.blade.php -->
-
-
 <!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="format-detection" content="telephone=no">
-        <title>レース成績表</title>
+        <title>オッズ｜地方競馬情報サイト</title>
     
     <!-- CSSファイルの読み込み -->
             <link rel="stylesheet" href="/KeibaWeb/resources/css/reset.css?t=20260201_1" type="text/css" media="all" />
             <link rel="stylesheet" href="/KeibaWeb/resources/css/common2.css?t=20260201_1" type="text/css" media="all" />
-            <link rel="stylesheet" href="/KeibaWeb/resources/css/raceinfo3.css?t=20260201_1" type="text/css" media="all" />
-            <link rel="stylesheet" href="/KeibaWeb/resources/css/raceMark.css?t=20260201_3" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/raceinfo2.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/odd.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/RaceDataTitle.css?t=20260201_1" type="text/css" media="all" />
     
     <!-- JSファイルの読み込み -->
             <script type="text/javascript" src="/KeibaWeb/resources/js/jquery-1.9.1.min.js?t=20260130_1"></script>
@@ -143,799 +141,761 @@
             <a id="MonthlyConveneInfoTop" href="../MonthlyConveneInfo/MonthlyConveneInfoTop">月別開催日程</a>
         </li>
                     <li>
-                <a id="RaceList" href="../TodayRaceInfo/RaceList?k_babaCode=22&amp;k_raceDate=2026%2F11%2F10&amp;k_raceNo=2">当日メニュー</a>
+                <a id="RaceList" href="../TodayRaceInfo/RaceList?k_babaCode=21&amp;k_raceDate=2026%2F11%2F13&amp;k_raceNo=11">当日メニュー</a>
             </li>
             <li>
-                                    <a id="RefundMoneyList" href="../TodayRaceInfo/RefundMoneyList?k_babaCode=22&amp;k_raceDate=2026%2F11%2F10&amp;k_raceNo=2">当日払戻金</a>
+                                    <a id="RefundMoneyList" href="../TodayRaceInfo/RefundMoneyList?k_babaCode=21&amp;k_raceDate=2026%2F11%2F13&amp;k_raceNo=11">当日払戻金</a>
                             </li>
             </ul>
 </div>
  <!-- サブメニュー部分の読み込み -->
         <main>
-                    <div id="mainContainer">
-        <article class="raceResult">
-            <div class="innerWrapper">
-                <nav class="clearfix noWrapNav">
-    <div class="chartNavi clearfix trackNameNavi ">
+        
+
+<div id="mainContainer">
+	<article class="raceCard">
+    <div class="innerWrapper">
+        <nav class="clearfix noWrapNav">
+    <div class="chartNavi clearfix trackNameNavi  ipatRaceNumNavi ">
                      
                                      
                         <a
-                            class="cNaviBtn courseBtn " 
-                             href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=36"                         >門別</a>
-                                                         
-                        <a
-                            class="cNaviBtn courseBtn " 
-                             href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=10"                         >盛岡</a>
-                                                         
-                        <a
-                            class="cNaviBtn courseBtn " 
-                             href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=21"                         >川崎</a>
-                                                         
-                        <a
                             class="cNaviBtn courseBtn active" 
-                                                    >金沢</a>
+                                                    >川崎</a>
                                                          
                         <a
                             class="cNaviBtn courseBtn " 
-                             href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=24"                         >名古屋</a>
+                             href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=10&amp;k_babaCode=22"                         >金沢</a>
+                                                         
+                        <a
+                            class="cNaviBtn courseBtn " 
+                             href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=24"                         >名古屋</a>
+                                                         
+                        <a
+                            class="cNaviBtn courseBtn " 
+                             href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=27"                         >園田</a>
                                                             </div>
 </nav>
 <nav class="clearfix noWrapNav">
-    <div class="chartNavi clearfix raceNumNavi ">
+    <div class="chartNavi clearfix raceNumNavi  ipatRaceNumNavi ">
              
                              
                     <a 
                         class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=1&amp;k_babaCode=22"                     >1R</a>
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=1&amp;k_babaCode=21"                     >1R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=2&amp;k_babaCode=21"                     >2R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=3&amp;k_babaCode=21"                     >3R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=4&amp;k_babaCode=21"                     >4R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=5&amp;k_babaCode=21"                     >5R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=6&amp;k_babaCode=21"                     >6R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=7&amp;k_babaCode=21"                     >7R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=8&amp;k_babaCode=21"                     >8R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=9&amp;k_babaCode=21"                     >9R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=10&amp;k_babaCode=21"                     >10R</a>
                                              
                     <a 
                         class="cNaviBtn raceNum active" 
-                                            >2R</a>
+                                            >11R</a>
                                              
                     <a 
                         class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=3&amp;k_babaCode=22"                     >3R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=4&amp;k_babaCode=22"                     >4R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=5&amp;k_babaCode=22"                     >5R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=6&amp;k_babaCode=22"                     >6R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=7&amp;k_babaCode=22"                     >7R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=8&amp;k_babaCode=22"                     >8R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=9&amp;k_babaCode=22"                     >9R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=10&amp;k_babaCode=22"                     >10R</a>
-                                             
-                    <a 
-                        class="cNaviBtn raceNum " 
-                         href="/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=11&amp;k_babaCode=22"                     >11R</a>
+                         href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21"                     >12R</a>
                                             </div>
 </nav>
 <h4>
-        2026年11月10日（火）　金　沢　第2競走<span class="redTitle">　競走成績</span>    </h4>
+        2026年11月13日（金）　川　崎　第11競走　20:15発走    </h4>
     <p class="racetime">
-            <br />
+        愛川町長賞 管理者賞   <br />
             <br />
             
     </p>
     <section class="raceTitle">
         <p class="roundInfo"></p>
         <p class="date"></p>
-        <p class="subTitle">ＪＲＡ交流</p>
-        <h3>加賀粟津賞Ａ２下Ｂ１上中央３歳上１勝クラス</h3>
+        <p class="subTitle">ご存じですか？愛あふれるブランド品</p>
+        <h3>買って、食べて、楽しんで！愛川ブランド杯Ｂ１二Ｂ２一</h3>
         <ul class="dataArea">
-            <li>ダート　1500ｍ（右）　　天候：曇　　馬場：重　　サラブレッド系　一般 定量　　＊電話投票コード：41#            </li>
-                        <li>賞金　1着1,000,000円　2着340,000円　3着180,000円　4着130,000円　5着100,000円</li>
+            <li>ダート　1600ｍ（左）　　天候：晴　　馬場：重　　サラブレッド系　一般　　＊電話投票コード：34#            </li>
+                        <li>賞金　1着3,200,000円　2着1,280,000円　3着800,000円　4着480,000円　5着320,000円</li>
         </ul>
     </section>
 
     <nav class="clearfix noWrapNav">
-        <div class="chartNavi clearfix ">
+        <div class="chartNavi clearfix  ipatRaceNumNavi ">
             
-                                                                        <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=22">出馬表</a>
-                                                                                    <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=22">オッズ</a>
-                                                                <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/CompeteTable?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=22">対戦表</a>
-                                        <a class="cNaviBtn" target="_blank" href="/KeibaWeb/TodayRaceInfo/DebaTableSmall?k_raceDate=2026%2F11%2F10&amp;k_raceNo=2&amp;k_babaCode=22">印刷用出馬表</a>
-                                            <a class="cNaviBtn" target="_blank" href="http://keiba-lv-st.jp/movie/player?date=20261110&amp;race=2&amp;track=kanazawa">レース映像</a>
-                                                                                                                    </div>
+                                                                        <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">出馬表</a>
+                                                                <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/CompeteTable?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">対戦表</a>
+                                        <a class="cNaviBtn" target="_blank" href="/KeibaWeb/TodayRaceInfo/DebaTableSmall?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">印刷用出馬表</a>
+                                            <a class="cNaviBtn live" target="_blank" href="http://simple.keiba-lv-st.jp/?track=kawasaki">ライブ中継</a>
+                                                                <a class="cNaviBtn standby">競走成績</a>
+                    
+                                    </div>
         
-            </nav>
-                <section class="gradeTable">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="a">着順</th>
-                                <th class="b">枠</th>
-                                <th class="c">馬番</th>
-                                <th class="d">馬名</th>
-                                <th class="e">所属</th>
-                                <th class="f">性齢</th>
-                                <th class="g">負担<br>重量</th>
-                                <th class="h">騎手<span>（所属）</span></th>
-                                <th class="i">調教師</th>
-                                <th class="j">馬体重<br><span>（増減）</span></th>
-                                <th class="k">タイム</th>
-                                <th class="l">着差</th>
-                                <th class="m">上がり<br>3F</th>
-                                                                    <th class="n">コーナー<br>通過順</th>
-                                                                <th class="o">人気</th>
-                                <th class="p">単勝<br>オッズ</th>
-                                                            </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">1</td>
-                                    <td class="b courseNum course_07">7
-                                    </td>
-                                    <td class="c">7</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30026402107">
-                                                ブルームザスマイル
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f  femal ">
-                                                                                        牝 3
-                                                                                </td>
-                                                                            <td class="g">52.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=60528">
-                                                
-                                                ◇今村聖
-                                                <span>（JRA）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40346"
-                                                target="_blank">
-                                                鈴木孝
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            427<span>(1)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:35.4</td>
-                                                                                                                <td class="l"></td>
-                                                                                                                <td class="m furlongNum course_01">
-                                            38.1</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o popularNum course_03">3
-                                        </td>
-                                                                                                                <td class="p femal">4.6</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">2</td>
-                                    <td class="b courseNum course_02">2
-                                    </td>
-                                    <td class="c">2</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30088401996">
-                                                デリュージョン
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f ">
-                                                                                        牡 4
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=60404">
-                                                
-                                                荻野琢
-                                                <span>（JRA）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40381"
-                                                target="_blank">
-                                                奥村豊
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            471<span>(5)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:36.0</td>
-                                                                                                                <td class="l">3</td>
-                                                                                                                <td class="m furlongNum course_01">
-                                            38.1</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">5</td>
-                                                                                                                <td class="p femal">7.6</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">3</td>
-                                    <td class="b courseNum course_08">8
-                                    </td>
-                                    <td class="c">10</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30015408886">
-                                                クインズセレネ
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f  femal ">
-                                                                                        牝 5
-                                                                                </td>
-                                                                            <td class="g">55.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=60436">
-                                                
-                                                藤懸貴
-                                                <span>（JRA）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40333"
-                                                target="_blank">
-                                                野中賢
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            479<span>(9)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:36.2</td>
-                                                                                                                <td class="l">1</td>
-                                                                                                                <td class="m furlongNum course_02">
-                                            38.9</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">6</td>
-                                                                                                                <td class="p femal">9.9</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">4</td>
-                                    <td class="b courseNum course_08">8
-                                    </td>
-                                    <td class="c">9</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30058402096">
-                                                バルミラクル
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f ">
-                                                                                        牡 4
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31039">
-                                                
-                                                吉原寛
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40433"
-                                                target="_blank">
-                                                河嶋宏
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            465<span>(9)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:36.4</td>
-                                                                                                                <td class="l">1.1/2</td>
-                                                                                                                <td class="m furlongNum course_03">
-                                            39.1</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o popularNum course_01">1
-                                        </td>
-                                                                                                                <td class="p femal">2.7</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">5</td>
-                                    <td class="b courseNum course_05">5
-                                    </td>
-                                    <td class="c">5</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30048402696">
-                                                ミッシオーネ
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f  femal ">
-                                                                                        牝 4
-                                                                                </td>
-                                                                            <td class="g">55.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31242">
-                                                
-                                                中島龍
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40448"
-                                                target="_blank">
-                                                秋本大
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            442<span>(-4)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:37.0</td>
-                                                                                                                <td class="l">3</td>
-                                                                                                                <td class="m">39.5</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">4</td>
-                                                                                                                <td class="p femal">7.2</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">6</td>
-                                    <td class="b courseNum course_07">7
-                                    </td>
-                                    <td class="c">8</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30068406996">
-                                                ルディシャ
-                                            </a>
-                                                                            </td>
-                                    <td class="e">JRA</td>
-                                    <td class="f ">
-                                                                                        牡 4
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31254">
-                                                
-                                                栗原大
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=40377"
-                                                target="_blank">
-                                                森田直
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            473<span>(-7)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:37.3</td>
-                                                                                                                <td class="l">1.1/2</td>
-                                                                                                                <td class="m">39.3</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">7</td>
-                                                                                                                <td class="p">21.5</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">7</td>
-                                    <td class="b courseNum course_06">6
-                                    </td>
-                                    <td class="c">6</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30096402956">
-                                                カズロレアート
-                                            </a>
-                                                                            </td>
-                                    <td class="e">金沢</td>
-                                    <td class="f ">
-                                                                                        牡 8
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=30783">
-                                                
-                                                米倉知
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=11499"
-                                                target="_blank">
-                                                藤田弘
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            493<span>(1)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:37.4</td>
-                                                                                                                <td class="l">1/2</td>
-                                                                                                                <td class="m furlongNum course_02">
-                                            38.9</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">10</td>
-                                                                                                                <td class="p">208.3</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">8</td>
-                                    <td class="b courseNum course_04">4
-                                    </td>
-                                    <td class="c">4</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30042408786">
-                                                アオイミモザ
-                                            </a>
-                                                                            </td>
-                                    <td class="e">金沢</td>
-                                    <td class="f ">
-                                                                                        セン 5
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31238">
-                                                
-                                                甲賀弘
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=11403"
-                                                target="_blank">
-                                                加藤義
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            515<span>(8)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:37.6</td>
-                                                                                                                <td class="l">1.1/2</td>
-                                                                                                                <td class="m">40.1</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">8</td>
-                                                                                                                <td class="p">95.8</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">9</td>
-                                    <td class="b courseNum course_01">1
-                                    </td>
-                                    <td class="c">1</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=30055409466">
-                                                オラヴェリタス
-                                            </a>
-                                                                            </td>
-                                    <td class="e">金沢</td>
-                                    <td class="f ">
-                                                                                        牡 7
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31099">
-                                                
-                                                青柳正
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=11034"
-                                                target="_blank">
-                                                佐藤茂
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            521<span>(0)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:37.9</td>
-                                                                                                                <td class="l">1.1/2</td>
-                                                                                                                <td class="m">39.6</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o">9</td>
-                                                                                                                <td class="p">129.8</td>
-                                                                                                        </tr>
-                                                            <tr class="tBorder">
-                                                                        <td class="a">10</td>
-                                    <td class="b courseNum course_03">3
-                                    </td>
-                                    <td class="c">3</td>
-                                    <td class="d horseName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/HorseMarkInfo?k_lineageLoginCode=40031407976">
-                                                ワールズコライド
-                                            </a>
-                                                                            </td>
-                                    <td class="e">金沢</td>
-                                    <td class="f ">
-                                                                                        牡 6
-                                                                                </td>
-                                                                            <td class="g">57.0 </td>
-                                                                       <td class="h jockeyName">
-                                                                                    <a target="_blank"
-                                                href="/KeibaWeb/DataRoom/RiderMark?k_riderLicenseNo=31298">
-                                                
-                                                魚住謙
-                                                <span>（金沢）</span>
-                                            </a>
-                                                                            </td>
-                                    <td class="i">
-                                                                                    <a class="trainerName"
-                                                href="/KeibaWeb/DataRoom/TrainerMark?k_trainerLicenseNo=11403"
-                                                target="_blank">
-                                                加藤義
-                                            </a>
-                                                                            </td>
-                                                                                                                    <td class="j horseWeight">
-                                            541<span>(3)</span>                                        </td>
-                                                                                                                                                        <td class="k">1:38.4</td>
-                                                                                                                <td class="l">2.1/2</td>
-                                                                                                                <td class="m">40.3</td>
-                                                                                                                <td class="n corner_position"></td>
-                                                                                                                                                    <td class="o popularNum course_02">2
-                                        </td>
-                                                                                                                <td class="p femal">4.2</td>
-                                                                                                        </tr>
-                                                    </tbody>
-                    </table>
-                </section>
-                                    <section class="newRefundTable">
-                        <h4><span class="smallTitle">払戻金</span></h4>
-                        <div class="twoRefundTable">
-                            <!-- 左テーブル：単勝/複勝/馬連複 -->
-                            <table>
-                                <tbody>
-                                                                                                                        <tr>
-                                                                                                    <td class="title" rowspan="1">単勝</td>
-                                                                                                <td class="a">7</td>
-                                                <td class="refundMoney">460円</td>
-                                                <td class="c">3人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="3">複勝</td>
-                                                                                                <td class="a">7</td>
-                                                <td class="refundMoney">190円</td>
-                                                <td class="c">3人気</td>
-                                            </tr>
-                                                                                    <tr>
-                                                                                                <td class="a">2</td>
-                                                <td class="refundMoney">290円</td>
-                                                <td class="c">6人気</td>
-                                            </tr>
-                                                                                    <tr>
-                                                                                                <td class="a">10</td>
-                                                <td class="refundMoney">290円</td>
-                                                <td class="c">5人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="1">枠連複</td>
-                                                                                                <td class="a">2-7</td>
-                                                <td class="refundMoney">1,510円</td>
-                                                <td class="c">7人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="1">馬連複</td>
-                                                                                                <td class="a">2-7</td>
-                                                <td class="refundMoney">2,500円</td>
-                                                <td class="c">13人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="1">枠連単</td>
-                                                                                                <td class="a">7-2</td>
-                                                <td class="refundMoney">3,550円</td>
-                                                <td class="c">16人気</td>
-                                            </tr>
-                                                                                                            </tbody>
-                            </table>
-                            <!-- 右テーブル：馬連単/ワイド/三連複/三連単 -->
-                            <table>
-                                <tbody>
-                                                                                                                        <tr>
-                                                                                                    <td class="title" rowspan="1">馬連単</td>
-                                                                                                <td class="d">7-2</td>
-                                                <td class="refundMoney">4,070円</td>
-                                                <td class="c">15人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="3">ワイド</td>
-                                                                                                <td class="d">2-7</td>
-                                                <td class="refundMoney">530円</td>
-                                                <td class="c">6人気</td>
-                                            </tr>
-                                                                                    <tr>
-                                                                                                <td class="d">7-10</td>
-                                                <td class="refundMoney">680円</td>
-                                                <td class="c">9人気</td>
-                                            </tr>
-                                                                                    <tr>
-                                                                                                <td class="d">2-10</td>
-                                                <td class="refundMoney">730円</td>
-                                                <td class="c">10人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="1">三連複</td>
-                                                                                                <td class="d">2-7-10</td>
-                                                <td class="refundMoney">3,690円</td>
-                                                <td class="c">16人気</td>
-                                            </tr>
-                                                                                                                                                                                                    <tr>
-                                                                                                    <td class="title" rowspan="1">三連単</td>
-                                                                                                <td class="d">7-2-10</td>
-                                                <td class="refundMoney">17,270円</td>
-                                                <td class="c">67人気</td>
-                                            </tr>
-                                                                                                            </tbody>
-                            </table>
-                        </div>
-                    </section>
-                                <section class="timeTable">
-                                        <h4><span class="smallTitle">タイム</span></h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                                                            <th>4F</th>
-                                                                                                                <th>3F</th>
-                                                                    </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>上がりタイム</td>
-                                                                            <td>49.8</td>
-                                                                                                                <td>38.1</td>
-                                                                    </tr>
-                            </tbody>
-                        </table>
-                                                        </section>
+                                    <div class="chartNavi clearfix">
+                    <h3 class="naviTitle">オッズ</h3>
+                                                                                                                    <a class="cNaviBtn live"
+                                href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">単・複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsWakuLenFukuTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">枠連</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">馬連複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">馬連単</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">ワイド</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">三連複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21">三連単</a>
+                                                            </div>
+                        </nav>
 
-                <section class="cornerPassTable">
-                                        <h4><span class="smallTitle">全馬コーナー通過順</span></h4>
-                    <table>
-                        <tbody>
-                                                            <tr>
-                                    <td>１コーナー</td>
-                                    <td>
-                                                                                                                                     ( 
-                                                                                                                                                                                <span class="firstHorse">7</span>
-                                                                                                                                                                                 , 
-                                                                                                                                                                                9
-                                                                                                                                                                                 )  , 
-                                                                                                                                                                                10
-                                                                                                                                                                                 ,  ( 
-                                                                                                                                                                                4
-                                                                                                                                                                                 , 
-                                                                                                                                                                                5
-                                                                                                                                                                                 )-
-                                                                                                                                                                                8
-                                                                                                                                                                                 , 
-                                                                                                                                                                                2
-                                                                                                                                                                                 , 
-                                                                                                                                                                                3
-                                                                                                                                                                                 ,  ( 
-                                                                                                                                                                                1
-                                                                                                                                                                                 , 
-                                                                                                                                                                                6
-                                                                                                                                                                                 ) 
-                                                                                                                        </td>
-                                </tr>
-                                                            <tr>
-                                    <td>２コーナー</td>
-                                    <td>
-                                                                                                                                     ( 
-                                                                                                                                                                                <span class="firstHorse">7</span>
-                                                                                                                                                                                 , 
-                                                                                                                                                                                9
-                                                                                                                                                                                 )  ,  ( 
-                                                                                                                                                                                4
-                                                                                                                                                                                 , 
-                                                                                                                                                                                5
-                                                                                                                                                                                 , 
-                                                                                                                                                                                10
-                                                                                                                                                                                 )-( 
-                                                                                                                                                                                2
-                                                                                                                                                                                 , 
-                                                                                                                                                                                8
-                                                                                                                                                                                 )  , 
-                                                                                                                                                                                3
-                                                                                                                                                                                 , 
-                                                                                                                                                                                1
-                                                                                                                                                                                 , 
-                                                                                                                                                                                6
-                                                                                                                                                                                
-                                                                                                                        </td>
-                                </tr>
-                                                            <tr>
-                                    <td>３コーナー</td>
-                                    <td>
-                                                                                                                                     ( 
-                                                                                                                                                                                <span class="firstHorse">7</span>
-                                                                                                                                                                                 , 
-                                                                                                                                                                                9
-                                                                                                                                                                                 , 
-                                                                                                                                                                                10
-                                                                                                                                                                                 )  ,  ( 
-                                                                                                                                                                                4
-                                                                                                                                                                                 , 
-                                                                                                                                                                                5
-                                                                                                                                                                                 )-
-                                                                                                                                                                                2
-                                                                                                                                                                                -( 
-                                                                                                                                                                                8
-                                                                                                                                                                                 , 
-                                                                                                                                                                                3
-                                                                                                                                                                                 )  , 
-                                                                                                                                                                                1
-                                                                                                                                                                                 , 
-                                                                                                                                                                                6
-                                                                                                                                                                                
-                                                                                                                        </td>
-                                </tr>
-                                                            <tr>
-                                    <td>４コーナー</td>
-                                    <td>
-                                                                                                                                    
-                                                                                                                                                                                <span class="firstHorse">7</span>
-                                                                                                                                                                                -
-                                                                                                                                                                                10
-                                                                                                                                                                                -( 
-                                                                                                                                                                                4
-                                                                                                                                                                                 , 
-                                                                                                                                                                                9
-                                                                                                                                                                                 )  , 
-                                                                                                                                                                                5
-                                                                                                                                                                                 , 
-                                                                                                                                                                                2
-                                                                                                                                                                                -( 
-                                                                                                                                                                                1
-                                                                                                                                                                                 , 
-                                                                                                                                                                                8
-                                                                                                                                                                                 , 
-                                                                                                                                                                                3
-                                                                                                                                                                                 )  , 
-                                                                                                                                                                                6
-                                                                                                                                                                                
-                                                                                                                        </td>
-                                </tr>
-                                                    </tbody>
-                    </table>
-                                    </section>
-                                                <section class="winHorseTable">
-                                    </section>
-                            </div>
-        </article>
-        <article class="attention">
-            <div class="innerWrapper">
-                <!-- <p>※本日のレース情報画面において競馬場名が空欄の日は、<br>　その日に開催がないことを意味しています。<br></p>
-    <p>※重賞競走については、出馬表が確定した段階で表示されます。<br></p>
-    <p>※減量騎手の負担重量は、★は４kg、▲は３kg、△及び◇は２kg、☆は１kg<br>　（ばんえいは、△は２０kg、☆は１０kg）を減じたものを表示しています。<br></p>
-    <p>※競走種類は、特は特別、準は準重賞、重は重賞、表示なしは普通競走<br>　を表しています。<br></p>
-    <p>※レース一覧画面においてレース名欄のＪ認はJRA認定競走、<br>　Ｊ交はJRA条件交流競走、Ｊ指はJRA指定競走を表しています。<br></p>
-    <p>※2014年4月以降、「ナ」と表示されるのは、南関東のナイター開催日における<br>　照明点灯時のレースに限られます。<br>　馬場別成績においてナイターとして集計されるのも同様の扱いとなります。<br></p>
-    <p>※海外競馬における成績については、一部に表示されないことがあります。<br></p>
-    <p>※勝馬投票に的中者がいない場合、その式別投票者全員に100円につき<br>　70円または80円の特払いがあります。表中の70円または80円は特払いを表示しています。<br></p>
-    <p>「勝馬投票券は、必ず正規の窓口または電話投票で購入してください。<br>　ノミ行為・代行業は、法律で禁止されています。<br>　20歳未満の者は、勝馬投票券を購入することはできません。<br>　出馬表・成績・オッズ等は、主催者発表のものと照合してください。」</p>
- -->
-                <p>※減量騎手の負担重量について、★は4kg、▲は3kg、△及び◇は2kg、☆は1kgを減じたものを表示します。<br>　ばんえい競馬は、△は20kg、☆は10kgを減じたものを表示します。</p>
-                <p>※勝馬投票に的中者がいない場合、その式別投票者全員に100円につき70円または80円の特払いがあります。<br></p>
-                <p>※降着・失格のルールなど、競走に関するルールについては<a href="https://www.keiba.go.jp/association/rule.html">こちら</a>をご覧ください。<br></p>
-                <p>※2026年4月以降、優勝馬の情報はレース終了翌日までに表示されます。また、優勝馬の情報はレース結果確定時点の情報となります。<br></p>
-                <p>※勝馬投票券は、必ず正規の窓口または電話投票で購入してください。ノミ行為・代行業は、法律で禁止されています。<br>　20歳未満の者は、勝馬投票券を購入することはできません。出馬表・成績・オッズ等は、主催者発表のものと照合してください。</p>
-            </div>
-        </article>
-    </div>
-    <!-- </article>
-    </div> -->
+
+			<div id="odd_content">
+
+				<div class="odd_header">
+					<h4 class="odd_title">
+						単勝・複勝　オッズ （19:11 現在）					</h4>
+
+
+					<ul class="odd_sort">
+						<a class="odd_sort_item active no_underline "
+								href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13
+								&k_raceNo=11&k_babaCode=21&odds_flg=4">
+								馬番順</a>
+						<a class="odd_sort_item "
+								href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13
+								&k_raceNo=11&k_babaCode=21&odds_flg=5">
+								人気順</a>
+					</ul>
+				</div>
+
+
+				<ul class="odd_list">
+					<li class="odd_list_item active">
+						<ul class="formList">
+							<li class="formList--item active">
+								<form name="formation_quinella" action="post">
+
+																			<table class="odd_popular_table_02">
+																				<thead>
+												<tr>
+																										<th>枠</th>
+													<th>馬番</th>
+													<th>馬名</th>
+													<th>単勝<br>オッズ</th>
+													<th colspan="2" >
+																													複勝オッズ<br>(3着払い)
+																											</th>
+													<th>性齢</th>
+													<th>馬体重<br><span>(増減)</span></th>
+																										<th>負担<br>重量</th>
+																										<th>騎手<br><span>(所属)</span></th>
+													<th>所属</th>
+													<th>調教師</th>
+													<th>変更情報</th>
+												</tr>
+											</thead>
+
+											<tbody>
+												 
+												 
+												<tr>
+																										
+																										<td class="odd_post1"
+														>
+
+														1
+													</td>
+																										
+													<td>
+														1
+													</td>
+													
+													<td>
+														スペンサーバローズ
+													</td>
+													
+													<td 														>
+																												26.5
+																											</td>
+													
+													<td  														>
+																												2.3-
+																											</td>
+													<td  														>
+																												3.6
+																											</td>
+													
+													<td >
+														牡6
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														笹川翼<span>（大井）</span>													</td>
+													
+													<td>
+														浦和
+													</td>
+													
+													<td>
+														繁田健
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post2"
+														>
+
+														2
+													</td>
+																										
+													<td>
+														2
+													</td>
+													
+													<td>
+														コスモギガンティア
+													</td>
+													
+													<td class = "odd_red"														>
+																												3.9
+																											</td>
+													
+													<td  class="odd_red" 														>
+																												1.3-
+																											</td>
+													<td  class="odd_red" 														>
+																												1.8
+																											</td>
+													
+													<td >
+														牡3
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														御神訓<span>（大井）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														河津裕
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post3"
+														>
+
+														3
+													</td>
+																										
+													<td>
+														3
+													</td>
+													
+													<td>
+														ミーヴァトン
+													</td>
+													
+													<td 														>
+																												56.0
+																											</td>
+													
+													<td  														>
+																												2.5-
+																											</td>
+													<td  														>
+																												4.1
+																											</td>
+													
+													<td >
+														牡4
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														町田直<span>（川崎）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														佐藤博
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post4"
+														>
+
+														4
+													</td>
+																										
+													<td>
+														4
+													</td>
+													
+													<td>
+														サンズ
+													</td>
+													
+													<td class = "odd_red"														>
+																												6.8
+																											</td>
+													
+													<td  class="odd_red" 														>
+																												1.3-
+																											</td>
+													<td  class="odd_red" 														>
+																												1.9
+																											</td>
+													
+													<td >
+														牡4
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														野畑凌<span>（川崎）</span>													</td>
+													
+													<td>
+														浦和
+													</td>
+													
+													<td>
+														小久智
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post5"
+														>
+
+														5
+													</td>
+																										
+													<td>
+														5
+													</td>
+													
+													<td>
+														ナガタエース
+													</td>
+													
+													<td 														>
+																												165.7
+																											</td>
+													
+													<td  														>
+																												14.0-
+																											</td>
+													<td  														>
+																												23.0
+																											</td>
+													
+													<td >
+														牡6
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												55.0
+																											</td>
+
+													
+													<td>
+														古岡勇<span>（川崎）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														田島寿
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post6"
+														>
+
+														6
+													</td>
+																										
+													<td>
+														6
+													</td>
+													
+													<td>
+														ホッコーソムニウム
+													</td>
+													
+													<td 														>
+																												10.5
+																											</td>
+													
+													<td  class="odd_red" 														>
+																												1.7-
+																											</td>
+													<td  class="odd_red" 														>
+																												2.5
+																											</td>
+													
+													<td >
+														牡6
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														佐野遥<span>（川崎）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														山崎裕
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post7"
+														>
+
+														7
+													</td>
+																										
+													<td>
+														7
+													</td>
+													
+													<td>
+														オペラプラージュ
+													</td>
+													
+													<td class = "odd_red"														>
+																												1.5
+																											</td>
+													
+													<td  class="odd_red" 														>
+																												1.1-
+																											</td>
+													<td  class="odd_red" 														>
+																												1.5
+																											</td>
+													
+													<td >
+														セン5
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												57.0
+																											</td>
+
+													
+													<td>
+														矢野貴<span>（大井）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														山崎誠
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post8"
+														rowspan="2" 
+														>
+
+														8
+													</td>
+																										
+													<td>
+														8
+													</td>
+													
+													<td>
+														エリンアキレウス
+													</td>
+													
+													<td 														>
+																												49.1
+																											</td>
+													
+													<td  														>
+																												3.6-
+																											</td>
+													<td  														>
+																												5.8
+																											</td>
+													
+													<td >
+														牡6
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												55.0
+																											</td>
+
+													
+													<td>
+														△杉山海<span>（大井）</span>													</td>
+													
+													<td>
+														浦和
+													</td>
+													
+													<td>
+														入口由
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													 
+												 
+												<tr>
+																										
+																										<td class="odd_post8"
+																												style ="display:none"
+														>
+
+														8
+													</td>
+																										
+													<td>
+														9
+													</td>
+													
+													<td>
+														ビップソリオ
+													</td>
+													
+													<td 														>
+																												61.0
+																											</td>
+													
+													<td  														>
+																												4.4-
+																											</td>
+													<td  														>
+																												7.1
+																											</td>
+													
+													<td >
+														セン7
+													</td>
+													
+
+													<td>
+																											
+																										</td>
+													
+
+													<td>
+																												55.0
+																											</td>
+
+													
+													<td>
+														伊藤裕<span>（川崎）</span>													</td>
+													
+													<td>
+														川崎
+													</td>
+													
+													<td>
+														秋山直
+													</td>
+													
+													<td>
+																												
+																											</td>
+													</tr>
+													
+
+											</tbody>
+										</table>
+
+
+
+
+
+										<br><br>
+								</form>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<article class="attention">
+
+					<div class="innerWrapper">
+												<p>※本日のレース情報画面において競馬場名が空欄の日は、 <br>　その日に開催がないことを意味しています。<br></p>
+												<p>※減量騎手の負担重量は、★は４kg、▲は３kg、△及び◇は２kg、☆は１kg <br>　（ばんえいは、△は２０kg、☆は１０kg）を減じたものを表示しています。<br></p>
+												<p>※競走種類は、特は特別、準は準重賞、重は重賞、表示なしは普通競走<br>　を表しています。<br><p>※単勝オッズでの順位です。<br></p>
+												<p>※レース一覧画面においてレース名欄のＪ認はJRA認定競走、<br>　Ｊ交はJRA条件交流競走、Ｊ指はJRA指定競走を表しています。<br></p>
+												<p>※2014年4月以降、「ナ」と表示されるのは、南関東のナイター開催日における<br>　照明点灯時のレースに限られます。<br>　馬場別成績においてナイターとして集計されるのも同様の扱いとなります。<br></p>
+												<p>※勝馬投票に的中者がいない場合、その式別投票者全員に100円につき<br>　70円または80円の特払いがあります。表中の70円または80円は特払いを表示しています。<br></p>
+												<p>「勝馬投票券は、必ず正規の窓口または電話投票で購入してください。</p>
+												<p>　ノミ行為・代行業は、法律で禁止されています。</p>
+												<p>　20歳未満の者は、勝馬投票券を購入することはできません。</p>
+												<p>　出馬表・成績・オッズ等は、主催者発表のものと照合してください。」</p>
+						
+					</div>
+
+				</article>
+			</div>
+		</div>
+	</article>
+</div>
+
+<div id="wrapper2"></div>
     </main>
 </body>
         <div class="innerWrapper2">
