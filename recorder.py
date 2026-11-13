@@ -108,7 +108,7 @@ BSKY_ID = os.environ.get('BSKY_HANDLE', '').strip(); BSKY_PW = os.environ.get('B
 _BSKY = {}
 
 
-def bsky_post(text):
+def bsky_post(text, quote=None):
     """Bluesky に投稿（戦略Yの買い目）。ハッシュタグはタップできる形にする。設定が無ければ何もしない"""
     if not (BSKY_ID and BSKY_PW):
         return
@@ -123,14 +123,16 @@ def bsky_post(text):
         st = len(text[:m.start()].encode('utf-8')); en = st + len(m.group(0).encode('utf-8'))
         facets.append({'index': {'byteStart': st, 'byteEnd': en}, 'features': [{'$type': 'app.bsky.richtext.facet#tag', 'tag': m.group(1)}]})
     rec = {'$type': 'app.bsky.feed.post', 'text': text, 'createdAt': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z', 'langs': ['ja'], 'facets': facets}
+    if quote:
+        rec['embed'] = {'$type': 'app.bsky.embed.record', 'record': {'uri': quote[0], 'cid': quote[1]}}
     for attempt in range(2):
         try:
             if 'tok' not in _BSKY or attempt:
                 s_ = api('com.atproto.server.createSession', {'identifier': BSKY_ID, 'password': BSKY_PW})
                 _BSKY.update(tok=s_['accessJwt'], did=s_['did'])
-            api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, _BSKY['tok'])
+            r_ = api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, _BSKY['tok'])
             append_csv('bsky_posts.csv', 'time,text', [[f'{now():%H:%M:%S}', text.replace('\n', ' / ')]])
-            return
+            return r_.get('uri'), r_.get('cid')
         except Exception as e:
             if attempt:
                 log('Bluesky投稿NG ' + repr(e))
@@ -461,6 +463,13 @@ def k_trio(html):
     return ('-'.join(map(str, n)), int(m.group(2).replace(',', ''))) if len(n) == 3 else None
 
 
+def bsky_pick(jcd, R, text):
+    """買い目を投稿して、あとで的中の投稿から引用できるように投稿の場所を残す"""
+    r = bsky_post(text)
+    if r and r[0]:
+        append_csv('bsky_y_ref.csv', 'jcd,R,uri,cid', [[jcd, R, r[0], r[1]]])
+
+
 def y_settle(k, html):
     """Blueskyに投稿したレースの結果を記録し、的中なら投稿する"""
     try:
@@ -473,7 +482,9 @@ def y_settle(k, html):
         pay = tr[1] if hit else (0 if tr else 100 * len(combos))   # 結果が無い＝中止などは返還として数える
         append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit)]])
         if hit and (cfg().get('strategy_Y') or {}).get('bsky'):
-            bsky_post(f"的中 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}")
+            ref = [r for r in read_csv('bsky_y_ref.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
+            bsky_post(f"🎯的中🎯 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n💰100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}",
+                      (ref[0]['uri'], ref[0]['cid']) if ref else None)
     except Exception as e:
         log('Y結果の投稿NG ' + repr(e))
 
@@ -840,7 +851,7 @@ def kyotei_main():
                                 pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitY), f"確定（戦略Y・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　今{ry[c].o3:.1f}倍" for c in hitY),True)
                                 if prmY.get('bsky'):
                                     append_csv('bsky_y.csv', 'time,jcd,R,combos', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(hitY)]])
-                                    pool.submit(bsky_post, f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
+                                    pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
                 except Exception:
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
