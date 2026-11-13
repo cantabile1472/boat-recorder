@@ -1,9 +1,6 @@
-0 200 44693 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=10&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:09:46 GMT
-1 200 461410 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=10&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:10:06 GMT
-2 200 38523 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&k_raceNo=10&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:10:17 GMT
-3 200 37418 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=11&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:10:47 GMT
-4 200 196807 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=11&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:11:08 GMT
-5 200 33827 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&k_raceNo=11&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:11:16 GMT
-6 200 44644 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=12&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:11:49 GMT
-7 200 460296 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=12&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:12:09 GMT
-8 200 37932 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&k_raceNo=12&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:12:15 GMT
+0 200 44756 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=10&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:24:47 GMT
+1 200 461609 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=10&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:25:07 GMT
+2 200 37421 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=11&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:25:26 GMT
+3 200 196957 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=11&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:25:38 GMT
+4 200 44652 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&k_raceNo=12&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:26:08 GMT
+5 200 460280 https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&k_raceNo=12&k_babaCode=21 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 10:26:29 GMT
