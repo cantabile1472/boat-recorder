@@ -125,10 +125,9 @@ def bsky_post(text):
     rec = {'$type': 'app.bsky.feed.post', 'text': text, 'createdAt': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z', 'langs': ['ja'], 'facets': facets}
     for attempt in range(2):
         try:
-            with LOCK:
-                if 'tok' not in _BSKY or attempt:
-                    s_ = api('com.atproto.server.createSession', {'identifier': BSKY_ID, 'password': BSKY_PW})
-                    _BSKY.update(tok=s_['accessJwt'], did=s_['did'])
+            if 'tok' not in _BSKY or attempt:
+                s_ = api('com.atproto.server.createSession', {'identifier': BSKY_ID, 'password': BSKY_PW})
+                _BSKY.update(tok=s_['accessJwt'], did=s_['did'])
             api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, _BSKY['tok'])
             append_csv('bsky_posts.csv', 'time,text', [[f'{now():%H:%M:%S}', text.replace('\n', ' / ')]])
             return
@@ -554,13 +553,14 @@ def kyotei_main():
     log(f'競艇: 開催{len(jcds)}場 / これから締切 {left}レース')
     debug_saved = os.path.exists(os.path.join(DDIR, 'kyotei_oddstf_sample.html'))
     pool = ThreadPoolExecutor(8)
+    pubpool = ThreadPoolExecutor(2); wp = Web()   # 公開用の記録は別の通り道で（判定用の取得を待たせない）
     morning = [x for x in races if x['st'] == 'wait' and not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
     last_morning = 0.0
     while time.time() - T0 < RUN_MIN * 60:
         n = now()
         if morning and time.time() - last_morning >= 2:
             xm = morning.pop(0); xm['pubd'].add('朝一'); last_morning = time.time()
-            pool.submit(k_pub, w, dict(xm), '朝一')
+            pubpool.submit(k_pub, wp, dict(xm), '朝一')
         busy = False
         for x in races:
             if x['st'] != 'wait':
@@ -578,7 +578,7 @@ def kyotei_main():
             x['xi'] = xi
             for ps, lb in PS:
                 if lb not in x['pubd'] and ps - 25 < sec <= ps:
-                    x['pubd'].add(lb); pool.submit(k_pub, w, dict(x), lb)
+                    x['pubd'].add(lb); pubpool.submit(k_pub, wp, dict(x), lb)
                 elif lb not in x['pubd'] and sec <= ps - 25:
                     x['pubd'].add(lb)   # 取り逃した時点は飛ばす（起動が遅れた時など）
             if x['snap'] >= len(SN) or sec > SN[x['snap']]:
@@ -1038,7 +1038,7 @@ def auto_main():
         n = now()
         busy = False
         if amorning and time.time() - alast >= 2:
-            xm = amorning.pop(0); xm['pubd'].add('朝一'); alast = time.time(); a_pub(A, xm, '朝一')
+            xm = amorning.pop(0); xm['pubd'].add('朝一'); alast = time.time(); APUB.submit(a_pub, A, dict(xm), '朝一')
         for x in races:
             if x['st'] != 'wait':
                 continue
@@ -1048,7 +1048,7 @@ def auto_main():
                 continue
             for ps, lb in PS:
                 if lb not in x['pubd'] and ps - 25 < sec <= ps:
-                    x['pubd'].add(lb); a_pub(A, x, lb)
+                    x['pubd'].add(lb); APUB.submit(a_pub, A, dict(x), lb)
                 elif lb not in x['pubd'] and sec <= ps - 25:
                     x['pubd'].add(lb)
             if x['snap'] >= len(SN) or sec > SN[x['snap']]:
@@ -1143,6 +1143,9 @@ def auto_main():
 
 
 AKEYS = ['tnsOddsList', 'fnsOddsList', 'rtwOddsList', 'rfwOddsList', 'widOddsList', 'rt3OddsList', 'rf3OddsList', 'salesInfo']
+
+
+APUB = ThreadPoolExecutor(1)   # オートの公開用の記録（判定のループを止めない）
 
 
 def a_pub(A, x, label):
