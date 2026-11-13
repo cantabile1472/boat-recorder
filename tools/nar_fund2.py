@@ -73,7 +73,7 @@ C['t_win'], C['t_in3'], C['t_n'] = rolling_rate('trainer')
 # ---- 過去走から：能力指数・脚質・クラス変化
 feat = []
 for r in C.itertuples():
-    ps = [p for p in (r.past or []) if p]
+    ps = [p for p in (r.past if isinstance(r.past, (list, tuple)) else []) if p]
     sis, fpos, l3, fins = [], [], [], []
     for p in ps:
         try:
