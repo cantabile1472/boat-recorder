@@ -118,8 +118,20 @@ def one(args):
 
 if __name__ == '__main__':
     Y, M = int(sys.argv[1]), int(sys.argv[2])
-    with gzip.open(f'data/nar/prob_{Y}{M:02d}.csv.gz', 'rt', encoding='utf-8') as f:
-        races = sorted({(str(r['日']), BABA.get(r['場']), int(r['R'])) for r in csv.DictReader(f) if BABA.get(r['場'])})
+    pf = f'data/nar/prob_{Y}{M:02d}.csv.gz'
+    if os.path.exists(pf) and os.path.getsize(pf) > 100:
+        with gzip.open(pf, 'rt', encoding='utf-8') as f:
+            races = sorted({(str(r['日']), BABA.get(r['場']), int(r['R'])) for r in csv.DictReader(f) if BABA.get(r['場'])})
+    else:   # 公式の月別一覧がまだ無い月は、レコーダーが記録したレースを使う
+        races = set()
+        for p in glob.glob(f'data/{Y}{M:02d}*/nar_odds.jsonl') + glob.glob(f'data/{Y}{M:02d}*/nar_pub.jsonl'):
+            hd = p.split(os.sep)[-2]
+            for l in open(p, encoding='utf-8'):
+                try:
+                    d = json.loads(l); races.add((hd, str(int(d['bc'])), int(d['R'])))
+                except Exception:
+                    pass
+        races = sorted(races)
     print(Y, M, len(races), 'レース', flush=True)
     out = []
     with ThreadPoolExecutor(6) as ex:
