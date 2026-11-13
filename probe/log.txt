@@ -1,1 +1,1 @@
-0 200 54209 https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=20261114 | LM=None ET=None CT=text/html; charset=UTF-8 Date=Fri, 13 Nov 2026 01:17:54 GMT
+0 200 58732 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=4&jcd=23&hd=20261113 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Fri, 13 Nov 2026 02:02:58 GMT
