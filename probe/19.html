@@ -1,0 +1,609 @@
+<!-- resources/views/layouts/app.blade.php -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="format-detection" content="telephone=no">
+        <title>オッズ｜地方競馬情報サイト</title>
+    
+    <!-- CSSファイルの読み込み -->
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/reset.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/common2.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/raceinfo2.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/odd.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/jquery.alerts.css?t=20260201_1" type="text/css" media="all" />
+            <link rel="stylesheet" href="/KeibaWeb/resources/css/RaceDataTitle.css?t=20260201_1" type="text/css" media="all" />
+    
+    <!-- JSファイルの読み込み -->
+            <script type="text/javascript" src="/KeibaWeb/resources/js/jquery-1.9.1.min.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/common.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/common2.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/monthltconveninfo.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/odd.js?t=20260130_1"></script>
+            <script type="text/javascript" src="/KeibaWeb/resources/js/recentButton.js?t=20260130_1"></script>
+        <link rel="shortcut icon" href="/KeibaWeb/resources/img/favicon.ico" />
+</head>
+<body>
+    <header>
+    <div class="headerInner">
+        <div class="titleArea">
+            <h1>
+                <span>地方競馬情報サイト</span>
+                <a href="/index.html">
+                    <img src="/KeibaWeb/resources/img/mainlogo.png?bld=20240319134801" alt="">
+                </a>
+            </h1>
+            <div class="vote">
+                <img id="headerbanner00" src="/KeibaWeb/resources/img/header_banner_00.png?bld=20240319134801" alt="">
+            </div>
+            <ul class="bannerArea clearfix">
+                <li>
+                    <a href="/jranet/" target="_blank">
+                        <img class="normal" src="/KeibaWeb/resources/img/header_banner_01.png?bld=20240319134801">
+                        <img class="min" src="/KeibaWeb/resources/img/header_banner_01_min.png?bld=20240319134801">
+                    </a>
+                </li>
+                                <li>
+                    <a href="https://www.spat4.jp/keiba/pc" target="_blank">
+                        <img class="normal" src="/KeibaWeb/resources/img/header_banner_02.png?bld=20240319134801">
+                        <img class="min" src="/KeibaWeb/resources/img/header_banner_02_min.png?bld=20240319134801">
+                    </a>
+                </li>
+                <li>
+                    <a href="https://my.keiba.rakuten.co.jp/?scid=keiba_NAR_bet" target="_blank">
+                        <img class="normal" src="/KeibaWeb/resources/img/header_banner_03.png?bld=20240319134801">
+                        <img class="min" src="/KeibaWeb/resources/img/header_banner_03_min.png?bld=20240319134801">
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.oddspark.com/keiba/auth/VoteKeibaTop.do" target="_blank">
+                        <img class="normal" src="/KeibaWeb/resources/img/header_banner_04.png?bld=20240319134801">
+                        <img class="min" src="/KeibaWeb/resources/img/header_banner_04_min.png?bld=20240319134801">
+                    </a>
+                </li>
+                            </ul>
+            <div class="topSearch clearfix">
+                <form id="cse-search-box" action="https://google.com/cse">
+                    <input type="hidden" name="cx" value="000374752549361390111:sr3uzpcoe-q" />
+                    <input type="hidden" name="ie" value="UTF-8" />
+                    <input type="text" name="q" size="31" class="searchBox"/ placeholder="サイト内検索">
+                    <input type="submit" name="sa" value="" class="searchBtn"/>
+                </form>
+                <script type="text/javascript"
+                                src="https://www.google.com/coop/cse/brand?form=cse-search-boxamp;lang=ja"></script>
+            </div>
+        </div>
+    </div>
+
+    <div class="globalNavi">
+        <ul class="gNavi clearfix">
+            <li class="gNaviitem1">
+                <a href="/KeibaWeb/TodayRaceInfo/TodayRaceInfoTop">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_08.png?bld=20240319134801" alt="">
+                    <p>レース情報</p>
+                </a>
+            </li>
+            <li class="gNaviitem2">
+                <a href="/KeibaWeb/MonthlyConveneInfo/MonthlyConveneInfoTop">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_01.png?bld=20240319134801" alt="">
+                                            <p>開催日程</p>
+                                    </a>
+            </li>
+            <li class="gNaviitem3">
+                <a href="/live/?20260804" target="_blank">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_02.png?bld=20240319134801" alt="">
+                    <p>ライブ中継</p>
+                </a>
+            </li>
+            <li class="gNaviitem4">
+                <a href="/dirtgraderace/">
+                    <img class="dart" src="/KeibaWeb/resources/img/icon_gnavi_12.png?bld=20240319134801" alt="">
+                    <p>ダートグレード競走</p>
+                </a>
+            </li>
+            <li class="gNaviitem5">
+                <a href="/gradedrace/">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_04.png?bld=20240319134801" alt="">
+                    <p>シリーズ･重賞競走</p>
+                </a>
+            </li>
+            <li class="gNaviitem6">
+                <a href="/KeibaWeb/DataRoom/DataRoomTop">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_05.png?bld=20240319134801" alt="">
+                    <p>データ検索</p>
+                </a>
+            </li>
+            <li class="gNaviitem7">
+                <a href="/guide/index.html">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_06.png?bld=20240319134801" alt="">
+                    <p>競馬場ガイド</p>
+                </a>
+            </li>
+            <!--<li>
+                <a href="about/">
+                    <img src="/KeibaWeb/resources/img/icon_gnavi_07.png?bld=20240319134801" alt="">
+                    <p>もっと！地方競馬</p>
+                </a>
+            </li>-->
+        </ul>
+    </div>
+</header>
+<div class="breadCrumb"></div>
+ <!-- Head部分の読み込み -->
+            <!-- <div class="pageHeader">
+<h2>開催日程</h2>
+</div> -->
+<div class="subMenu">
+    <ul class="clearfix">
+        <li>
+            <a id="TodayRaceInfoTop" href="../TodayRaceInfo/TodayRaceInfoTop">本日のレース情報</a>
+        </li>
+        <li>
+            <a id="MonthlyConveneInfoTop" href="../MonthlyConveneInfo/MonthlyConveneInfoTop">月別開催日程</a>
+        </li>
+                    <li>
+                <a id="RaceList" href="../TodayRaceInfo/RaceList?k_babaCode=21&amp;k_raceDate=2026%2F11%2F13&amp;k_raceNo=12">当日メニュー</a>
+            </li>
+            <li>
+                                    <a id="RefundMoneyList" href="../TodayRaceInfo/RefundMoneyList?k_babaCode=21&amp;k_raceDate=2026%2F11%2F13&amp;k_raceNo=12">当日払戻金</a>
+                            </li>
+            </ul>
+</div>
+ <!-- サブメニュー部分の読み込み -->
+        <main>
+            
+    <link rel="stylesheet" href="">
+    <div id="mainContainer" class="">
+        <article class="raceCard">
+            <div class="innerWrapper">
+                
+                <nav class="clearfix noWrapNav">
+    <div class="chartNavi clearfix trackNameNavi  ipatRaceNumNavi ">
+                     
+                                     
+                        <a
+                            class="cNaviBtn courseBtn active" 
+                                                    >川崎</a>
+                                                         
+                        <a
+                            class="cNaviBtn courseBtn " 
+                             href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=10&amp;k_babaCode=22"                         >金沢</a>
+                                                         
+                        <a
+                            class="cNaviBtn courseBtn " 
+                             href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=24"                         >名古屋</a>
+                                                         
+                        <a
+                            class="cNaviBtn courseBtn " 
+                             href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=27"                         >園田</a>
+                                                            </div>
+</nav>
+<nav class="clearfix noWrapNav">
+    <div class="chartNavi clearfix raceNumNavi  ipatRaceNumNavi ">
+             
+                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=1&amp;k_babaCode=21"                     >1R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=2&amp;k_babaCode=21"                     >2R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=3&amp;k_babaCode=21"                     >3R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=4&amp;k_babaCode=21"                     >4R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=5&amp;k_babaCode=21"                     >5R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=6&amp;k_babaCode=21"                     >6R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=7&amp;k_babaCode=21"                     >7R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=8&amp;k_babaCode=21"                     >8R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=9&amp;k_babaCode=21"                     >9R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=10&amp;k_babaCode=21"                     >10R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum " 
+                         href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=11&amp;k_babaCode=21"                     >11R</a>
+                                             
+                    <a 
+                        class="cNaviBtn raceNum active" 
+                                            >12R</a>
+                                            </div>
+</nav>
+<h4>
+        2026年11月13日（金）　川　崎　第12競走　20:50発走    </h4>
+    <p class="racetime">
+            <br />
+            <br />
+            
+    </p>
+    <section class="raceTitle">
+        <p class="roundInfo"></p>
+        <p class="date"></p>
+        <p class="subTitle">特選　川崎スプリントシリーズ</p>
+        <h3>猪突猛進（ちょとつもうしん）賞Ｂ３選定馬</h3>
+        <ul class="dataArea">
+            <li>ダート　900ｍ（左）　　天候：晴　　馬場：重　　サラブレッド系　一般　　＊電話投票コード：34#            </li>
+                        <li>賞金　1着2,100,000円　2着840,000円　3着525,000円　4着315,000円　5着210,000円</li>
+        </ul>
+    </section>
+
+    <nav class="clearfix noWrapNav">
+        <div class="chartNavi clearfix  ipatRaceNumNavi ">
+            
+                                                                        <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/DebaTable?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">出馬表</a>
+                                                                <a class="cNaviBtn" href="/KeibaWeb/TodayRaceInfo/CompeteTable?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">対戦表</a>
+                                        <a class="cNaviBtn" target="_blank" href="/KeibaWeb/TodayRaceInfo/DebaTableSmall?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">印刷用出馬表</a>
+                                            <a class="cNaviBtn live" target="_blank" href="http://simple.keiba-lv-st.jp/?track=kawasaki">ライブ中継</a>
+                                                                <a class="cNaviBtn standby">競走成績</a>
+                    
+                                    </div>
+        
+                                    <div class="chartNavi clearfix">
+                    <h3 class="naviTitle">オッズ</h3>
+                                                                                                                    <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsTanFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">単・複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsWakuLenFukuTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">枠連</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsUmLenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">馬連複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsUmLenTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">馬連単</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/OddsWide?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">ワイド</a>
+                                                                                                                        <a class="cNaviBtn live"
+                                href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">三連複</a>
+                                                                                                                        <a class="cNaviBtn "
+                                href="/KeibaWeb/TodayRaceInfo/Odds3LenTan?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21">三連単</a>
+                                                            </div>
+                        </nav>
+                
+                <div id="odd_content">
+                    <div class="odd_header">
+                        <h4 class="odd_title">三連複　オッズ  （19:45 現在）</h4>
+                                                <ul class="odd_sort">
+                            <a class="odd_sort_item active no_underline" href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21&odds_flg=0">フォーメーション</a>
+                            <a class="odd_sort_item" href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21&odds_flg=1">ボックス</a>
+                            <a class="odd_sort_item" href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21&odds_flg=2">軸１頭流し</a>
+                            <a class="odd_sort_item" href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21&odds_flg=3">軸２頭流し</a>
+                            <a class="odd_sort_item" href="/KeibaWeb/TodayRaceInfo/Odds3LenFuku?k_raceDate=2026%2F11%2F13&amp;k_raceNo=12&amp;k_babaCode=21&odds_flg=4">馬番順</a>
+                        </ul>
+                    </div>
+                    
+                                        <ul class="odd_list" id="odd_pattern_trio">
+                        <li class="odd_list_item active">
+                            <ul class="formList">
+                                
+                                                                <li class="formList--item active">
+                                    <form name="formation_trio" class=&quot;formation_trio&quot; action="/KeibaWeb/TodayRaceInfo/Odds3LenFuku">
+    <table class="odd_table" id="formation_trio">
+        <tbody>
+            <tr>
+                <th>枠</th>
+                <th colspan="1" class="course_01">1</th><th colspan="1" class="course_02">2</th><th colspan="1" class="course_03">3</th><th colspan="1" class="course_04">4</th><th colspan="2" class="course_05">5</th><th colspan="2" class="course_06">6</th><th colspan="2" class="course_07">7</th><th colspan="2" class="course_08">8</th>                <th rowspan="2" class="allcheck"><div class="column_white_name">全頭</div></th>
+                <th rowspan="2" class="allreset"><div class="column_white_name">全消</div></th>
+                <th colspan="2" class="mulch"></th>
+            </tr>
+            <tr>
+                <th>馬番</th>
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>8</td>
+                                    <td>9</td>
+                                    <td>10</td>
+                                    <td>11</td>
+                                    <td>12</td>
+                                 
+                    
+                    <td rowspan=4 colspan="2"></td>
+                            </tr>
+            
+                        <tr>
+                <th class="odds">1頭目</th>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="1" value="1"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="2" value="2"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="3" value="3"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="4" value="4"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="5" value="5"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="6" value="6"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="7" value="7"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="8" value="8"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="9" value="9"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="10" value="10"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="11" value="11"
+                        />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='uma[]' title="12" value="12"
+                        />
+                    </td>
+                                <td class="all_button_cell"><input class="allcheck_1 all_button allcheck" type="button" value="全"/></td>
+                <td class="all_button_cell"><input class="1 all_button allreset" type="button" value="消"/></td>
+            </tr>
+            <tr>
+                <th class="odds">2頭目</th>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="1" value="1"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="2" value="2"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="3" value="3"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="4" value="4"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="5" value="5"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="6" value="6"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="7" value="7"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="8" value="8"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="9" value="9"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="10" value="10"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="11" value="11"
+                         />
+                    </td>
+                                    <td class="horseNum oddsSelect">
+                        <input type='checkbox' name='umb[]' title="12" value="12"
+                         />
+                    </td>
+                                <td class="all_button_cell"><input class="allcheck_1 all_button allcheck" type="button" value="全"/></td>
+                <td class="all_button_cell"><input class="1 all_button allreset" type="button" value="消"/></td>
+            </tr>
+             
+                <tr>
+                    <th class="odds">3頭目</th>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="1" value="1"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="2" value="2"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="3" value="3"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="4" value="4"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="5" value="5"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="6" value="6"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="7" value="7"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="8" value="8"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="9" value="9"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="10" value="10"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="11" value="11"
+                             />
+                        </td>
+                                            <td class="horseNum oddsSelect">
+                            <input type='checkbox' name='umc[]' title="12" value="12"
+                             />
+                        </td>
+                                        <td class="all_button_cell"><input class="allcheck_1 all_button allcheck" type="button" value="全"/></td>
+                    <td class="all_button_cell"><input class="1 all_button allreset" type="button" value="消"/></td>
+                </tr>
+                                    
+            <tr class="horse_neme">
+                <th class="">馬名</th>
+                                <td><div class="column_white_name">デーレーシトロン</div></td>
+                                <td><div class="column_white_name">マナフラッシュ</div></td>
+                                <td><div class="column_white_name">スプリンガフォート</div></td>
+                                <td><div class="column_white_name">ビターメロン</div></td>
+                                <td><div class="column_white_name">ファイアトーチ</div></td>
+                                <td><div class="column_white_name">ムーランアルザン</div></td>
+                                <td><div class="column_white_name">タイセイフランク</div></td>
+                                <td><div class="column_white_name">ランラン</div></td>
+                                <td><div class="column_white_name">ポッドデューク</div></td>
+                                <td><div class="column_white_name">ディーズメイト</div></td>
+                                <td><div class="column_white_name">サンエイジロー</div></td>
+                                <td><div class="column_white_name">トリプルアクセル</div></td>
+                                <td colspan="4">
+                    <div class="odd_result">
+                        <div class="odd_result__inner">
+                            <div class="result_input">
+                                組合せ:<span id="odd_result_output_formation_renfuku">0</span>通り
+                            </div>
+                            <div class="odd_select arrow">
+                                <label for="odd_select_id">
+                                <select id="odd_select_id" onchange="document.getElementsByName('sortFlg')['0'].value=value;">
+                                    <option value="0" selected>人気順</option>
+                                    <option value="1" >高額配当順</option>
+                                    <option value="2" >馬番昇順</option>
+                                </select>
+                                </label>
+                            </div>
+                            <button type="submit" class="odd_view">オッズを表示</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <input type="hidden" name="k_raceDate" value="2026/11/13" >
+            <input type="hidden" name="k_babaCode" value="21" >
+            <input type="hidden" name="k_raceNo" value="12" >
+            <input type="hidden" name="odds_flg" id="oddsFlg" value="0" >
+            <input type="hidden" name="sortFlg" id="sortFlg" value="0" >
+                    </tbody>
+    </table>
+</form>
+                                </li>
+                                                            </ul>
+                        </li>
+                    </ul>
+                        <ul class="odd_ranking">
+                            <li class="odd_ranking_item"><h4 class="odd_ranking_title">1～25件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">2-3-9</td><td class="odd_red">9.5</td><td>1</td></tr><tr><td align="center" width="20%">3-9-11</td><td class="odd_red">15.4</td><td>2</td></tr><tr><td align="center" width="20%">2-3-11</td><td class="odd_red">17.3</td><td>3</td></tr><tr><td align="center" width="20%">3-6-9</td><td class="odd_red">22.7</td><td>4</td></tr><tr><td align="center" width="20%">3-7-9</td><td class="odd_red">26.3</td><td>5</td></tr><tr><td align="center" width="20%">3-9-10</td><td class="odd_red">26.4</td><td>6</td></tr><tr><td align="center" width="20%">2-3-10</td><td class="odd_red">26.6</td><td>7</td></tr><tr><td align="center" width="20%">2-3-7</td><td class="odd_red">28.9</td><td>8</td></tr><tr><td align="center" width="20%">2-9-11</td><td class="odd_red">30.9</td><td>9</td></tr><tr><td align="center" width="20%">2-3-6</td><td class="odd_red">31.5</td><td>10</td></tr><tr><td align="center" width="20%">3-9-12</td><td class="odd_red">37.5</td><td>11</td></tr><tr><td align="center" width="20%">2-3-12</td><td class="odd_red">41.5</td><td>12</td></tr><tr><td align="center" width="20%">2-3-8</td><td class="odd_red">46.6</td><td>13</td></tr><tr><td align="center" width="20%">3-8-9</td><td class="odd_red">52.9</td><td>14</td></tr><tr><td align="center" width="20%">3-10-11</td><td class="odd_red">54.1</td><td>15</td></tr><tr><td align="center" width="20%">3-7-11</td><td class="odd_red">54.7</td><td>16</td></tr><tr><td align="center" width="20%">3-6-11</td><td class="odd_red">55.1</td><td>17</td></tr><tr><td align="center" width="20%">1-2-3</td><td class="odd_red">59.1</td><td>18</td></tr><tr><td align="center" width="20%">1-3-9</td><td class="odd_red">63.6</td><td>19</td></tr><tr><td align="center" width="20%">2-3-5</td><td class="odd_red">68.9</td><td>20</td></tr><tr><td align="center" width="20%">2-3-4</td><td class="odd_red">69.2</td><td>21</td></tr><tr><td align="center" width="20%">2-9-10</td><td class="odd_red">70.2</td><td>22</td></tr><tr><td align="center" width="20%">2-6-9</td><td class="odd_red">70.5</td><td>23</td></tr><tr><td align="center" width="20%">2-7-9</td><td class="odd_red">71.1</td><td>24</td></tr><tr><td align="center" width="20%">3-6-7</td><td class="odd_red">73.4</td><td>25</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">26～50件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">9-10-11</td><td class="odd_red">74.5</td><td>26</td></tr><tr><td align="center" width="20%">3-4-9</td><td class="odd_red">76.4</td><td>27</td></tr><tr><td align="center" width="20%">6-9-11</td><td class="odd_red">77.0</td><td>28</td></tr><tr><td align="center" width="20%">3-11-12</td><td class="odd_red">84.8</td><td>29</td></tr><tr><td align="center" width="20%">3-7-10</td><td class="odd_red">90.4</td><td>30</td></tr><tr><td align="center" width="20%">7-9-11</td><td class="odd_red">93.2</td><td>31</td></tr><tr><td align="center" width="20%">3-8-11</td><td class="odd_red">99.4</td><td>32</td></tr><tr><td align="center" width="20%">3-5-9</td><td class="">101.3</td><td>33</td></tr><tr><td align="center" width="20%">3-7-12</td><td class="">103.4</td><td>34</td></tr><tr><td align="center" width="20%">2-9-12</td><td class="">104.3</td><td>35</td></tr><tr><td align="center" width="20%">2-8-9</td><td class="">105.5</td><td>36</td></tr><tr><td align="center" width="20%">6-7-9</td><td class="">107.7</td><td>37</td></tr><tr><td align="center" width="20%">2-10-11</td><td class="">111.0</td><td>38</td></tr><tr><td align="center" width="20%">3-6-12</td><td class="">115.3</td><td>39</td></tr><tr><td align="center" width="20%">3-6-10</td><td class="">121.5</td><td>40</td></tr><tr><td align="center" width="20%">2-7-12</td><td class="">122.8</td><td>41</td></tr><tr><td align="center" width="20%">2-7-10</td><td class="">125.3</td><td>42</td></tr><tr><td align="center" width="20%">2-7-11</td><td class="">125.3</td><td>42</td></tr><tr><td align="center" width="20%">2-6-11</td><td class="">126.2</td><td>44</td></tr><tr><td align="center" width="20%">2-10-12</td><td class="">126.7</td><td>45</td></tr><tr><td align="center" width="20%">9-11-12</td><td class="">128.9</td><td>46</td></tr><tr><td align="center" width="20%">8-9-11</td><td class="">131.3</td><td>47</td></tr><tr><td align="center" width="20%">3-6-8</td><td class="">141.1</td><td>48</td></tr><tr><td align="center" width="20%">3-10-12</td><td class="">147.4</td><td>49</td></tr><tr><td align="center" width="20%">6-9-10</td><td class="">147.4</td><td>49</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">51～75件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">1-2-9</td><td class="">158.5</td><td>51</td></tr><tr><td align="center" width="20%">2-8-11</td><td class="">160.6</td><td>52</td></tr><tr><td align="center" width="20%">3-7-8</td><td class="">161.3</td><td>53</td></tr><tr><td align="center" width="20%">3-8-10</td><td class="">166.6</td><td>54</td></tr><tr><td align="center" width="20%">1-3-11</td><td class="">168.1</td><td>55</td></tr><tr><td align="center" width="20%">7-9-10</td><td class="">170.5</td><td>56</td></tr><tr><td align="center" width="20%">3-4-11</td><td class="">171.3</td><td>57</td></tr><tr><td align="center" width="20%">6-9-12</td><td class="">172.1</td><td>58</td></tr><tr><td align="center" width="20%">7-9-12</td><td class="">178.1</td><td>59</td></tr><tr><td align="center" width="20%">2-8-10</td><td class="">179.0</td><td>60</td></tr><tr><td align="center" width="20%">2-11-12</td><td class="">179.9</td><td>61</td></tr><tr><td align="center" width="20%">2-6-7</td><td class="">180.8</td><td>62</td></tr><tr><td align="center" width="20%">9-10-12</td><td class="">180.8</td><td>62</td></tr><tr><td align="center" width="20%">1-3-10</td><td class="">189.4</td><td>64</td></tr><tr><td align="center" width="20%">2-5-10</td><td class="">194.5</td><td>65</td></tr><tr><td align="center" width="20%">6-7-11</td><td class="">203.3</td><td>66</td></tr><tr><td align="center" width="20%">3-4-7</td><td class="">206.8</td><td>67</td></tr><tr><td align="center" width="20%">2-4-9</td><td class="">210.4</td><td>68</td></tr><tr><td align="center" width="20%">6-10-11</td><td class="">211.6</td><td>69</td></tr><tr><td align="center" width="20%">8-9-10</td><td class="">214.2</td><td>70</td></tr><tr><td align="center" width="20%">2-8-12</td><td class="">216.7</td><td>71</td></tr><tr><td align="center" width="20%">3-8-12</td><td class="">216.7</td><td>71</td></tr><tr><td align="center" width="20%">2-5-12</td><td class="">218.1</td><td>73</td></tr><tr><td align="center" width="20%">2-6-12</td><td class="">220.7</td><td>74</td></tr><tr><td align="center" width="20%">1-3-8</td><td class="">222.1</td><td>75</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">76～100件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">2-7-8</td><td class="">222.1</td><td>75</td></tr><tr><td align="center" width="20%">2-6-10</td><td class="">223.5</td><td>77</td></tr><tr><td align="center" width="20%">3-4-6</td><td class="">232.1</td><td>78</td></tr><tr><td align="center" width="20%">2-5-9</td><td class="">251.6</td><td>79</td></tr><tr><td align="center" width="20%">1-2-11</td><td class="">255.2</td><td>80</td></tr><tr><td align="center" width="20%">6-11-12</td><td class="">257.0</td><td>81</td></tr><tr><td align="center" width="20%">7-8-9</td><td class="">258.8</td><td>82</td></tr><tr><td align="center" width="20%">3-5-7</td><td class="">262.6</td><td>83</td></tr><tr><td align="center" width="20%">10-11-12</td><td class="">262.6</td><td>83</td></tr><tr><td align="center" width="20%">4-9-11</td><td class="">268.5</td><td>85</td></tr><tr><td align="center" width="20%">1-3-7</td><td class="">270.5</td><td>86</td></tr><tr><td align="center" width="20%">6-8-9</td><td class="">270.5</td><td>86</td></tr><tr><td align="center" width="20%">1-9-11</td><td class="">278.9</td><td>88</td></tr><tr><td align="center" width="20%">7-11-12</td><td class="">283.3</td><td>89</td></tr><tr><td align="center" width="20%">6-7-10</td><td class="">287.8</td><td>90</td></tr><tr><td align="center" width="20%">2-6-8</td><td class="">292.5</td><td>91</td></tr><tr><td align="center" width="20%">3-5-8</td><td class="">292.5</td><td>91</td></tr><tr><td align="center" width="20%">6-7-12</td><td class="">292.5</td><td>91</td></tr><tr><td align="center" width="20%">7-10-11</td><td class="">294.9</td><td>94</td></tr><tr><td align="center" width="20%">2-5-7</td><td class="">304.9</td><td>95</td></tr><tr><td align="center" width="20%">3-4-10</td><td class="">304.9</td><td>95</td></tr><tr><td align="center" width="20%">8-9-12</td><td class="">307.5</td><td>97</td></tr><tr><td align="center" width="20%">1-3-6</td><td class="">315.6</td><td>98</td></tr><tr><td align="center" width="20%">2-4-7</td><td class="">315.6</td><td>98</td></tr><tr><td align="center" width="20%">2-5-8</td><td class="">318.4</td><td>100</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">101～125件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">7-8-11</td><td class="">324.2</td><td>101</td></tr><tr><td align="center" width="20%">3-5-6</td><td class="">339.4</td><td>102</td></tr><tr><td align="center" width="20%">1-9-10</td><td class="">352.8</td><td>103</td></tr><tr><td align="center" width="20%">2-4-11</td><td class="">352.8</td><td>103</td></tr><tr><td align="center" width="20%">3-4-12</td><td class="">359.8</td><td>105</td></tr><tr><td align="center" width="20%">3-5-11</td><td class="">359.8</td><td>105</td></tr><tr><td align="center" width="20%">1-3-4</td><td class="">374.8</td><td>107</td></tr><tr><td align="center" width="20%">1-3-5</td><td class="">374.8</td><td>107</td></tr><tr><td align="center" width="20%">3-4-8</td><td class="">378.8</td><td>109</td></tr><tr><td align="center" width="20%">4-6-9</td><td class="">395.4</td><td>110</td></tr><tr><td align="center" width="20%">1-3-12</td><td class="">399.8</td><td>111</td></tr><tr><td align="center" width="20%">3-5-10</td><td class="">413.6</td><td>112</td></tr><tr><td align="center" width="20%">5-9-11</td><td class="">413.6</td><td>112</td></tr><tr><td align="center" width="20%">6-8-11</td><td class="">413.6</td><td>112</td></tr><tr><td align="center" width="20%">1-2-10</td><td class="">418.4</td><td>115</td></tr><tr><td align="center" width="20%">1-6-9</td><td class="">418.4</td><td>115</td></tr><tr><td align="center" width="20%">2-4-6</td><td class="">418.4</td><td>115</td></tr><tr><td align="center" width="20%">1-8-9</td><td class="">423.3</td><td>118</td></tr><tr><td align="center" width="20%">4-7-9</td><td class="">423.3</td><td>118</td></tr><tr><td align="center" width="20%">1-11-12</td><td class="">433.5</td><td>120</td></tr><tr><td align="center" width="20%">1-2-6</td><td class="">449.8</td><td>121</td></tr><tr><td align="center" width="20%">8-10-11</td><td class="">449.8</td><td>121</td></tr><tr><td align="center" width="20%">1-2-7</td><td class="">455.5</td><td>123</td></tr><tr><td align="center" width="20%">1-2-8</td><td class="">455.5</td><td>123</td></tr><tr><td align="center" width="20%">4-9-10</td><td class="">455.5</td><td>123</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">126～150件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">1-2-12</td><td class="">467.3</td><td>126</td></tr><tr><td align="center" width="20%">1-7-9</td><td class="">473.5</td><td>127</td></tr><tr><td align="center" width="20%">7-10-12</td><td class="">479.8</td><td>128</td></tr><tr><td align="center" width="20%">1-2-4</td><td class="">486.3</td><td>129</td></tr><tr><td align="center" width="20%">6-8-10</td><td class="">486.3</td><td>129</td></tr><tr><td align="center" width="20%">6-7-8</td><td class="">492.9</td><td>131</td></tr><tr><td align="center" width="20%">8-10-12</td><td class="">499.8</td><td>132</td></tr><tr><td align="center" width="20%">2-5-6</td><td class="">514.0</td><td>133</td></tr><tr><td align="center" width="20%">5-7-9</td><td class="">521.5</td><td>134</td></tr><tr><td align="center" width="20%">6-10-12</td><td class="">529.2</td><td>135</td></tr><tr><td align="center" width="20%">1-6-11</td><td class="">545.2</td><td>136</td></tr><tr><td align="center" width="20%">2-4-10</td><td class="">545.2</td><td>136</td></tr><tr><td align="center" width="20%">2-5-11</td><td class="">545.2</td><td>136</td></tr><tr><td align="center" width="20%">1-9-12</td><td class="">553.6</td><td>139</td></tr><tr><td align="center" width="20%">3-5-12</td><td class="">553.6</td><td>139</td></tr><tr><td align="center" width="20%">4-6-11</td><td class="">553.6</td><td>139</td></tr><tr><td align="center" width="20%">5-6-9</td><td class="">553.6</td><td>139</td></tr><tr><td align="center" width="20%">2-4-8</td><td class="">580.4</td><td>143</td></tr><tr><td align="center" width="20%">4-7-11</td><td class="">580.4</td><td>143</td></tr><tr><td align="center" width="20%">7-8-10</td><td class="">589.9</td><td>145</td></tr><tr><td align="center" width="20%">1-6-8</td><td class="">609.9</td><td>146</td></tr><tr><td align="center" width="20%">1-8-10</td><td class="">609.9</td><td>146</td></tr><tr><td align="center" width="20%">6-8-12</td><td class="">609.9</td><td>146</td></tr><tr><td align="center" width="20%">2-4-12</td><td class="">620.4</td><td>149</td></tr><tr><td align="center" width="20%">1-10-11</td><td class="">631.3</td><td>150</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">151～175件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">5-9-10</td><td class="">631.3</td><td>150</td></tr><tr><td align="center" width="20%">8-11-12</td><td class="">631.3</td><td>150</td></tr><tr><td align="center" width="20%">4-9-12</td><td class="">642.6</td><td>153</td></tr><tr><td align="center" width="20%">1-4-9</td><td class="">654.3</td><td>154</td></tr><tr><td align="center" width="20%">4-10-11</td><td class="">678.9</td><td>155</td></tr><tr><td align="center" width="20%">7-8-12</td><td class="">692.0</td><td>156</td></tr><tr><td align="center" width="20%">4-8-9</td><td class="">719.7</td><td>157</td></tr><tr><td align="center" width="20%">1-5-9</td><td class="">749.7</td><td>158</td></tr><tr><td align="center" width="20%">4-6-7</td><td class="">749.7</td><td>158</td></tr><tr><td align="center" width="20%">5-9-12</td><td class="">749.7</td><td>158</td></tr><tr><td align="center" width="20%">1-7-11</td><td class="">765.6</td><td>161</td></tr><tr><td align="center" width="20%">1-6-7</td><td class="">782.3</td><td>162</td></tr><tr><td align="center" width="20%">3-4-5</td><td class="">782.3</td><td>162</td></tr><tr><td align="center" width="20%">4-6-10</td><td class="">799.7</td><td>164</td></tr><tr><td align="center" width="20%">5-8-9</td><td class="">817.8</td><td>165</td></tr><tr><td align="center" width="20%">1-2-5</td><td class="">836.9</td><td>166</td></tr><tr><td align="center" width="20%">1-6-10</td><td class="">836.9</td><td>166</td></tr><tr><td align="center" width="20%">4-7-10</td><td class="">836.9</td><td>166</td></tr><tr><td align="center" width="20%">1-6-12</td><td class="">856.8</td><td>169</td></tr><tr><td align="center" width="20%">5-10-11</td><td class="">877.7</td><td>170</td></tr><tr><td align="center" width="20%">1-8-11</td><td class="">899.6</td><td>171</td></tr><tr><td align="center" width="20%">1-8-12</td><td class="">899.6</td><td>171</td></tr><tr><td align="center" width="20%">4-11-12</td><td class="">899.6</td><td>171</td></tr><tr><td align="center" width="20%">1-7-12</td><td class="">922.7</td><td>174</td></tr><tr><td align="center" width="20%">5-6-11</td><td class="">922.7</td><td>174</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">176～200件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">1-10-12</td><td class="">947.0</td><td>176</td></tr><tr><td align="center" width="20%">5-6-7</td><td class="">947.0</td><td>176</td></tr><tr><td align="center" width="20%">1-7-10</td><td class="">972.6</td><td>178</td></tr><tr><td align="center" width="20%">4-7-8</td><td class="">972.6</td><td>178</td></tr><tr><td align="center" width="20%">2-4-5</td><td class="">999.6</td><td>180</td></tr><tr><td align="center" width="20%">5-7-10</td><td class="">999.6</td><td>180</td></tr><tr><td align="center" width="20%">5-6-8</td><td class="odd_blue">1028.1</td><td>182</td></tr><tr><td align="center" width="20%">4-6-12</td><td class="odd_blue">1058.4</td><td>183</td></tr><tr><td align="center" width="20%">5-7-11</td><td class="odd_blue">1058.4</td><td>183</td></tr><tr><td align="center" width="20%">1-4-11</td><td class="odd_blue">1090.5</td><td>185</td></tr><tr><td align="center" width="20%">1-7-8</td><td class="odd_blue">1090.5</td><td>185</td></tr><tr><td align="center" width="20%">4-5-9</td><td class="odd_blue">1090.5</td><td>185</td></tr><tr><td align="center" width="20%">4-6-8</td><td class="odd_blue">1090.5</td><td>185</td></tr><tr><td align="center" width="20%">4-8-11</td><td class="odd_blue">1090.5</td><td>185</td></tr><tr><td align="center" width="20%">1-4-7</td><td class="odd_blue">1124.5</td><td>190</td></tr><tr><td align="center" width="20%">1-5-11</td><td class="odd_blue">1124.5</td><td>190</td></tr><tr><td align="center" width="20%">4-10-12</td><td class="odd_blue">1160.8</td><td>192</td></tr><tr><td align="center" width="20%">5-10-12</td><td class="odd_blue">1160.8</td><td>192</td></tr><tr><td align="center" width="20%">5-11-12</td><td class="odd_blue">1199.5</td><td>194</td></tr><tr><td align="center" width="20%">4-7-12</td><td class="odd_blue">1240.9</td><td>195</td></tr><tr><td align="center" width="20%">1-4-6</td><td class="odd_blue">1285.2</td><td>196</td></tr><tr><td align="center" width="20%">4-8-10</td><td class="odd_blue">1285.2</td><td>196</td></tr><tr><td align="center" width="20%">4-8-12</td><td class="odd_blue">1285.2</td><td>196</td></tr><tr><td align="center" width="20%">5-6-10</td><td class="odd_blue">1285.2</td><td>196</td></tr><tr><td align="center" width="20%">5-8-11</td><td class="odd_blue">1285.2</td><td>196</td></tr></table></li><li class="odd_ranking_item"><h4 class="odd_ranking_title">201～220件</h4><table class="odd_ranking_table"><tr><th>組合せ</th><th>オッズ</th><th>人気</th></tr><tr><td align="center" width="20%">5-7-12</td><td class="odd_blue">1332.8</td><td>201</td></tr><tr><td align="center" width="20%">5-8-10</td><td class="odd_blue">1384.1</td><td>202</td></tr><tr><td align="center" width="20%">5-8-12</td><td class="odd_blue">1384.1</td><td>202</td></tr><tr><td align="center" width="20%">4-5-7</td><td class="odd_blue">1439.4</td><td>204</td></tr><tr><td align="center" width="20%">4-5-6</td><td class="odd_blue">1499.4</td><td>205</td></tr><tr><td align="center" width="20%">1-5-6</td><td class="odd_blue">1564.6</td><td>206</td></tr><tr><td align="center" width="20%">5-6-12</td><td class="odd_blue">1564.6</td><td>206</td></tr><tr><td align="center" width="20%">5-7-8</td><td class="odd_blue">1564.6</td><td>206</td></tr><tr><td align="center" width="20%">1-4-8</td><td class="odd_blue">1713.6</td><td>209</td></tr><tr><td align="center" width="20%">4-5-11</td><td class="odd_blue">1713.6</td><td>209</td></tr><tr><td align="center" width="20%">1-4-10</td><td class="odd_blue">1799.3</td><td>211</td></tr><tr><td align="center" width="20%">1-5-8</td><td class="odd_blue">1799.3</td><td>211</td></tr><tr><td align="center" width="20%">1-4-5</td><td class="odd_blue">1894.0</td><td>213</td></tr><tr><td align="center" width="20%">1-4-12</td><td class="odd_blue">1999.2</td><td>214</td></tr><tr><td align="center" width="20%">1-5-7</td><td class="odd_blue">1999.2</td><td>214</td></tr><tr><td align="center" width="20%">4-5-10</td><td class="odd_blue">2116.8</td><td>216</td></tr><tr><td align="center" width="20%">4-5-8</td><td class="odd_blue">2249.1</td><td>217</td></tr><tr><td align="center" width="20%">4-5-12</td><td class="odd_blue">2249.1</td><td>217</td></tr><tr><td align="center" width="20%">1-5-10</td><td class="odd_blue">2399.1</td><td>219</td></tr><tr><td align="center" width="20%">1-5-12</td><td class="odd_blue">2570.4</td><td>220</td></tr></table></li>                        </ul>
+                    
+                                        
+                    
+                    <article class="attention">
+                        <div class="innerWrapper">
+                            <p>※本日のレース情報画面において競馬場名が空欄の日は、 <br>
+　その日に開催がないことを意味しています。<br></p>
+    <p>※減量騎手の負担重量は、★は４kg、▲は３kg、△及び◇は２kg、☆は１kg <br>　（ばんえいは、△は２０kg、☆は１０kg）を減じたものを表示しています。<br></p>
+    <p>※競走種類は、特は特別、準は準重賞、重は重賞、表示なしは普通競走<br>　を表しています。<br></p>
+    <p>※レース一覧画面においてレース名欄のＪ認はJRA認定競走、<br>　Ｊ交はJRA条件交流競走、Ｊ指はJRA指定競走を表しています。<br></p>
+    <p>※2014年4月以降、「ナ」と表示されるのは、南関東のナイター開催日における<br>　照明点灯時のレースに限られます。<br>　馬場別成績においてナイターとして集計されるのも同様の扱いとなります。<br></p>
+    <p>※勝馬投票に的中者がいない場合、その式別投票者全員に100円につき<br>　70円または80円の特払いがあります。表中の70円または80円は特払いを表示しています。<br></p>
+    <p>「勝馬投票券は、必ず正規の窓口または電話投票で購入してください。</p>
+    <p>　ノミ行為・代行業は、法律で禁止されています。</p>
+    <p>　20歳未満の者は、勝馬投票券を購入することはできません。</p>
+    <p>　出馬表・成績・オッズ等は、主催者発表のものと照合してください。」</p>
+                        </div>
+                    </article>
+                    
+                </div>
+            </div>
+        </article>
+    </div>
+    </main>
+</body>
+        <div class="innerWrapper2">
+    <footer>
+        <ul class="footerMenu">
+            <li>
+                <a href="/index.html">
+                    HOME
+                </a>
+            </li>
+            <li>
+                <a href="/association/">
+                    地方競馬全国協会（NAR）
+                </a>
+            </li>
+            <li>
+                <a href="/sitemap.html">
+                    サイトマップ
+                </a>
+            </li>
+            <li>
+                <a href="/link.html">
+                    関連リンク
+                </a>
+            </li>
+            <li>
+                <a href="/terms.html">
+                    利用規約
+                </a>
+            </li>
+            <li>
+                <a href="/qa.html">
+                    ご意見・ご要望／FAQ
+                </a>
+            </li>
+        </ul>
+        <div class="copyright">
+        copyright 1998-NAR (The National Association of Racing) All Rights Reserved
+        </div>
+        <!-- 言語選択 -->
+        <div class="language cp_sl01">
+            <select onChange="location.href=value;">
+                <option value="#">Language</option>
+                <option value="https://www.goracing.jp/english/">English</option>
+                <option value="https://www.goracing.jp/french/">Francais</option>
+                <option value="https://www.goracing.jp/chinese/">中文</option>
+                <option value="https://www.goracing.jp/korea/">한글</option>
+            </select>
+        </div>
+    </footer>
+</div></html>
