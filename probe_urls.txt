@@ -1,2 +1,1 @@
-UA: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)
-https://keirin.kdreams.jp/fukui/racedetail/5120261111020009/?pageType=odds&kakeshikiType=wide
+https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=20261114
