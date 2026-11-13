@@ -69,6 +69,18 @@ def append_csv(name, header, rows):
                 f.write(','.join('' if v is None else str(v) for v in r) + '\n')
 
 
+def csv_rows(p):
+    """どこかの日付フォルダのCSVを辞書の行で読む（無ければ空）"""
+    if not os.path.exists(p):
+        return []
+    with LOCK:
+        lines = open(p, encoding='utf-8').read().splitlines()
+    if len(lines) < 2:
+        return []
+    h = lines[0].split(',')
+    return [dict(zip(h, l.split(','))) for l in lines[1:]]
+
+
 def read_csv(name):
     p = os.path.join(DDIR, name)
     if not os.path.exists(p):
@@ -441,6 +453,71 @@ def k_result(html):
     return (int(m.group(1)), int(m.group(2).replace(',', ''))) if m else None
 
 
+def k_trio(html):
+    """結果ページから3連複の組（小さい順 '2-3-5'）と払戻（100円あたり）"""
+    m = re.search(r'3連複</td>(.*?)is-payout1">&yen;([\d,]+)', html, re.S)
+    if not m:
+        return None
+    n = sorted(int(x) for x in re.findall(r'numberSet1_number[^>]*>(\d)</span>', m.group(1)))
+    return ('-'.join(map(str, n)), int(m.group(2).replace(',', ''))) if len(n) == 3 else None
+
+
+def y_settle(k, html):
+    """Blueskyに投稿したレースの結果を記録し、的中なら投稿する"""
+    try:
+        posted = [r for r in read_csv('bsky_y.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
+        if not posted:
+            return
+        tr = k_trio(html) if html else None
+        combos = posted[0]['combos'].split(' / ')
+        hit = bool(tr) and tr[0] in combos
+        pay = tr[1] if hit else (0 if tr else 100 * len(combos))   # 結果が無い＝中止などは返還として数える
+        append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit)]])
+        if hit and (cfg().get('strategy_Y') or {}).get('bsky'):
+            bsky_post(f"的中 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}")
+    except Exception as e:
+        log('Y結果の投稿NG ' + repr(e))
+
+
+def y_summary():
+    """その日の最終レースの結果がそろったら、本日と投稿開始からの成績を1回だけ投稿"""
+    flag = os.path.join(DDIR, 'bsky_summary_done')
+    if os.path.exists(flag) or not (cfg().get('strategy_Y') or {}).get('bsky'):
+        return
+    try:
+        logrows = read_csv('kyotei_log.csv')
+        if not logrows:
+            return
+        last = max(r['deadline'] for r in logrows)
+        hh, mm = map(int, last.split(':'))
+        if now() < TODAY.replace(hour=hh, minute=mm, second=0, microsecond=0) + datetime.timedelta(minutes=10):
+            return
+        posted = read_csv('bsky_y.csv'); res = {(r['jcd'], str(r['R'])): r for r in read_csv('bsky_y_result.csv')}
+        if any((r['jcd'], str(r['R'])) not in res for r in posted) and now().hour < 23:
+            return
+        def stat(days):
+            n = h = pay = 0
+            for d in days:
+                p = os.path.join(os.path.dirname(DDIR), d)
+                P = [r for r in (csv_rows(os.path.join(p, 'bsky_y.csv')))]
+                R_ = {(r['jcd'], str(r['R'])): r for r in csv_rows(os.path.join(p, 'bsky_y_result.csv'))}
+                for r in P:
+                    rr = R_.get((r['jcd'], str(r['R'])))
+                    if not rr:
+                        continue
+                    n += len(r['combos'].split(' / ')); h += int(rr['hit']); pay += int(rr['pay'] or 0)
+            return n, h, pay
+        alld = sorted(d for d in os.listdir(os.path.dirname(DDIR)) if d.isdigit() and os.path.exists(os.path.join(os.path.dirname(DDIR), d, 'bsky_y.csv')) and d <= HD)
+        n1, h1, p1 = stat([HD]); n2, h2, p2 = stat(alld)
+        if n1 == 0:
+            open(flag, 'w').write('0'); return
+        txt = (f"{TODAY:%-m/%-d} の結果\n購入 {n1}点・的中 {h1}本・回収率 {p1 / n1:.0f}%\n"
+               f"投稿開始（{alld[0][4:6].lstrip('0')}/{alld[0][6:].lstrip('0')}）から\n購入 {n2}点・的中 {h2}本・回収率 {p2 / n2:.0f}%\n#ボートレース")
+        bsky_post(txt); open(flag, 'w').write(txt)
+    except Exception as e:
+        log('Y成績の投稿NG ' + repr(e))
+
+
 def p3_of(inv, act):
     s = sum(inv[b] for b in act)
     return {b: (inv[b] / s if s > 0 else 0.0) for b in act}
@@ -748,7 +825,8 @@ def kyotei_main():
                             elif prmY.get('notify'):
                                 pool.submit(notify, f"【Y】競艇 {tag}（40秒前・3連複）", '\n'.join(f"3連複 {c}　今{ry[c].o3:.1f}倍　EV{ry[c].ev:.2f}" for c in hitY), False)
                                 if prmY.get('bsky'):
-                                    pool.submit(bsky_post, f"{KNAME[x['jcd']]} {x['R']}R（締切{x['dl']:%H:%M}）\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
+                                    append_csv('bsky_y.csv', 'time,jcd,R,combos', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(hitY)]])
+                                    pool.submit(bsky_post, f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
                 except Exception:
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
@@ -792,6 +870,8 @@ def kyotei_settle():
         q = f'?rno={k[1]}&jcd={k[0]}&hd={HD}'
         s, h = w.req(KB + 'raceresult' + q)
         res = k_result(h) if s == 200 else None
+        if res or now() > dl + datetime.timedelta(minutes=90):
+            y_settle(k, h if s == 200 else '')
         if not res:
             if now() > dl + datetime.timedelta(minutes=90):
                 res = (0, 0)  # 中止など
@@ -828,6 +908,7 @@ def kyotei_settle():
                 row += [r['odds'], r['p3'], r['buyA']] if r else ['', '', '']
             out.append(row)
         append_csv('kyotei_close.csv', KCLS_H, out)
+        y_summary()
         ab = [r_[2] for r_ in out if r_[7 + 3 * 2 + 2] == '1']
         if ab:
             hit = res[0] in ab
@@ -1187,7 +1268,7 @@ def write_status():
 def settle_loop(stop):
     last_git = time.time()
     while not stop.is_set():
-        for f in (kyotei_settle, auto_settle):
+        for f in (kyotei_settle, auto_settle, y_summary):
             try:
                 f()
             except Exception:
@@ -1241,7 +1322,7 @@ if __name__ == '__main__':
         time.sleep(60)
     stop.set()
     st.join()
-    for f in (kyotei_settle, auto_settle):
+    for f in (kyotei_settle, auto_settle, y_summary):
         try:
             f()
         except Exception:
