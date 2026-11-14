@@ -61,11 +61,13 @@ def odds(rid):
         s = get(f'https://race.netkeiba.com/api/api_get_jra_odds.html?race_id={rid}&type={t}&action=init')
         try:
             j = json.loads(s)
-            if j.get('status') != 'result':
+            d = j.get('data') or {}
+            # 発売中は status が result 以外（middle など）でもオッズが入っている。中身があれば受け取る
+            if not isinstance(d, dict) or not d.get('odds') or not any(v for v in d['odds'].values()):
                 if t == '1':
                     return None
                 continue
-            d = j['data']; out['official'] = d.get('official_datetime')
+            out['official'] = d.get('official_datetime'); out['status'] = j.get('status')
             for k, v in d['odds'].items():
                 out[TYPES.get(k, k)] = {c: x[0] if isinstance(x, list) else x for c, x in v.items()}
         except Exception:
