@@ -1,1 +1,3 @@
-https://raw.githubusercontent.com/BoatraceCSV/boatracecsv.github.io/main/data/results/payouts/2026/11/15.csv
+https://raw.githubusercontent.com/BoatraceCSV/boatracecsv.github.io/main/data/results/payouts/2026/11/14.csv
+https://boatracecsv.github.io/data/results/payouts/2026/11/15.csv
+https://api.github.com/repos/BoatraceCSV/boatracecsv.github.io/commits?per_page=3
