@@ -1,3 +1,1 @@
-https://raw.githubusercontent.com/BoatraceCSV/boatracecsv.github.io/main/data/results/payouts/2026/11/14.csv
-https://boatracecsv.github.io/data/results/payouts/2026/11/15.csv
-https://api.github.com/repos/BoatraceCSV/boatracecsv.github.io/commits?per_page=3
+https://www.boatrace.jp/owpc/pc/race/raceresult?rno=5&jcd=18&hd=20261115
