@@ -16,7 +16,7 @@ for p in glob.glob('/usr/share/fonts/**/NotoSansCJK*.tt*', recursive=True) + glo
         pass
 plt.rcParams['font.family'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'sans-serif']
 
-BG, INK, SUB, ACC, HIT, GRID = '#0f1b2d', '#f4f1ea', '#9fb0c8', '#38bdf8', '#fbbf24', '#24344d'
+BG, INK, SUB, ACC, HIT, GRID, BAR = '#ffffff', '#1a1a1a', '#6b7280', '#0284c7', '#d97706', '#e5e7eb', '#cbd5e1'
 BOAT = {1: ('#ffffff', '#111'), 2: ('#1f1f1f', '#fff'), 3: ('#e53935', '#fff'), 4: ('#1e63d6', '#fff'), 5: ('#f2c200', '#111'), 6: ('#2e9e4f', '#fff')}
 W, H = 12, 6.75
 
@@ -31,7 +31,7 @@ def _boats(f, x, y, combo, size=0.085):
     for i, b in enumerate(int(c) for c in combo.split('-')):
         bg, fg = BOAT[b]
         ax = f.add_axes([x + i * (size * 0.62), y, size * 0.56, size]); ax.axis('off')
-        ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=bg, ec='#555', lw=1.5, transform=ax.transAxes))
+        ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=bg, ec='#9ca3af', lw=2, transform=ax.transAxes))
         ax.text(0.5, 0.47, str(b), ha='center', va='center', fontsize=40, fontweight='bold', color=fg, transform=ax.transAxes)
 
 
@@ -74,7 +74,7 @@ def hit_card(place, R, combo, pay, series, out):
     _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
-def summary_card(day_label, days, today, total, out):
+def summary_card(day_label, days, today, total, out, base=(0, 0)):
     """days: [(日付'11/13', 点数, 払戻合計円), ...]  today/total: (点数, 的中, 回収率%)"""
     f = _fig()
     f.text(0.05, 0.89, f'{day_label} の結果', color=INK, fontsize=34, fontweight='bold', va='center')
@@ -84,10 +84,10 @@ def summary_card(day_label, days, today, total, out):
     f.text(0.05, 0.21, f'{total[0]}点・的中{total[1]}本', color=SUB, fontsize=16)
     ax = f.add_axes([0.42, 0.16, 0.53, 0.62]); ax.set_facecolor(BG)
     lab = [d for d, _, _ in days]; roi = [p / max(n, 1) for _, n, p in days]
-    cum, cn, cp = [], 0, 0
+    cum, cn, cp = [], base[0], base[1]   # base：表示より前の日の点数・払戻（累計の線を投稿開始からにする）
     for _, n, p in days:
         cn += n; cp += p; cum.append(cp / max(cn, 1))
-    ax.bar(range(len(days)), roi, color=[HIT if r >= 100 else '#3b5170' for r in roi], width=0.6, label='日ごと')
+    ax.bar(range(len(days)), roi, color=[HIT if r >= 100 else BAR for r in roi], width=0.6, label='日ごと')
     ax.plot(range(len(days)), cum, color=ACC, lw=3, marker='o', ms=7, label='累計')
     ax.axhline(100, color=SUB, lw=1, ls='--')
     ax.set_xticks(range(len(days))); ax.set_xticklabels(lab, color=SUB, fontsize=12)

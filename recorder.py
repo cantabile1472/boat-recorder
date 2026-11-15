@@ -112,16 +112,17 @@ _BSKY = {}
 KY_LAST = [None]   # 今日の競艇の最終レースの締切（開催予定から）
 
 
-def bsky_post(text, quote=None):
-    """Bluesky に投稿（戦略Yの買い目）。ハッシュタグはタップできる形にする。設定が無ければ何もしない"""
+def bsky_post(text, quote=None, image=None, alt=''):
+    """Bluesky に投稿（戦略Yの買い目）。ハッシュタグはタップできる形にする。設定が無ければ何もしない
+    image：添付する画像（png のパス）。quote と両方あれば「引用＋画像」で投稿。画像が使えないときは文字だけで投稿"""
     if not (BSKY_ID and BSKY_PW):
         return
-    def api(path, body, tok=None):
-        h = {'Content-Type': 'application/json'}
+    def api(path, body, tok=None, raw=None):
+        h = {'Content-Type': 'image/png' if raw is not None else 'application/json'}
         if tok:
             h['Authorization'] = 'Bearer ' + tok
-        rq = urllib.request.Request('https://bsky.social/xrpc/' + path, data=json.dumps(body).encode('utf-8'), headers=h)
-        return json.loads(urllib.request.urlopen(rq, timeout=15).read() or b'{}')
+        rq = urllib.request.Request('https://bsky.social/xrpc/' + path, data=raw if raw is not None else json.dumps(body).encode('utf-8'), headers=h)
+        return json.loads(urllib.request.urlopen(rq, timeout=30).read() or b'{}')
     b = text.encode('utf-8'); facets = []
     for m in re.finditer(r'#(\S+)', text):
         st = len(text[:m.start()].encode('utf-8')); en = st + len(m.group(0).encode('utf-8'))
@@ -134,7 +135,16 @@ def bsky_post(text, quote=None):
             if 'tok' not in _BSKY or attempt:
                 s_ = api('com.atproto.server.createSession', {'identifier': BSKY_ID, 'password': BSKY_PW})
                 _BSKY.update(tok=s_['accessJwt'], did=s_['did'])
-            r_ = api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, _BSKY['tok'])
+            if image and os.path.exists(image) and 'imgdone' not in rec:
+                try:
+                    blob = api('com.atproto.repo.uploadBlob', None, _BSKY['tok'], raw=open(image, 'rb').read())['blob']
+                    imgs = {'$type': 'app.bsky.embed.images', 'images': [{'image': blob, 'alt': alt or text, 'aspectRatio': {'width': 1200, 'height': 675}}]}
+                    rec['embed'] = ({'$type': 'app.bsky.embed.recordWithMedia', 'record': rec['embed'], 'media': imgs} if quote else imgs)
+                except Exception as e:
+                    log('Bluesky画像NG ' + repr(e))
+                rec['imgdone'] = 1
+            body = {k: v for k, v in rec.items() if k != 'imgdone'}
+            r_ = api('com.atproto.repo.createRecord', {'repo': _BSKY['did'], 'collection': 'app.bsky.feed.post', 'record': body}, _BSKY['tok'])
             append_csv('bsky_posts.csv', 'time,text', [[f'{now():%H:%M:%S}', text.replace('\n', ' / ')]])
             return r_.get('uri'), r_.get('cid')
         except Exception as e:
@@ -487,8 +497,28 @@ def y_settle(k, html):
         append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit)]])
         if hit and (cfg().get('strategy_Y') or {}).get('bsky'):
             ref = [r for r in read_csv('bsky_y_ref.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
+            img = None
+            try:   # 的中の画像（分刻みの3連複オッズ＝公開する時点だけ。40秒前などは載せない）
+                import bsky_images, strategy_y
+                ti = strategy_y.TRI.index(tuple(int(c) for c in tr[0].split('-')))
+                ser = {}
+                for r in read_csv('kyotei_pub.csv'):
+                    if r['jcd'] == k[0] and str(r['R']) == str(k[1]) and r['kind'] == '3f' and r['label'] != '朝一':
+                        v = r['values'].split()
+                        if len(v) == 20:
+                            try:
+                                ser[r['label']] = float(v[ti])
+                            except ValueError:
+                                pass
+                order = ['60分前', '30分前', '15分前', '10分前', '5分前', '3分前', '2分前', '1分前']
+                os.makedirs(os.path.join(DDIR, 'bsky_img'), exist_ok=True)
+                img = os.path.join(DDIR, 'bsky_img', f'hit_{k[0]}_{k[1]}.png')
+                bsky_images.hit_card(KNAME[k[0]], k[1], tr[0], tr[1], [(l, ser[l]) for l in order if l in ser], img)
+            except Exception as e:
+                log('的中画像NG ' + repr(e)); img = None
             bsky_post(f"🎯的中🎯 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n💰100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}",
-                      (ref[0]['uri'], ref[0]['cid']) if ref else None)
+                      (ref[0]['uri'], ref[0]['cid']) if ref else None, image=img,
+                      alt=f"的中 {KNAME[k[0]]}{k[1]}R 3連複{tr[0]} 100円→{tr[1]:,}円")
     except Exception as e:
         log('Y結果の投稿NG ' + repr(e))
 
@@ -522,7 +552,17 @@ def y_summary():
             open(flag, 'w').write('0'); return
         txt = (f"{TODAY:%-m/%-d} の結果\n購入 {n1}点・的中 {h1}本・回収率 {p1 / n1:.0f}%\n"
                f"投稿開始（{alld[0][4:6].lstrip('0')}/{alld[0][6:].lstrip('0')}）から\n購入 {n2}点・的中 {h2}本・回収率 {p2 / n2:.0f}%\n#ボートレース")
-        bsky_post(txt); open(flag, 'w').write(txt)
+        img = None
+        try:   # 日ごとの回収率と累計のグラフ
+            import bsky_images
+            days = [(f"{d[4:6].lstrip('0')}/{d[6:].lstrip('0')}",) + (lambda t: (t[0], t[2]))(stat([d])) for d in alld[-14:]]
+            os.makedirs(os.path.join(DDIR, 'bsky_img'), exist_ok=True)
+            img = os.path.join(DDIR, 'bsky_img', 'summary.png')
+            nb, _, pb = stat(alld[:-14]) if len(alld) > 14 else (0, 0, 0)
+            bsky_images.summary_card(f'{TODAY:%-m/%-d}', days, (n1, h1, round(p1 / n1)), (n2, h2, round(p2 / n2)), img, base=(nb, pb))
+        except Exception as e:
+            log('成績画像NG ' + repr(e)); img = None
+        bsky_post(txt, image=img, alt=txt.replace('\n', ' ')); open(flag, 'w').write(txt)
     except Exception as e:
         log('Y成績の投稿NG ' + repr(e))
 

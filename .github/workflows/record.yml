@@ -23,7 +23,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: 戦略H用のライブラリ（モデルの保存時と同じ版）
-        run: pip install -q scikit-learn==1.9.1 pandas numpy
+        run: pip install -q scikit-learn==1.9.1 pandas numpy matplotlib
+      - name: Bluesky画像用の日本語フォント（記録の開始を遅らせないよう裏で入れる）
+        run: (sudo apt-get install -y -qq fonts-noto-cjk >/dev/null 2>&1 &) || true
       - name: git の設定
         run: |
           git config user.name "recorder-bot"
