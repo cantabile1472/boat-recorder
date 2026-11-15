@@ -1,5 +1,5 @@
 # 試験中の戦略（記録のみ）の答え合わせ：オート
-#  戦略X1＝オート単勝・a70のEV0.9以上・42秒前
+#  戦略X1＝オート単勝・a70のEV0.9以上・42秒前 … 11/16に終了（集計しない）
 #  戦略X2＝オート単勝・1号車・3連単換算の1着率5〜30%・a70のEV0.75以上・42秒前
 #  戦略X3＝オート単勝・1〜4号車・42秒前のオッズ50倍以下・a70のEV0.85以上
 #  data/YYYYMMDD/h_auto_log.csv（全車のa70のEV）× auto_close.csv（結果）
@@ -17,7 +17,7 @@ for f in sorted(glob.glob('data/2026*/h_auto_log.csv')):
     cc = pd.read_csv(c)[['pc', 'R', 'car', 'winner', 'payout']].drop_duplicates(['pc', 'R', 'car'])
     h = h.merge(cc, on=['pc', 'R', 'car'], how='left'); h['day'] = day
     h['pay'] = ((h.winner == h.car) * h.payout).fillna(0); h['done'] = h.winner.notna()
-    rows.append(h[h.s70_ev >= 0.9].assign(rule='戦略X1'))
+    # 戦略X1（a70のEV0.9以上）は11/16に終了（57車で回収71%）
     rows.append(h[(h.car == 1) & (h.p3 >= 0.05) & (h.p3 < 0.3) & (h.s70_ev >= 0.75)].assign(rule='戦略X2'))
     rows.append(h[(h.car <= 4) & (h.odds <= 50) & (h.odds > 0) & (h.s70_ev >= 0.85)].assign(rule='戦略X3'))
 if not rows:
@@ -25,7 +25,7 @@ if not rows:
 P = pd.concat(rows, ignore_index=True); P.to_csv('data/x_picks.csv', index=False)
 done = P[P.done]
 print(f'# 試験中の戦略（オート・記録のみ） {start}〜')
-for rule, nm in (('戦略X1', 'a70のEV0.9以上'), ('戦略X2', '1号車・1着率5〜30%・a70のEV0.75以上'), ('戦略X3', '1〜4号車・50倍以下・a70のEV0.85以上')):
+for rule, nm in (('戦略X2', '1号車・1着率5〜30%・a70のEV0.75以上'), ('戦略X3', '1〜4号車・50倍以下・a70のEV0.85以上')):
     g = done[done.rule == rule]
     if g.empty:
         print(f'{rule}（{nm}）: なし'); continue

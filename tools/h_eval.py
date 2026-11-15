@@ -1,6 +1,6 @@
 # 戦略Hの答え合わせ（40秒前判定）
 #  戦略H 単勝＝s70のEV0.85以上・6号艇除外（h_log.csv） ／ 戦略H 複勝＝f70のEV0.7以上・1号艇除外（hf_log.csv）… 通知中
-#  戦略H2＝レース内でs70のEVが2番目の艇が0.75以上・6号艇除外（h_log.csv から）… 記録のみ
+#  戦略H2＝レース内でs70のEVが2番目の艇が0.75以上・6号艇除外 … 11/16に終了（集計しない）
 #  単勝の結果は kyotei_close.csv、複勝の払戻は公開データ（boatracecsv の data/results/payouts）
 #  python tools/h_eval.py [開始日YYYYMMDD]
 import sys, glob, os
@@ -44,7 +44,8 @@ for f in sorted(glob.glob('data/2026*/h_log.csv')):
     cc = pd.read_csv(c)[['jcd', 'R', 'boat', 'winner', 'payout']]
     h = h.merge(cc, on=['jcd', 'R', 'boat'], how='left'); h['day'] = day
     h['pay'] = ((h.winner == h.boat) * h.payout).fillna(0); h['done'] = h.winner.notna()
-    for rule, m in (('戦略H 単勝', (h.s70_ev >= 0.85) & (h.boat != 6)), ('戦略H2（記録のみ）', (h.rk == 2) & (h.s70_ev >= 0.75) & (h.boat != 6))):
+    # 戦略H2（2番目の艇・EV0.75以上）は11/16に終了（123点で回収79%）
+    for rule, m in (('戦略H 単勝', (h.s70_ev >= 0.85) & (h.boat != 6)),):
         rows.append(h[m].assign(rule=rule))
 for f in sorted(glob.glob('data/2026*/hf_log.csv')):
     day = f.split('/')[1]
@@ -62,7 +63,7 @@ if not rows:
 P = pd.concat(rows, ignore_index=True); P.to_csv('data/h_picks.csv', index=False)
 done = P[P.done]
 print(f'# 戦略H 答え合わせ {start}〜（40秒前判定）')
-for rule in ('戦略H 単勝', '戦略H 複勝', '戦略H2（記録のみ）'):
+for rule in ('戦略H 単勝',):   # 複勝・H2は11/16に終了
     g = done[done.rule == rule]
     if g.empty:
         print(f'{rule}: なし'); continue
