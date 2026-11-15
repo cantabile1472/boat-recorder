@@ -14,7 +14,8 @@ for p in glob.glob('/usr/share/fonts/**/NotoSansCJK*.tt*', recursive=True) + glo
         font_manager.fontManager.addfont(p)
     except Exception:
         pass
-plt.rcParams['font.family'] = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'sans-serif']
+import logging; logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+plt.rcParams['font.family'] = ['Noto Sans CJK JP', 'sans-serif']
 
 BG, INK, SUB, ACC, HIT, GRID, BAR = '#ffffff', '#1a1a1a', '#6b7280', '#0284c7', '#d97706', '#e5e7eb', '#cbd5e1'
 BOAT = {1: ('#ffffff', '#111'), 2: ('#1f1f1f', '#fff'), 3: ('#e53935', '#fff'), 4: ('#1e63d6', '#fff'), 5: ('#f2c200', '#111'), 6: ('#2e9e4f', '#fff')}
