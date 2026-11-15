@@ -895,6 +895,15 @@ def kyotei_settle():
         q = f'?rno={k[1]}&jcd={k[0]}&hd={HD}'
         s, h = w.req(KB + 'raceresult' + q)
         res = k_result(h) if s == 200 else None
+        if res:
+            try:   # 全券種の払戻を保存（公開データが無くなったので自前で作る）
+                import kyotei_payouts
+                row = kyotei_payouts.row_from_html(h, HD, k[0], k[1], rs[0]['deadline'])
+                if row:
+                    with LOCK:
+                        kyotei_payouts.append(row, HD)
+            except Exception as e:
+                log(f'払戻の保存NG {k} {e!r}')
         if res or now() > dl + datetime.timedelta(minutes=90):
             y_settle(k, h if s == 200 else '')
         if not res:

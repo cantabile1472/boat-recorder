@@ -7,7 +7,13 @@ import numpy as np, pandas as pd
 from scipy.optimize import minimize
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.join(HERE, '..')
 MODEL = os.path.join(ROOT, 'models', 'y_trio.pkl')
-PUB = '/home/claude/boatracecsv/boatracecsv.github.io/data/results/payouts/'
+PUB = '/home/claude/boatracecsv/boatracecsv.github.io/data/results/payouts/'   # 旧：公開データ（11/14まで）
+PUB2 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'payouts') + '/'   # 11/15から：公式の結果ページから自前で作ったもの（tools/kyotei_payouts.py）
+
+
+def pub_file(day):
+    f2 = f'{PUB2}{day[:4]}/{day[4:6]}/{day[6:]}.csv'
+    return f2 if os.path.exists(f2) else f'{PUB}{day[:4]}/{day[4:6]}/{day[6:]}.csv'
 P3 = []
 for i in range(120):
     a = i % 6 + 1; row = i // 6; o = [b for b in range(1, 7) if b != a]; b = o[row // 4]; o2 = [c for c in o if c != b]; P3.append((a, b, o2[row % 4]))
@@ -31,7 +37,7 @@ def mins(a, b):
 
 
 def results(day):
-    f = f'{PUB}{day[:4]}/{day[4:6]}/{day[6:]}.csv'; R = {}
+    f = pub_file(day); R = {}
     if not os.path.exists(f):
         return R
     p = pd.read_csv(f, dtype=str)

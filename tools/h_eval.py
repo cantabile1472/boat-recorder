@@ -5,12 +5,18 @@
 #  python tools/h_eval.py [開始日YYYYMMDD]
 import sys, glob, os
 import pandas as pd
-PUB = '/home/claude/boatracecsv/boatracecsv.github.io/data/results/payouts/'
+PUB = '/home/claude/boatracecsv/boatracecsv.github.io/data/results/payouts/'   # 旧：公開データ（11/14まで）
+PUB2 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'payouts') + '/'   # 11/15から：公式の結果ページから自前で作ったもの（tools/kyotei_payouts.py）
+
+
+def pub_file(day):
+    f2 = f'{PUB2}{day[:4]}/{day[4:6]}/{day[6:]}.csv'
+    return f2 if os.path.exists(f2) else f'{PUB}{day[:4]}/{day[4:6]}/{day[6:]}.csv'
 start = sys.argv[1] if len(sys.argv) > 1 else '20261111'
 
 
 def fuku_pay(day):
-    f = f'{PUB}{day[:4]}/{day[4:6]}/{day[6:]}.csv'
+    f = pub_file(day)
     if not os.path.exists(f):
         return None
     p = pd.read_csv(f, dtype=str); out = {}

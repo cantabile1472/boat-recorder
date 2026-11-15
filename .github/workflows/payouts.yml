@@ -1,0 +1,19 @@
+name: 競艇の払戻（取りこぼし分を作り直す）
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '日付（スペース区切り、例 20261115 20261116）'
+        required: true
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/kyotei_payouts.py ${{ github.event.inputs.days }}
+      - run: |
+          git config user.name bot; git config user.email bot@example.com
+          git add data/payouts; git commit -qm "競艇の払戻 ${{ github.event.inputs.days }}" || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
