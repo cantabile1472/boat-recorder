@@ -1,3 +1,1 @@
-0 ERR 28 https://raw.githubusercontent.com/BoatraceCSV/boatracecsv.github.io/main/data/results/payouts/2026/11/14.csv | 
-1 ERR 28 https://boatracecsv.github.io/data/results/payouts/2026/11/15.csv | 
-2 ERR 28 https://api.github.com/repos/BoatraceCSV/boatracecsv.github.io/commits?per_page=3 | 
+0 200 58427 https://www.boatrace.jp/owpc/pc/race/raceresult?rno=5&jcd=18&hd=20261115 | LM=None ET=None CT=text/html;charset=UTF-8 Date=Sun, 15 Nov 2026 21:07:00 GMT
