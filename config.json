@@ -165,7 +165,6 @@
   "notify": true,
   "note": "オート単勝・1〜4号車・50倍以下・a70のEV0.85以上（記録＋通知、出資記録には入れない）"
  },
- "notify_until": "17:00",
  "strategy_Y2": {
   "start": "20261117",
   "notify": true,
