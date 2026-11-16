@@ -48,7 +48,21 @@ def results(day):
     return R
 
 
-def build(day_min=None, day_max=None):
+def fix_321(q):
+    """3連単「3-2-1」が、1着確率から作った本来の線（ハービル）より多く買われていたら、その線まで戻す（大口の買いの影響を消す）。
+    戦略Y2で使う（11/16〜）。戦略Y本体は使わない"""
+    I = P3.index((3, 2, 1)); w = np.zeros(7)
+    for (a, b, c), v in zip(P3, q):
+        w[a] += v
+    h = w[3] * w[2] / max(1 - w[3], 1e-9) * w[1] / max(1 - w[3] - w[2], 1e-9)
+    hs = sum(w[a] * w[b] / max(1 - w[a], 1e-9) * w[c] / max(1 - w[a] - w[b], 1e-9) for a, b, c in P3)
+    h = h / hs if hs > 0 else h
+    if q[I] > h:
+        q = q.copy(); q[I] = h; q = q / q.sum()
+    return q
+
+
+def build(day_min=None, day_max=None, fix321=False):
     rows = []
     for f in sorted(glob.glob(os.path.join(ROOT, 'data', '2026*', 'kyotei_odds_full.csv'))):
         day = f.split(os.sep)[-2]
@@ -76,6 +90,8 @@ def build(day_min=None, day_max=None):
                 if inv.sum() <= 0:
                     continue
                 q = inv / inv.sum(); tri = {}
+                if fix321:
+                    q = fix_321(q)
                 for (a, b, c), v in zip(P3, q):
                     kk = tuple(sorted((a, b, c))); tri[kk] = tri.get(kk, 0) + v
                 try:
