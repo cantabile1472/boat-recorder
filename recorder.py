@@ -141,6 +141,8 @@ def bsky_post(text, quote=None, image=None, alt=''):
                     imgs = {'$type': 'app.bsky.embed.images', 'images': [{'image': blob, 'alt': alt or text, 'aspectRatio': {'width': 1200, 'height': 675}}]}
                     rec['embed'] = ({'$type': 'app.bsky.embed.recordWithMedia', 'record': rec['embed'], 'media': imgs} if quote else imgs)
                 except Exception as e:
+                    if not attempt:
+                        raise   # ログインが切れていることが多いので、ログインし直してもう一度
                     log('Bluesky画像NG ' + repr(e))
                 rec['imgdone'] = 1
             body = {k: v for k, v in rec.items() if k != 'imgdone'}
