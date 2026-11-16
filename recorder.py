@@ -483,6 +483,12 @@ def y2_on():
     return bool(p) and HD >= str(p.get('start', '99999999'))
 
 
+def y2_notify_on():
+    """戦略Y2の通知が有効か（strategy_Y2.notify_start 以降。無ければ start）"""
+    p = cfg().get('strategy_Y2') or {}
+    return bool(p) and HD >= str(p.get('notify_start', p.get('start', '99999999')))
+
+
 def y_bsky_on():
     return bool((cfg().get('strategy_Y2') or {}).get('bsky')) if y2_on() else bool((cfg().get('strategy_Y') or {}).get('bsky'))
 
@@ -511,6 +517,22 @@ def bsky_pick(jcd, R, text):
         append_csv('bsky_y_ref.csv', 'jcd,R,uri,cid', [[jcd, R, r[0], r[1]]])
 
 
+def y2_settle(k, html):
+    """戦略Y2で通知したレースの結果を記録して、資金を増減させる"""
+    try:
+        rows = [r for r in read_csv('y2_log.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
+        if not rows or any(r['jcd'] == k[0] and str(r['R']) == str(k[1]) for r in read_csv('y2_result.csv')):
+            return
+        tr = k_trio(html) if html else None
+        inv = sum(int(r['stake']) for r in rows)
+        hitr = [r for r in rows if tr and r['combo'] == tr[0]]
+        ret = int(hitr[0]['stake']) * tr[1] // 100 if hitr else (0 if tr else inv)
+        append_csv('y2_result.csv', 'jcd,R,n,trio,pay,inv,ret', [[k[0], k[1], len(rows), tr[0] if tr else '返還', tr[1] if hitr else 0, inv, ret]])
+        y2_bank(ret - inv, f"{KNAME[k[0]]}{k[1]}R")
+    except Exception as e:
+        log('Y2結果NG ' + repr(e))
+
+
 def y_settle(k, html):
     """Blueskyに投稿したレースの結果を記録し、的中なら投稿する"""
     try:
@@ -527,8 +549,6 @@ def y_settle(k, html):
         pay = tr[1] if hit else (0 if tr else 100 * len(combos))   # 結果が無い＝中止などは返還として数える
         inv = sum(stakes); ret = st_hit * tr[1] // 100 if hit else (0 if tr else inv)
         append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit,inv,ret', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit), inv, ret]])
-        if posted[0].get('stakes'):
-            y2_bank(ret - inv, f"{KNAME[k[0]]}{k[1]}R")
         if hit and y_bsky_on():
             ref = [r for r in read_csv('bsky_y_ref.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
             img = None
@@ -915,7 +935,8 @@ def kyotei_main():
                             elif prmY.get('notify') and len(hitY) > mx:
                                 log(f"【Y】{tag} 買い目{len(hitY)}点のため通知なし（{mx}点まで）")
                             elif prmY.get('notify'):
-                                pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitY), f"確定（戦略Y・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　今{ry[c].o3:.1f}倍" for c in hitY),True)
+                                if not y2_notify_on():
+                                    pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitY), f"確定（戦略Y・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　今{ry[c].o3:.1f}倍" for c in hitY),True)
                                 if prmY.get('bsky'):
                                     append_csv('bsky_y.csv', 'time,jcd,R,combos', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(hitY)]])
                                     pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
@@ -923,7 +944,7 @@ def kyotei_main():
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
             # 戦略Y2（異常な票を補正・3点まで・急落除外・ハーフケリー）… 11/17から通知とBluesky
             prmY2 = cfg().get('strategy_Y2')
-            if x['snap'] == 3 and prmY2 and y2_on() and not x.get('y2_done'):
+            if x['snap'] == 3 and prmY2 and y2_notify_on() and not x.get('y2_done'):
                 x['y2_done'] = True
                 try:
                     import strategy_y
@@ -938,7 +959,7 @@ def kyotei_main():
                         if prmY2.get('notify'):
                             pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2),
                                         f"確定（戦略Y2・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　{st:,}円　今{o:.1f}倍" for c, st, o in b2) + f"\n資金 {bank:,}円", True)
-                        if prmY2.get('bsky'):
+                        if prmY2.get('bsky') and y2_on():
                             append_csv('bsky_y.csv', 'time,jcd,R,combos,stakes', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(c for c, _, _ in b2), ' / '.join(str(st) for _, st, _ in b2)]])
                             pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(f'{c} {st:,}円' for c, st, _ in b2) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
                 except Exception:
@@ -995,6 +1016,7 @@ def kyotei_settle():
                 log(f'払戻の保存NG {k} {e!r}')
         if res or now() > dl + datetime.timedelta(minutes=90):
             y_settle(k, h if s == 200 else '')
+            y2_settle(k, h if s == 200 else '')
         if not res:
             if now() > dl + datetime.timedelta(minutes=90):
                 res = (0, 0)  # 中止など

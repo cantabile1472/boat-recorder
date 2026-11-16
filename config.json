@@ -171,6 +171,7 @@
   "notify": true,
   "bsky": true,
   "bank0": 100000,
-  "note": "11/17から通知とBlueskyはY2（ハーフケリー・100円単位）。Yは記録だけ。資金は data/y2_bank.json（10万円から結果で増減）"
+  "note": "通知は11/16昼から、Blueskyは11/17からY2（ハーフケリー・100円単位）。Yは記録だけ（11/16はBlueskyだけY）。資金は data/y2_bank.json（10万円から結果で増減）",
+  "notify_start": "20261116"
  }
 }
