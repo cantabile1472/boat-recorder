@@ -498,22 +498,11 @@ def y_settle(k, html):
         if hit and (cfg().get('strategy_Y') or {}).get('bsky'):
             ref = [r for r in read_csv('bsky_y_ref.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
             img = None
-            try:   # 的中の画像（分刻みの3連複オッズ＝公開する時点だけ。40秒前などは載せない）
-                import bsky_images, strategy_y
-                ti = strategy_y.TRI.index(tuple(int(c) for c in tr[0].split('-')))
-                ser = {}
-                for r in read_csv('kyotei_pub.csv'):
-                    if r['jcd'] == k[0] and str(r['R']) == str(k[1]) and r['kind'] == '3f' and r['label'] != '朝一':
-                        v = r['values'].split()
-                        if len(v) == 20:
-                            try:
-                                ser[r['label']] = float(v[ti])
-                            except ValueError:
-                                pass
-                order = ['60分前', '30分前', '15分前', '10分前', '5分前', '3分前', '2分前', '1分前']
+            try:   # 的中の画像（払戻だけ）
+                import bsky_images
                 os.makedirs(os.path.join(DDIR, 'bsky_img'), exist_ok=True)
                 img = os.path.join(DDIR, 'bsky_img', f'hit_{k[0]}_{k[1]}.png')
-                bsky_images.hit_card(KNAME[k[0]], k[1], tr[0], tr[1], [(l, ser[l]) for l in order if l in ser], img)
+                bsky_images.hit_card(KNAME[k[0]], k[1], tr[0], tr[1], out=img)
             except Exception as e:
                 log('的中画像NG ' + repr(e)); img = None
             bsky_post(f"🎯的中🎯 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n💰100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}",
