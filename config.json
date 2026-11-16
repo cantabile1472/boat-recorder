@@ -159,11 +159,18 @@
   "note": "競艇3連複・40秒前に10〜50倍・3連単＋ワイドの確率×80%点予想でEV1.0〜1.2（記録＋通知、出資記録には入れない） / 1Rの買い目が4点以上のときは通知しない（記録は続ける）",
   "max_notify": 3,
   "bsky": true,
-  "pre_notify": true
+  "pre_notify": false
  },
  "strategy_X3": {
   "notify": true,
   "note": "オート単勝・1〜4号車・50倍以下・a70のEV0.85以上（記録＋通知、出資記録には入れない）"
  },
- "notify_until": "17:00"
+ "notify_until": "17:00",
+ "strategy_Y2": {
+  "start": "20261117",
+  "notify": true,
+  "bsky": true,
+  "bank0": 100000,
+  "note": "11/17から通知とBlueskyはY2（ハーフケリー・100円単位）。Yは記録だけ。資金は data/y2_bank.json（10万円から結果で増減）"
+ }
 }

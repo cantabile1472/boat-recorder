@@ -176,7 +176,7 @@ if __name__ == '__main__':
 _M = {}
 
 
-def _snap(t3s, f3s, ks):
+def _snap(t3s, f3s, ks, fix=False):
     t3 = np.array([num(v) for v in (t3s or [])]); f3 = np.array([num(v) for v in (f3s or [])])
     if len(t3) != 120 or len(f3) != 20:
         return None
@@ -184,6 +184,8 @@ def _snap(t3s, f3s, ks):
     if inv.sum() <= 0:
         return None
     q = inv / inv.sum(); tri = {}
+    if fix:
+        q = fix_anom(q)
     for (a, b, c), v in zip(P3, q):
         kk = tuple(sorted((a, b, c))); tri[kk] = tri.get(kk, 0) + v
     kw = [num(v) for v in (ks or [])]
@@ -192,7 +194,7 @@ def _snap(t3s, f3s, ks):
     return f3, np.array([tri[kk] for kk in TRI]), wsc
 
 
-def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2):
+def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2, fix=False):
     """full = {スナップ: {'3t': [...], '3f': [...], 'k': [...]}}。戻り値 (20組の表, 買い目の組リスト)"""
     if 'm' not in _M:
         _M['m'] = pickle.load(open(MODEL, 'rb')) if os.path.exists(MODEL) else None
@@ -202,7 +204,7 @@ def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2):
     sn = {}
     for s in (1, 2, 3):
         v = full.get(s) or {}
-        z = _snap(v.get('3t'), v.get('3f'), v.get('k'))
+        z = _snap(v.get('3t'), v.get('3f'), v.get('k'), fix)
         if z is not None:
             sn[str(s)] = z
     if '3' not in sn:
@@ -231,3 +233,22 @@ def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2):
     z = X[['lq', 'lw']].values @ M['w']; e = np.exp(z - np.nanmax(z)); X['qb'] = e / np.nansum(e)
     X['o80'] = X.o3 * np.exp(M['q80'].predict(X[M['F']])); X['ev'] = X.qb * X.o80
     return X, list(X.c[(X.o3 > lo) & (X.o3 <= hi) & (X.ev >= ev_lo) & (X.ev < ev_hi)])
+
+
+def y2_pick(full, upd, jcd, deadline, bank):
+    """戦略Y2の本番の判定（11/17〜）。戻り値 (表, [(組, 賭け金, 今のオッズ), ...], メモ)
+    ・異常な票を補正した確率でYと同じ条件 → 4点以上のレースは見送り → 3連単で200秒前→40秒前に2割以上急落した組を除く
+    ・賭け金＝資金×ハーフケリー（100円単位で切り捨て、最低100円）"""
+    X, hit = evaluate(full, upd, jcd, deadline, fix=True)
+    if X is None or not hit:
+        return X, [], ''
+    if len(hit) > 3:
+        return X, [], f'{len(hit)}点のため見送り'
+    out = []
+    for r in X[X.c.isin(hit)].itertuples():
+        mom = np.log(r.q3 / r.q1) if (r.q1 == r.q1 and r.q1 > 0) else 0.0
+        if mom <= -0.2:
+            continue
+        f = max((r.qb * r.o80 - 1) / (r.o80 - 1), 0) if r.o80 > 1 else 0
+        out.append((r.c, max(int(bank * f / 2 // 100 * 100), 100), r.o3))
+    return X, out, ''

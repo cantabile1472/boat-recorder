@@ -477,6 +477,33 @@ def k_trio(html):
     return ('-'.join(map(str, n)), int(m.group(2).replace(',', ''))) if len(n) == 3 else None
 
 
+def y2_on():
+    """戦略Y2の本番（通知・Bluesky）が今日から有効か（config の strategy_Y2.start 以降）"""
+    p = cfg().get('strategy_Y2') or {}
+    return bool(p) and HD >= str(p.get('start', '99999999'))
+
+
+def y_bsky_on():
+    return bool((cfg().get('strategy_Y2') or {}).get('bsky')) if y2_on() else bool((cfg().get('strategy_Y') or {}).get('bsky'))
+
+
+BANK_P = os.path.join(os.path.dirname(DDIR), 'y2_bank.json')
+
+
+def y2_bank(delta=None, note=''):
+    """戦略Y2の資金（10万円から、結果で増減）。delta を渡すと足して保存"""
+    with LOCK:
+        try:
+            b = json.load(open(BANK_P, encoding='utf-8'))
+        except Exception:
+            b = {'bank': int((cfg().get('strategy_Y2') or {}).get('bank0', 100000)), 'log': []}
+        if delta is not None:
+            b['bank'] = int(round(b['bank'] + delta)); b.setdefault('log', []).append([f'{HD} {now():%H:%M}', note, int(round(delta)), b['bank']])
+            b['log'] = b['log'][-500:]
+            json.dump(b, open(BANK_P, 'w', encoding='utf-8'), ensure_ascii=False)
+        return b['bank']
+
+
 def bsky_pick(jcd, R, text):
     """買い目を投稿して、あとで的中の投稿から引用できるように投稿の場所を残す"""
     r = bsky_post(text)
@@ -492,22 +519,29 @@ def y_settle(k, html):
             return
         tr = k_trio(html) if html else None
         combos = posted[0]['combos'].split(' / ')
+        stakes = [int(x) for x in (posted[0].get('stakes') or '').split(' / ') if x.strip().isdigit()]
+        if len(stakes) != len(combos):
+            stakes = [100] * len(combos)
         hit = bool(tr) and tr[0] in combos
+        st_hit = stakes[combos.index(tr[0])] if hit else 0
         pay = tr[1] if hit else (0 if tr else 100 * len(combos))   # 結果が無い＝中止などは返還として数える
-        append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit)]])
-        if hit and (cfg().get('strategy_Y') or {}).get('bsky'):
+        inv = sum(stakes); ret = st_hit * tr[1] // 100 if hit else (0 if tr else inv)
+        append_csv('bsky_y_result.csv', 'jcd,R,n,trio,pay,hit,inv,ret', [[k[0], k[1], len(combos), tr[0] if tr else '返還', pay, int(hit), inv, ret]])
+        if posted[0].get('stakes'):
+            y2_bank(ret - inv, f"{KNAME[k[0]]}{k[1]}R")
+        if hit and y_bsky_on():
             ref = [r for r in read_csv('bsky_y_ref.csv') if r['jcd'] == k[0] and str(r['R']) == str(k[1])]
             img = None
             try:   # 的中の画像（払戻だけ）
                 import bsky_images
                 os.makedirs(os.path.join(DDIR, 'bsky_img'), exist_ok=True)
                 img = os.path.join(DDIR, 'bsky_img', f'hit_{k[0]}_{k[1]}.png')
-                bsky_images.hit_card(KNAME[k[0]], k[1], tr[0], tr[1], out=img)
+                bsky_images.hit_card(KNAME[k[0]], k[1], tr[0], ret, out=img, stake=st_hit)
             except Exception as e:
                 log('的中画像NG ' + repr(e)); img = None
-            bsky_post(f"🎯的中🎯 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n💰100円 → {tr[1]:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}",
+            bsky_post(f"🎯的中🎯 {KNAME[k[0]]} {k[1]}R\n3連複 {tr[0]}\n💰{st_hit:,}円 → {ret:,}円\n#ボートレース #ボートレース{KNAME[k[0]]}",
                       (ref[0]['uri'], ref[0]['cid']) if ref else None, image=img,
-                      alt=f"的中 {KNAME[k[0]]}{k[1]}R 3連複{tr[0]} 100円→{tr[1]:,}円")
+                      alt=f"的中 {KNAME[k[0]]}{k[1]}R 3連複{tr[0]} {st_hit:,}円→{ret:,}円")
     except Exception as e:
         log('Y結果の投稿NG ' + repr(e))
 
@@ -515,7 +549,7 @@ def y_settle(k, html):
 def y_summary():
     """その日の最終レースの結果がそろったら、本日と投稿開始からの成績を1回だけ投稿"""
     flag = os.path.join(DDIR, 'bsky_summary_posted')
-    if os.path.exists(flag) or not (cfg().get('strategy_Y') or {}).get('bsky'):
+    if os.path.exists(flag) or not y_bsky_on():
         return
     try:
         if KY_LAST[0] is None or now() < KY_LAST[0] + datetime.timedelta(minutes=10):   # その日の開催予定の最終レース
@@ -524,7 +558,8 @@ def y_summary():
         if any((r['jcd'], str(r['R'])) not in res for r in posted) and now().hour < 23:
             return
         def stat(days):
-            n = h = pay = 0
+            """(点数, 的中, 購入額, 払戻額)。11/16までは1点100円、11/17からは実際の賭け金"""
+            n = h = inv = ret = 0
             for d in days:
                 p = os.path.join(os.path.dirname(DDIR), d)
                 P = [r for r in (csv_rows(os.path.join(p, 'bsky_y.csv')))]
@@ -533,22 +568,23 @@ def y_summary():
                     rr = R_.get((r['jcd'], str(r['R'])))
                     if not rr:
                         continue
-                    n += len(r['combos'].split(' / ')); h += int(rr['hit']); pay += int(rr['pay'] or 0)
-            return n, h, pay
+                    m = len(r['combos'].split(' / ')); n += m; h += int(rr['hit'])
+                    inv += int(rr.get('inv') or 100 * m); ret += int(rr.get('ret') or rr['pay'] or 0)
+            return n, h, inv, ret
         alld = sorted(d for d in os.listdir(os.path.dirname(DDIR)) if d.isdigit() and os.path.exists(os.path.join(os.path.dirname(DDIR), d, 'bsky_y.csv')) and d <= HD)
-        n1, h1, p1 = stat([HD]); n2, h2, p2 = stat(alld)
+        n1, h1, i1, r1 = stat([HD]); n2, h2, i2, r2 = stat(alld)
         if n1 == 0:
             open(flag, 'w').write('0'); return
-        txt = (f"{TODAY:%-m/%-d} の結果\n購入 {n1}点・的中 {h1}本・回収率 {p1 / n1:.0f}%\n"
-               f"投稿開始（{alld[0][4:6].lstrip('0')}/{alld[0][6:].lstrip('0')}）から\n購入 {n2}点・的中 {h2}本・回収率 {p2 / n2:.0f}%\n#ボートレース")
+        txt = (f"{TODAY:%-m/%-d} の結果\n購入 {n1}点（{i1:,}円）・的中 {h1}本・回収率 {r1 / i1 * 100:.0f}%\n"
+               f"投稿開始（{alld[0][4:6].lstrip('0')}/{alld[0][6:].lstrip('0')}）から\n購入 {n2}点（{i2:,}円）・的中 {h2}本・回収率 {r2 / i2 * 100:.0f}%\n#ボートレース")
         img = None
         try:   # 日ごとの回収率と累計のグラフ
             import bsky_images
-            days = [(f"{d[4:6].lstrip('0')}/{d[6:].lstrip('0')}",) + (lambda t: (t[0], t[2]))(stat([d])) for d in alld[-14:]]
+            days = [(f"{d[4:6].lstrip('0')}/{d[6:].lstrip('0')}",) + (lambda t: (t[2] / 100, t[3]))(stat([d])) for d in alld[-14:]]
             os.makedirs(os.path.join(DDIR, 'bsky_img'), exist_ok=True)
             img = os.path.join(DDIR, 'bsky_img', 'summary.png')
-            nb, _, pb = stat(alld[:-14]) if len(alld) > 14 else (0, 0, 0)
-            bsky_images.summary_card(f'{TODAY:%-m/%-d}', days, (n1, h1, round(p1 / n1)), (n2, h2, round(p2 / n2)), img, base=(nb, pb))
+            _, _, ib, rb = stat(alld[:-14]) if len(alld) > 14 else (0, 0, 0, 0)
+            bsky_images.summary_card(f'{TODAY:%-m/%-d}', days, (n1, h1, round(r1 / i1 * 100)), (n2, h2, round(r2 / i2 * 100)), img, base=(ib / 100, rb))
         except Exception as e:
             log('成績画像NG ' + repr(e)); img = None
         bsky_post(txt, image=img, alt=txt.replace('\n', ' ')); open(flag, 'w').write(txt)
@@ -849,7 +885,7 @@ def kyotei_main():
             # 戦略Y（3連複・40秒前に10〜50倍・EV1.0〜1.2）
             prmY = cfg().get('strategy_Y')
             # 戦略Yの「候補」：1分35秒前のオッズで同じ判定をして、先に知らせる（確定は40秒前）
-            if x['snap'] == 2 and prmY and prmY.get('pre_notify') and not x.get('yp_done'):
+            if x['snap'] == 2 and prmY and prmY.get('pre_notify') and not y2_on() and not x.get('yp_done'):
                 x['yp_done'] = True
                 try:
                     import strategy_y
@@ -874,7 +910,9 @@ def kyotei_main():
                             ry = {r.c: r for r in xy.itertuples()}
                             log(f"【Y】競艇 {tag} 3連複 " + ' / '.join(hitY))
                             mx = prmY.get('max_notify') or 99
-                            if prmY.get('notify') and len(hitY) > mx:
+                            if y2_on():
+                                pass   # 11/17からは通知・BlueskyはY2（Yは記録だけ）
+                            elif prmY.get('notify') and len(hitY) > mx:
                                 log(f"【Y】{tag} 買い目{len(hitY)}点のため通知なし（{mx}点まで）")
                             elif prmY.get('notify'):
                                 pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(hitY), f"確定（戦略Y・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　今{ry[c].o3:.1f}倍" for c in hitY),True)
@@ -883,6 +921,28 @@ def kyotei_main():
                                     pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(hitY) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
                 except Exception:
                     log('戦略Y NG ' + traceback.format_exc().splitlines()[-1])
+            # 戦略Y2（異常な票を補正・3点まで・急落除外・ハーフケリー）… 11/17から通知とBluesky
+            prmY2 = cfg().get('strategy_Y2')
+            if x['snap'] == 3 and prmY2 and y2_on() and not x.get('y2_done'):
+                x['y2_done'] = True
+                try:
+                    import strategy_y
+                    bank = y2_bank()
+                    _, b2, memo = strategy_y.y2_pick(x.get('full', {}), (x.get('hist', {}).get(3) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}", bank)
+                    if memo:
+                        log(f"【Y2】{tag} {memo}")
+                    if b2:
+                        append_csv('y2_log.csv', 'time,jcd,place,R,deadline,combo,stake,odds,bank',
+                                   [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", c, st, o, bank] for c, st, o in b2])
+                        log(f"【Y2】競艇 {tag} 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2))
+                        if prmY2.get('notify'):
+                            pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2),
+                                        f"確定（戦略Y2・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　{st:,}円　今{o:.1f}倍" for c, st, o in b2) + f"\n資金 {bank:,}円", True)
+                        if prmY2.get('bsky'):
+                            append_csv('bsky_y.csv', 'time,jcd,R,combos,stakes', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(c for c, _, _ in b2), ' / '.join(str(st) for _, st, _ in b2)]])
+                            pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(f'{c} {st:,}円' for c, st, _ in b2) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")
+                except Exception:
+                    log('戦略Y2 NG ' + traceback.format_exc().splitlines()[-1])
             if x['snap'] in (2, 3):
                 try:
                     s6, h6 = f6.result()

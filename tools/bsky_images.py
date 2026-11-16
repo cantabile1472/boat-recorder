@@ -52,15 +52,15 @@ def pick_card(place, R, deadline, combos, out):
     _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
-def hit_card(place, R, combo, pay, series=None, out='hit.png'):
-    """的中の画像（オッズの動きは載せない）。series は互換のため受け取るだけ"""
+def hit_card(place, R, combo, pay, series=None, out='hit.png', stake=100):
+    """的中の画像（オッズの動きは載せない）。pay＝払戻額、stake＝賭け金。series は互換のため受け取るだけ"""
     f = _fig()
     f.text(0.05, 0.86, '的中', color=HIT, fontsize=40, fontweight='bold', va='center')
     f.text(0.19, 0.86, f'{place}  {R}R　3連複', color=INK, fontsize=36, fontweight='bold', va='center')
     _boats(f, 0.06, 0.36, combo, size=0.22)
-    f.text(0.53, 0.62, '100円 →', color=SUB, fontsize=30, va='center')
+    f.text(0.53, 0.62, f'{stake:,}円 →', color=SUB, fontsize=30, va='center')
     f.text(0.53, 0.44, f'{pay:,}円', color=HIT, fontsize=80, fontweight='bold', va='center')
-    f.text(0.53, 0.29, f'{pay / 100:.1f}倍', color=SUB, fontsize=24, va='center')
+    f.text(0.53, 0.29, f'{pay / max(stake, 1):.1f}倍', color=SUB, fontsize=24, va='center')
     _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
