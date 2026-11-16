@@ -48,21 +48,42 @@ def results(day):
     return R
 
 
-def fix_321(q):
-    """3連単「3-2-1」が、1着確率から作った本来の線（ハービル）より多く買われていたら、その線まで戻す（大口の買いの影響を消す）。
-    戦略Y2で使う（11/16〜）。戦略Y本体は使わない"""
-    I = P3.index((3, 2, 1)); w = np.zeros(7)
+_ANOM = None
+
+
+def _anom_flags(q, z=3.0):
+    """3連単120通りのうち、異常に票を集めている買い目の位置と、本来の線（ハービル×普段の差）を返す。
+    普段の差は models/anom_3t.json（11/3〜13の記録から、組ごと・ハービル確率の5段階ごとの中央値とブレ）"""
+    global _ANOM
+    if _ANOM is None:
+        import json
+        j = json.load(open(os.path.join(ROOT, 'models', 'anom_3t.json')))
+        _ANOM = (np.array(j['edges']), np.array(j['med']), np.array(j['mad']))
+    edges, med, mad = _ANOM
+    w = np.zeros(7)
     for (a, b, c), v in zip(P3, q):
         w[a] += v
-    h = w[3] * w[2] / max(1 - w[3], 1e-9) * w[1] / max(1 - w[3] - w[2], 1e-9)
-    hs = sum(w[a] * w[b] / max(1 - w[a], 1e-9) * w[c] / max(1 - w[a] - w[b], 1e-9) for a, b, c in P3)
-    h = h / hs if hs > 0 else h
-    if q[I] > h:
-        q = q.copy(); q[I] = h; q = q / q.sum()
+    h = np.array([w[a] * w[b] / max(1 - w[a], 1e-9) * w[c] / max(1 - w[a] - w[b], 1e-9) for a, b, c in P3]); h = h / h.sum()
+    lr = np.log(np.maximum(q, 1e-7) / np.maximum(h, 1e-9))
+    k = np.digitize(np.log(np.maximum(h, 1e-9)), edges); m = med[np.arange(120), k]; sd = mad[np.arange(120), k]
+    return lr > m + z * sd, h * np.exp(m)
+
+
+def fix_anom(q, z=3.0):
+    """異常に票を集めている買い目（3-2-1の大口など）を本来の線まで戻して、確率を作り直す。戦略Y2で使う（11/16〜）。Y本体は使わない"""
+    bad, base = _anom_flags(q, z)
+    if bad.any():
+        q = q.copy(); q[bad] = base[bad]; q = q / q.sum()
     return q
 
 
-def build(day_min=None, day_max=None, fix321=False):
+def anom_list(q, z=3.0):
+    """異常に票を集めている買い目の一覧（確認用）"""
+    bad, _ = _anom_flags(q, z)
+    return [P3[i] for i in np.where(bad)[0]]
+
+
+def build(day_min=None, day_max=None, fix321=False):   # fix321=True で fix_anom（異常な票の補正）をかける
     rows = []
     for f in sorted(glob.glob(os.path.join(ROOT, 'data', '2026*', 'kyotei_odds_full.csv'))):
         day = f.split(os.sep)[-2]
@@ -91,7 +112,7 @@ def build(day_min=None, day_max=None, fix321=False):
                     continue
                 q = inv / inv.sum(); tri = {}
                 if fix321:
-                    q = fix_321(q)
+                    q = fix_anom(q)
                 for (a, b, c), v in zip(P3, q):
                     kk = tuple(sorted((a, b, c))); tri[kk] = tri.get(kk, 0) + v
                 try:
