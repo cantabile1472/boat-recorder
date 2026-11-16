@@ -5,6 +5,14 @@ on:
       text:
         description: '投稿する文'
         required: true
+      image:
+        description: '添付する画像（リポジトリ内のパス、任意）'
+        required: false
+        default: ''
+      reply:
+        description: '返信先の投稿の at:// URI（任意）'
+        required: false
+        default: ''
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -17,6 +25,8 @@ jobs:
           BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
           BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
           TEXT: ${{ github.event.inputs.text }}
+          IMAGE: ${{ github.event.inputs.image }}
+          REPLY: ${{ github.event.inputs.reply }}
         run: |
           python - <<'PY'
           import os, sys, json, urllib.request, urllib.error
@@ -41,6 +51,18 @@ jobs:
               st = len(text[:m.start()].encode()); en = st + len(m.group(0).encode())
               facets.append({'index': {'byteStart': st, 'byteEnd': en}, 'features': [{'$type': 'app.bsky.richtext.facet#tag', 'tag': m.group(1)}]})
           rec = {'$type': 'app.bsky.feed.post', 'text': text, 'langs': ['ja'], 'facets': facets, 'createdAt': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}
+          img = os.environ.get('IMAGE', '').strip()
+          if img:
+              rq = urllib.request.Request('https://bsky.social/xrpc/com.atproto.repo.uploadBlob', data=open(img, 'rb').read(), headers={'Content-Type': 'image/png', 'Authorization': 'Bearer ' + s['accessJwt']})
+              blob = json.loads(urllib.request.urlopen(rq, timeout=30).read())['blob']
+              rec['embed'] = {'$type': 'app.bsky.embed.images', 'images': [{'image': blob, 'alt': text, 'aspectRatio': {'width': 1200, 'height': 675}}]}
+          rp = os.environ.get('REPLY', '').strip()
+          if rp:
+              import urllib.parse
+              post = json.loads(urllib.request.urlopen('https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=' + urllib.parse.quote(rp), timeout=20).read())['posts'][0]
+              ref = {'uri': post['uri'], 'cid': post['cid']}
+              root = (post.get('record') or {}).get('reply', {}).get('root') or ref
+              rec['reply'] = {'root': root, 'parent': ref}
           r = api('com.atproto.repo.createRecord', {'repo': s['did'], 'collection': 'app.bsky.feed.post', 'record': rec}, s['accessJwt'])
           print('投稿OK:', r.get('uri'))
           PY
