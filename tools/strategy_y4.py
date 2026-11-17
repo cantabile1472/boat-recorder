@@ -1,4 +1,4 @@
-# 戦略Y4（記録のみ）：戦略Y2のEVの範囲を 1.0〜1.2 → 1.0〜1.4 に広げたもの（それ以外はY2と同じ）
+# 戦略Y4（記録のみ）：戦略Y2のEVの範囲を 1.0〜1.2 → 1.0〜1.4 に広げ、オッズを10〜50倍 → 10〜20倍に絞ったもの（それ以外はY2と同じ）
 #  11/17に条件固定。11/18以降が本当の検証（11/4〜16は条件を決めるときに見た期間）
 #  python tools/strategy_y4.py [開始日] [終了日]   … 既定は 20261118
 # ---- 以下、元にした戦略Y2の説明 ----
@@ -18,6 +18,7 @@ import strategy_y as Y
 start = sys.argv[1] if len(sys.argv) > 1 else '20261118'
 end = sys.argv[2] if len(sys.argv) > 2 else None
 EV_HI = 1.4
+ODDS_HI = 20
 M = pickle.load(open(Y.MODEL, 'rb'))
 K = ['day', 'jcd', 'R']
 
@@ -28,7 +29,7 @@ def picks(fix):
         return X
     X['qb'] = Y.sm(X[['lq', 'lw']].values @ M['w'], X.gid.values)
     X['ev'] = X.qb * X.o3 * np.exp(M['q80'].predict(X[M['F']]))
-    P = X[(X.o3 > 10) & (X.o3 <= 50) & (X.ev >= 1.0) & (X.ev < (EV_HI if fix else 1.2))].copy()
+    P = X[(X.o3 > 10) & (X.o3 <= (ODDS_HI if fix else 50)) & (X.ev >= 1.0) & (X.ev < (EV_HI if fix else 1.2))].copy()
     P['n'] = P.groupby(K).c.transform('count')
     P = P[P.n <= 3].copy()
     P['mom'] = np.log(P.q3 / P.q1)
@@ -47,7 +48,7 @@ def line(t):
     return f"{len(t)}点 的中{int((t.pay > 0).sum())} 出資{len(t)*100:,}円 払戻{int(t.pay.sum()):,}円 回収{t.pay.mean():.0f}%" if len(t) else '0点'
 
 
-print(f'# 戦略Y4（記録のみ：Y2のEVを1.0〜1.4に広げたもの） {start}〜')
+print(f'# 戦略Y4（記録のみ：Y2のEVを1.0〜1.4・オッズを10〜20倍にしたもの） {start}〜')
 for d in sorted(set(P.day) | set(Yb.day)):
     t = P[P.day == d]; y = Yb[Yb.day == d]
     print(f'  {d}: Y(3点まで) {line(y)} ／ Y4 {line(t[~t.ex])}（急落で除外{int(t.ex.sum())}点・的中{int((t[t.ex].pay > 0).sum())}）')
