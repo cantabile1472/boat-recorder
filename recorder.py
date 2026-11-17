@@ -654,8 +654,28 @@ def kyotei_main():
     pubpool = ThreadPoolExecutor(2); wp = Web()   # 公開用の記録は別の通り道で（判定用の取得を待たせない）
     morning = [x for x in races if x['st'] == 'wait' and not x['pubd'] and (x['dl'] - now()).total_seconds() > 3700]
     last_morning = 0.0
+    wd = Web(); dlpool = ThreadPoolExecutor(2); last_dl = {}
+
+    def dl_refresh(j):
+        """その場の出走表から締切時刻を取り直し、変わっていれば（延長も前倒しも）直す"""
+        try:
+            st_, h_ = wd.req(f'{KB}racelist?rno=1&jcd={j}&hd={HD}')
+            ts_ = k_deadlines(h_) if st_ == 200 else []
+            for x_ in races:
+                if x_['jcd'] != j or x_['st'] != 'wait' or len(ts_) < x_['R']:
+                    continue
+                hh_, mm_ = map(int, ts_[x_['R'] - 1].split(':'))
+                nd_ = TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=hh_, minutes=mm_)
+                if nd_ != x_['dl']:
+                    log(f"競艇 {KNAME[j]}{x_['R']}R 締切変更 {x_['dl']:%H:%M} → {nd_:%H:%M}")
+                    x_['dl'] = nd_
+        except Exception as e_:
+            log('締切の見直しNG ' + repr(e_))
     while time.time() - T0 < RUN_MIN * 60:
         n = now()
+        for j in {x['jcd'] for x in races if x['st'] == 'wait' and (x['dl'] - n).total_seconds() < 1200}:
+            if time.time() - last_dl.get(j, 0) >= 60:
+                last_dl[j] = time.time(); dlpool.submit(dl_refresh, j)
         if morning and time.time() - last_morning >= 2:
             xm = morning.pop(0); xm['pubd'].add('朝一'); last_morning = time.time()
             pubpool.submit(k_pub, wp, dict(xm), '朝一')
@@ -761,7 +781,7 @@ def kyotei_main():
                 if len(ts) >= x['R']:
                     hh, mm = map(int, ts[x['R'] - 1].split(':'))
                     nd = TODAY.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=hh, minutes=mm)
-                    if nd > x['dl']:
+                    if nd != x['dl']:   # 延長も前倒しも拾う（11/17 江戸川の前倒しで通知が遅れたため）
                         x['dl'] = nd
                         log(f"競艇 {KNAME[x['jcd']]}{x['R']}R 締切変更 → {nd:%H:%M}")
                         continue
@@ -1205,7 +1225,7 @@ def auto_main():
             if x['snap'] < 3:
                 ri = A.post('OtherRaceInfo', x['pc'], x['R'])
                 nd = to_time(ri.get('telvoteTime')) if ri else None
-                if nd and nd > x['dl']:
+                if nd and nd != x['dl']:   # 延長も前倒しも拾う
                     x['dl'] = nd
                     log(f"オート {APL[x['pc']]}{x['R']}R 締切変更 → {nd:%H:%M}")
                     continue
