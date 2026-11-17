@@ -235,11 +235,11 @@ def evaluate(full, upd, jcd, deadline, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2, fix=F
     return X, list(X.c[(X.o3 > lo) & (X.o3 <= hi) & (X.ev >= ev_lo) & (X.ev < ev_hi)])
 
 
-def y2_pick(full, upd, jcd, deadline, bank):
-    """戦略Y2の本番の判定（11/17〜）。戻り値 (表, [(組, 賭け金, 今のオッズ), ...], メモ)
+def y2_pick(full, upd, jcd, deadline, bank, hi=50, ev_hi=1.2):
+    """戦略Y2の本番の判定（11/17〜）。hi・ev_hi を変えると戦略Y4（11/18〜：hi=20, ev_hi=1.4）。戻り値 (表, [(組, 賭け金, 今のオッズ), ...], メモ)
     ・異常な票を補正した確率でYと同じ条件 → 4点以上のレースは見送り → 3連単で200秒前→40秒前に2割以上急落した組を除く
     ・賭け金＝資金×ハーフケリー（100円単位で切り捨て、最低100円）"""
-    X, hit = evaluate(full, upd, jcd, deadline, fix=True)
+    X, hit = evaluate(full, upd, jcd, deadline, hi=hi, ev_hi=ev_hi, fix=True)
     if X is None or not hit:
         return X, [], ''
     if len(hit) > 3:

@@ -971,16 +971,20 @@ def kyotei_main():
                 try:
                     import strategy_y
                     bank = y2_bank()
-                    _, b2, memo = strategy_y.y2_pick(x.get('full', {}), (x.get('hist', {}).get(3) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}", bank)
+                    p4 = cfg().get('strategy_Y4') or {}
+                    y4 = bool(p4) and HD >= str(p4.get('start', '99999999'))   # 11/18から通知・BlueskyはY4（10〜20倍・EV1.0〜1.4）
+                    snm = '戦略Y4' if y4 else '戦略Y2'
+                    _, b2, memo = strategy_y.y2_pick(x.get('full', {}), (x.get('hist', {}).get(3) or {}).get('upd'), x['jcd'], f"{x['dl']:%H:%M}", bank,
+                                                     hi=p4.get('hi', 20) if y4 else 50, ev_hi=p4.get('ev_hi', 1.4) if y4 else 1.2)
                     if memo:
                         log(f"【Y2】{tag} {memo}")
                     if b2:
                         append_csv('y2_log.csv', 'time,jcd,place,R,deadline,combo,stake,odds,bank',
                                    [[f'{now():%H:%M:%S}', x['jcd'], KNAME[x['jcd']], x['R'], f"{x['dl']:%H:%M}", c, st, o, bank] for c, st, o in b2])
-                        log(f"【Y2】競艇 {tag} 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2))
+                        log(f"【{snm[2:]}】競艇 {tag} 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2))
                         if prmY2.get('notify'):
                             pool.submit(notify, f"競艇 {KNAME[x['jcd']]}{x['R']}R 3連複 " + ' / '.join(f'{c} {st}円' for c, st, _ in b2),
-                                        f"確定（戦略Y2・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　{st:,}円　今{o:.1f}倍" for c, st, o in b2) + f"\n資金 {bank:,}円", True)
+                                        f"確定（{snm}・40秒前）締切{x['dl']:%H:%M}\n" + '\n'.join(f"{c}　{st:,}円　今{o:.1f}倍" for c, st, o in b2) + f"\n資金 {bank:,}円", True)
                         if prmY2.get('bsky') and y2_on():
                             append_csv('bsky_y.csv', 'time,jcd,R,combos,stakes', [[f'{now():%H:%M:%S}', x['jcd'], x['R'], ' / '.join(c for c, _, _ in b2), ' / '.join(str(st) for _, st, _ in b2)]])
                             pool.submit(bsky_pick, x['jcd'], x['R'], f"{KNAME[x['jcd']]} {x['R']}R\n3連複 " + ' / '.join(f'{c} {st:,}円' for c, st, _ in b2) + f"\n#ボートレース #ボートレース{KNAME[x['jcd']]}")

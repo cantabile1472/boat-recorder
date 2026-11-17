@@ -172,5 +172,11 @@
   "bank0": 100000,
   "note": "通知は11/16昼から、Blueskyは11/17からY2（ハーフケリー・100円単位）。Yは記録だけ（11/16はBlueskyだけY）。資金は data/y2_bank.json（10万円から結果で増減）",
   "notify_start": "20261116"
+ },
+ "strategy_Y4": {
+  "start": "20261118",
+  "hi": 20,
+  "ev_hi": 1.4,
+  "note": "11/18から通知とBlueskyはY4（Y2の仕組みで、10〜20倍・EV1.0〜1.4）。資金はY2から引き継ぎ（data/y2_bank.json）"
  }
 }
