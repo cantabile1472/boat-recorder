@@ -176,9 +176,10 @@ def settle(ddir, get, babacode, ds, log):
             continue
         bc = babacode.get(pl)
         h = get(f"https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate={ds}&k_raceNo={R}&k_babaCode={bc}") if bc else ''
-        if h and not os.path.exists(os.path.join(ddir, 'nar_result_sample.html')):
-            open(os.path.join(ddir, 'nar_result_sample.html'), 'w', encoding='utf-8').write(h)
         tr = trio_pay(h) if h else None
+        sp = os.path.join(ddir, 'nar_result_sample.html')   # 確認用：払戻が載ったページを1つ残す
+        if tr and (not os.path.exists(sp) or 'newRefundTable' not in open(sp, encoding='utf-8').read()):
+            open(sp, 'w', encoding='utf-8').write(h)
         if tr is None and t < post_t + datetime.timedelta(minutes=60):
             continue   # まだ確定していない（60分たっても取れなければ返還扱い）
         inv = sum(int(r['stake']) for r in rs)
