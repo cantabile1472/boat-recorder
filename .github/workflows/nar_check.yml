@@ -1,0 +1,35 @@
+name: 地方 成績ページの読み取り確認
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '日付（例 2026/11/18）'
+        required: true
+      baba:
+        description: '競馬場コード（例 23＝笠松）'
+        required: true
+      race:
+        description: 'レース番号'
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          D: ${{ github.event.inputs.date }}
+          B: ${{ github.event.inputs.baba }}
+          R: ${{ github.event.inputs.race }}
+        run: |
+          python - <<'PY'
+          import os, sys, re, urllib.request, urllib.parse
+          sys.path.insert(0, 'tools'); import nar_y5 as Y
+          u = f"https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate={urllib.parse.quote(os.environ['D'])}&k_raceNo={os.environ['R']}&k_babaCode={os.environ['B']}"
+          h = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0'}), timeout=20).read().decode('utf-8', 'replace')
+          print('ページの長さ', len(h), '払戻表あり', 'newRefundTable' in h)
+          print('3連複の読み取り結果:', Y.trio_pay(h))
+          i = h.find('newRefundTable')
+          if i >= 0:
+              print(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', h[i:i+5000]))[:800])
+          PY
