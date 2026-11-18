@@ -1067,11 +1067,12 @@ def kyotei_settle():
                         kyotei_payouts.append(row, HD)
             except Exception as e:
                 log(f'払戻の保存NG {k} {e!r}')
-        if res or now() > dl + datetime.timedelta(minutes=90):
+        # 90分たっても結果が無い＝中止などは返還。ただしページ自体が取れない（403など）ときは返還にせず取り直し続ける
+        if res or (s == 200 and now() > dl + datetime.timedelta(minutes=90)):
             y_settle(k, h if s == 200 else '')
             y2_settle(k, h if s == 200 else '')
         if not res:
-            if now() > dl + datetime.timedelta(minutes=90):
+            if s == 200 and now() > dl + datetime.timedelta(minutes=90):
                 res = (0, 0)  # 中止など
             else:
                 continue

@@ -180,7 +180,7 @@ def settle(ddir, get, babacode, ds, log):   # y5_result.csv の pay＝そのレ�
         sp = os.path.join(ddir, 'nar_result_sample.html')   # 確認用：払戻が載ったページを1つ残す
         if tr and (not os.path.exists(sp) or 'newRefundTable' not in open(sp, encoding='utf-8').read()):
             open(sp, 'w', encoding='utf-8').write(h)
-        if tr is None and t < post_t + datetime.timedelta(minutes=60):
+        if tr is None and (not h or t < post_t + datetime.timedelta(minutes=60)):   # ページが取れないときは返還にせず取り直す
             continue   # まだ確定していない（60分たっても取れなければ返還扱い）
         inv = sum(int(r['stake']) for r in rs)
         hit = [r for r in rs if tr and r['combo'] == tr[0]]
