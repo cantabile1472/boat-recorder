@@ -172,12 +172,17 @@ def send_order(sport, jcd, R, kind, sel, deadline, stars, odds, note=''):
         log('注文送信NG ' + repr(e))
 
 
+KBLOCK = [0.0, 0]   # 競艇サイトに拒否されたら、この時刻までは問い合わせない／拒否された回数
+
+
 class Web:
     def __init__(self):
         self.cj = http.cookiejar.CookieJar()
         self.op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cj))
 
     def req(self, url, headers=None, data=None, timeout=20):
+        if 'boatrace.jp' in url and time.time() < KBLOCK[0]:
+            return 403, ''   # 拒否された直後は問い合わせない
         h = {'User-Agent': 'Mozilla/5.0', 'Accept-Encoding': 'gzip'}
         h.update(headers or {})
         rq = urllib.request.Request(url, data=data, headers=h)
@@ -188,6 +193,14 @@ class Web:
                     b = gzip.decompress(b)
                 return r.status, b.decode('utf-8', 'replace')
         except urllib.error.HTTPError as e:
+            if e.code == 403 and 'boatrace.jp' in url and time.time() >= KBLOCK[0]:
+                KBLOCK[0] = time.time() + 600; KBLOCK[1] += 1
+                try:
+                    log(f'競艇の公式サイトにアクセスを拒否された（{KBLOCK[1]}回目）→ 10分間止める')
+                    if KBLOCK[1] % 6 == 1:   # 最初と、その後1時間おきにスマホへ
+                        notify('競艇の記録が止まっています', '公式サイトにアクセスを拒否されています。10分おきに試して、つながり次第自動で再開します（その間は通知も止まります）', True)
+                except Exception:
+                    pass
             return e.code, ''
         except Exception:
             return 0, ''
@@ -310,8 +323,9 @@ def k_upd(html):
 
 XS = [150, 120, 80, 60, 30, 25, 12]   # 締切オッズ予想用の細かい記録（単勝・複勝・ワイド・3連単）
 # 公開データベース用：分刻みの時点で全賭式を記録（kyotei_pub.csv）。40秒前など秒単位の記録は公開しない
-PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前'), (300, '5分前'), (180, '3分前'), (120, '2分前'), (60, '1分前')]
-PUB_KINDS = [('tf', 'oddstf'), ('2tf', 'odds2tf'), ('k', 'oddsk'), ('3t', 'odds3t'), ('3f', 'odds3f')]
+# 11/18：競艇の公式サイトにアクセスを拒否（403）されたため、公開用の分刻みを減らした（時点 8→5、券種 5→3）
+PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (300, '5分前'), (60, '1分前')]
+PUB_KINDS = [('2tf', 'odds2tf'), ('3t', 'odds3t'), ('3f', 'odds3f')]
 
 
 def k_pub(w, x, label):
@@ -622,13 +636,19 @@ def p3_of(inv, act):
 def kyotei_main():
     prm = CFG['kyotei_A']
     w = Web()
-    for i_ in range(20):   # 開催場の一覧が取れないときは、30秒おきに取り直す（11/18 10:58 に0場と判定して監視が止まったため）
+    told = False
+    while True:   # 開催場の一覧が取れないときは取り直す（11/18：公式サイトに拒否され、0場と判定して監視が止まったため）
         st, idx = w.req(KB + 'index?hd=' + HD)
         jcds = sorted(set(re.findall(r'jcd=(\d\d)', idx or '')))
-        if jcds or (now().hour >= 21):
+        if jcds or now().hour >= 21 or time.time() - T0 > RUN_MIN * 60 - 300:
             break
-        log(f'競艇: 開催場の一覧が取れない（{st}）→ 30秒後に取り直し')
-        time.sleep(30)
+        wait_ = max(60, KBLOCK[0] - time.time() + 5) if st == 403 else 60
+        log(f'競艇: 開催場の一覧が取れない（{st}）→ {int(wait_)}秒後に取り直し')
+        if st == 403:
+            told = True
+        time.sleep(wait_)
+    if told and jcds:
+        notify('競艇の記録が再開しました', f'開催{len(jcds)}場。ここから通知も再開します')
     races = []
     for j in jcds:
         st, h = w.req(f'{KB}racelist?rno=1&jcd={j}&hd={HD}')
@@ -678,10 +698,10 @@ def kyotei_main():
             log('締切の見直しNG ' + repr(e_))
     while time.time() - T0 < RUN_MIN * 60:
         n = now()
-        for j in {x['jcd'] for x in races if x['st'] == 'wait' and (x['dl'] - n).total_seconds() < 1200}:
-            if time.time() - last_dl.get(j, 0) >= 60:
+        for j in {x['jcd'] for x in races if x['st'] == 'wait' and (x['dl'] - n).total_seconds() < 600}:
+            if time.time() - last_dl.get(j, 0) >= 180:
                 last_dl[j] = time.time(); dlpool.submit(dl_refresh, j)
-        if morning and time.time() - last_morning >= 2:
+        if morning and time.time() - last_morning >= 5:
             xm = morning.pop(0); xm['pubd'].add('朝一'); last_morning = time.time()
             pubpool.submit(k_pub, wp, dict(xm), '朝一')
         busy = False
