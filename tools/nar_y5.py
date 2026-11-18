@@ -162,7 +162,7 @@ def trio_pay(html):
     return None
 
 
-def settle(ddir, get, babacode, ds, log):
+def settle(ddir, get, babacode, ds, log):   # y5_result.csv の pay＝そのレースの3連複の払戻（100円あたり、的中に関係なく）
     """締切から8分以上たった未精算のレースの結果を取って、資金を増減。的中なら投稿。全部精算済みなら True"""
     bets = rows(ddir, 'y5_bets.csv'); done = {(r['place'], r['R']) for r in rows(ddir, 'y5_result.csv')}
     todo = {}
@@ -186,7 +186,7 @@ def settle(ddir, get, babacode, ds, log):
         hit = [r for r in rs if tr and r['combo'] == tr[0]]
         st = int(hit[0]['stake']) if hit else 0
         ret = st * tr[1] // 100 if hit else (0 if tr else inv)
-        append(ddir, 'y5_result.csv', 'place,R,n,trio,pay,hit,inv,ret', [[pl, R, len(rs), tr[0] if tr else '返還', tr[1] if hit else 0, int(bool(hit)), inv, ret]])
+        append(ddir, 'y5_result.csv', 'place,R,n,trio,pay,hit,inv,ret', [[pl, R, len(rs), tr[0] if tr else '返還', tr[1] if tr else 0, int(bool(hit)), inv, ret]])
         bank(ret - inv, f'{pl}{R}R')
         log(f"【Y5結果】{pl}{R}R {tr[0] if tr else '返還'} 購入{inv}円 払戻{ret}円 資金{bank():,}円")
         if hit and bsky_on():
