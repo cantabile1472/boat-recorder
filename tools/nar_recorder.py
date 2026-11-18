@@ -63,6 +63,11 @@ PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前
 def pub(x, label):
     """公開データベース用：全券種を1回分記録（nar_pub.jsonl）。締切は発走の2分前として扱う"""
     try:
+        if not (json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('pub_on') or {}).get('nar'):
+            return   # 11/18〜オッズDBは一旦やめた（config の pub_on で切り替え）
+    except Exception:
+        pass
+    try:
         q = f"?k_raceDate={DS}&k_raceNo={x['R']}&k_babaCode={x['bc']}"
         close = x['post'] - datetime.timedelta(minutes=2)
         rec = {'label': label, 'sec': int((close - now()).total_seconds()), 'time': f'{now():%H:%M:%S}', 'bc': x['bc'], 'place': BABA.get(str(int(x['bc'])), x['bc']),

@@ -78,6 +78,12 @@ def odds(rid):
 
 
 def snap(x, label, fn):
+    if fn == 'jra_pub.jsonl':
+        try:
+            if not (json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('pub_on') or {}).get('jra'):
+                return   # 11/18〜オッズDBは一旦やめた
+        except Exception:
+            pass
     try:
         o = odds(x['id'])
         if not o:

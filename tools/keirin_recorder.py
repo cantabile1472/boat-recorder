@@ -214,6 +214,11 @@ PS = [(3600, '60分前'), (1800, '30分前'), (900, '15分前'), (600, '10分前
 def pub(x, label):
     """公開データベース用（記録のみ・公開は未定）：keirin_pub.jsonl"""
     try:
+        if not (json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('pub_on') or {}).get('keirin'):
+            return   # 11/18〜オッズDBは一旦やめた（config の pub_on で切り替え）
+    except Exception:
+        pass
+    try:
         h = get(f"{B}{x['v']}/racedetail/{x['id']}/?pageType=odds&kakeshikiType=wide")
         if not h:
             return

@@ -330,6 +330,8 @@ PUB_KINDS = [('2tf', 'odds2tf'), ('3t', 'odds3t'), ('3f', 'odds3f')]
 
 def k_pub(w, x, label):
     """公開データベース用：単勝・複勝／2連単・2連複／ワイド／3連単／3連複を1回分まとめて記録"""
+    if not (cfg().get('pub_on') or {}).get('kyotei'):
+        return   # 11/18〜オッズDBは一旦やめた（config の pub_on で切り替え）
     try:
         q = f"?rno={x['R']}&jcd={x['jcd']}&hd={HD}"
         with ThreadPoolExecutor(2) as ex:
@@ -1346,6 +1348,8 @@ APUB = ThreadPoolExecutor(1)   # オートの公開用の記録（判定のル�
 
 def a_pub(A, x, label):
     """公開データベース用：オートの全賭式を1回分記録（auto_pub.jsonl）"""
+    if not (cfg().get('pub_on') or {}).get('auto'):
+        return   # 11/18〜オッズDBは一旦やめた
     try:
         bd = A.post('Odds', x['pc'], x['R'])
         if not bd:

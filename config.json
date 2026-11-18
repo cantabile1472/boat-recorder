@@ -178,5 +178,13 @@
   "hi": 20,
   "ev_hi": 1.4,
   "note": "11/18から通知とBlueskyはY4（Y2の仕組みで、10〜20倍・EV1.0〜1.4）。資金はY2から引き継ぎ（data/y2_bank.json）"
+ },
+ "pub_on": {
+  "kyotei": false,
+  "auto": false,
+  "keirin": false,
+  "jra": false,
+  "nar": true,
+  "note": "オッズDB用の分刻みの記録。11/18に一旦やめた（競艇サイトに拒否されたため）。地方競馬は12/1のトリプル馬単・早い時間のオッズの検証に使うので残している"
  }
 }
