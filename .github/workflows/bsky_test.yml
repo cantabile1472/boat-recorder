@@ -13,6 +13,10 @@ on:
         description: '返信先の投稿の at:// URI（任意）'
         required: false
         default: ''
+      account:
+        description: 'どのアカウントか（boat＝競艇 / nar＝地方競馬）'
+        required: false
+        default: 'boat'
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -22,8 +26,8 @@ jobs:
         with:
           ref: main
       - env:
-          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
-          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+          BSKY_HANDLE: ${{ github.event.inputs.account == 'nar' && secrets.BSKY_NAR_HANDLE || secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD: ${{ github.event.inputs.account == 'nar' && secrets.BSKY_NAR_APP_PASSWORD || secrets.BSKY_APP_PASSWORD }}
           TEXT: ${{ github.event.inputs.text }}
           IMAGE: ${{ github.event.inputs.image }}
           REPLY: ${{ github.event.inputs.reply }}
