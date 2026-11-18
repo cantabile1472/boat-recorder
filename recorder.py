@@ -622,8 +622,13 @@ def p3_of(inv, act):
 def kyotei_main():
     prm = CFG['kyotei_A']
     w = Web()
-    st, idx = w.req(KB + 'index?hd=' + HD)
-    jcds = sorted(set(re.findall(r'jcd=(\d\d)', idx)))
+    for i_ in range(20):   # 開催場の一覧が取れないときは、30秒おきに取り直す（11/18 10:58 に0場と判定して監視が止まったため）
+        st, idx = w.req(KB + 'index?hd=' + HD)
+        jcds = sorted(set(re.findall(r'jcd=(\d\d)', idx or '')))
+        if jcds or (now().hour >= 21):
+            break
+        log(f'競艇: 開催場の一覧が取れない（{st}）→ 30秒後に取り直し')
+        time.sleep(30)
     races = []
     for j in jcds:
         st, h = w.req(f'{KB}racelist?rno=1&jcd={j}&hd={HD}')
