@@ -38,6 +38,8 @@ jobs:
           ORDER_TOPIC: ${{ secrets.ORDER_TOPIC }}
           BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
           BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+          BSKY_NAR_HANDLE: ${{ secrets.BSKY_NAR_HANDLE }}
+          BSKY_NAR_APP_PASSWORD: ${{ secrets.BSKY_NAR_APP_PASSWORD }}
           START_NOTIFY: '1'
         run: |
           python tools/nar_recorder.py > nar_log.txt 2>&1 &

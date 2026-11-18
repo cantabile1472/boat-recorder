@@ -27,13 +27,13 @@ def _fig():
     return f
 
 
-def _boats(f, x, y, combo, size=0.085):
-    """艇番を公式の色の丸で描く（combo='3-4-5'）"""
+def _boats(f, x, y, combo, size=0.085, horse=False):
+    """艇番を公式の色の丸で描く（combo='3-4-5'）。horse=True は馬番（白地に黒字）"""
     for i, b in enumerate(int(c) for c in combo.split('-')):
-        bg, fg = BOAT[b]
+        bg, fg = ('#ffffff', '#111') if horse else BOAT[b]
         ax = f.add_axes([x + i * (size * 0.62), y, size * 0.56, size]); ax.axis('off')
         ax.add_patch(plt.Rectangle((0, 0), 1, 1, color=bg, ec='#9ca3af', lw=2, transform=ax.transAxes))
-        ax.text(0.5, 0.47, str(b), ha='center', va='center', fontsize=min(40 * size / 0.085, 80), fontweight='bold', color=fg, transform=ax.transAxes)
+        ax.text(0.5, 0.47, str(b), ha='center', va='center', fontsize=min(40 * size / 0.085, 80) * (0.8 if b >= 10 else 1), fontweight='bold', color=fg, transform=ax.transAxes)
 
 
 def _foot(f, txt='@kuzuboat.bsky.social'):
@@ -52,19 +52,19 @@ def pick_card(place, R, deadline, combos, out):
     _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
-def hit_card(place, R, combo, pay, series=None, out='hit.png', stake=100):
+def hit_card(place, R, combo, pay, series=None, out='hit.png', stake=100, horse=False, foot=None):
     """的中の画像（オッズの動きは載せない）。pay＝払戻額、stake＝賭け金。series は互換のため受け取るだけ"""
     f = _fig()
     f.text(0.05, 0.86, '的中', color=HIT, fontsize=40, fontweight='bold', va='center')
     f.text(0.19, 0.86, f'{place}  {R}R　3連複', color=INK, fontsize=36, fontweight='bold', va='center')
-    _boats(f, 0.06, 0.36, combo, size=0.22)
+    _boats(f, 0.06, 0.36, combo, size=0.22, horse=horse)
     f.text(0.53, 0.62, f'{stake:,}円 →', color=SUB, fontsize=30, va='center')
     f.text(0.53, 0.44, f'{pay:,}円', color=HIT, fontsize=80, fontweight='bold', va='center')
     f.text(0.53, 0.29, f'{pay / max(stake, 1):.1f}倍', color=SUB, fontsize=24, va='center')
-    _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
+    _foot(f, foot) if foot else _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
-def summary_card(day_label, days, today, total, out, base=(0, 0)):
+def summary_card(day_label, days, today, total, out, base=(0, 0), foot=None):
     """days: [(日付'11/13', 点数, 払戻合計円), ...]  today/total: (点数, 的中, 回収率%)"""
     f = _fig()
     f.text(0.05, 0.89, f'{day_label} の結果', color=INK, fontsize=34, fontweight='bold', va='center')
@@ -84,7 +84,7 @@ def summary_card(day_label, days, today, total, out, base=(0, 0)):
     ax.tick_params(colors=SUB, labelsize=12); [sp.set_visible(False) for sp in ax.spines.values()]
     ax.set_ylabel('回収率 %', color=SUB, fontsize=12); ax.grid(axis='y', color=GRID); ax.set_axisbelow(True)
     leg = ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.0), ncol=2, frameon=False, fontsize=12); [t.set_color(SUB) for t in leg.get_texts()]
-    _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
+    _foot(f, foot) if foot else _foot(f); f.savefig(out, facecolor=BG); plt.close(f)
 
 
 if __name__ == '__main__':

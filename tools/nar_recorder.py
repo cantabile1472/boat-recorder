@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import strat_e
 import nar_cards
+import nar_y5
 BABA = {'3': '帯広', '10': '盛岡', '11': '水沢', '18': '浦和', '19': '船橋', '20': '大井', '21': '川崎', '22': '金沢', '23': '笠松', '24': '名古屋', '27': '園田', '28': '姫路', '31': '高知', '32': '佐賀', '36': '門別'}
 JST = datetime.timezone(datetime.timedelta(hours=9))
 now = lambda: datetime.datetime.now(JST)
@@ -143,46 +144,10 @@ GN_RULES = [
 ]
 
 
-def y5_pick(rec, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2, nmax=3):
-    """戦略Y5（地方版Y）：3連単オッズから出した3連複の確率 × 3連複オッズ = EV。条件に合う組が nmax 点以下なら買い目"""
-    t3 = [(c, strat_e.num(o)) for c, o, *_ in rec.get('tri3') or [] if '-' in c and strat_e.num(o) > 0]
-    tr = {}
-    for c, o, *_ in rec.get('tri') or []:
-        if '-' in c and strat_e.num(o) > 0:
-            tr['-'.join(sorted(c.split('-'), key=int))] = strat_e.num(o)
-    if not t3 or not tr:
-        return []
-    s = sum(1 / o for _, o in t3); qt = {}
-    for c, o in t3:
-        k = '-'.join(sorted(c.split('-'), key=int)); qt[k] = qt.get(k, 0) + (1 / o) / s
-    P = [(c, o, qt.get(c, 0) * o) for c, o in tr.items() if lo < o <= hi and ev_lo <= qt.get(c, 0) * o < ev_hi]
-    return sorted(P, key=lambda z: z[1]) if len(P) <= nmax else []
-
-
 def y5(x, rec):
-    """締切1分前に判定して通知。ばんえいも含める。結果は y5_log.csv（10〜100倍も比較用に記録）"""
-    cf = {}
-    try:
-        cf = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('strategy_Y5', {})
-    except Exception:
-        pass
-    if not cf.get('on', True):
-        return
+    """戦略Y5（地方版Y）：締切1分前に判定して通知・Bluesky（中身は nar_y5.py）"""
     nm = BABA.get(str(int(x['bc'])), x['bc']); close = x['post'] - datetime.timedelta(minutes=2)
-    P = y5_pick(rec, hi=cf.get('hi', 50), ev_hi=cf.get('ev_hi', 1.2))
-    W = y5_pick(rec, hi=100, ev_hi=1.2)
-    with LOCK:
-        with open(os.path.join(DDIR, 'y5_log.csv'), 'a', encoding='utf-8') as f:
-            if f.tell() == 0:
-                f.write('time,place,R,close,rule,combo,odds,ev\n')
-            for tag, L in (('Y5', P), ('Y5w', W)):
-                for c, o, ev in L:
-                    f.write(f"{now():%H:%M:%S},{nm},{x['R']},{close:%H:%M},{tag},{c},{o},{ev:.3f}\n")
-    if P and cf.get('notify', True):
-        st = int(cf.get('stake', 100))
-        body = '\n'.join(f"3連複 {c}　今{o:.1f}倍　{st}円" for c, o, _ in P)
-        strat_e.notify(f"確定（戦略Y5・地方）{nm} {x['R']}R 締切{close:%H:%M}頃（発走{x['post']:%H:%M}）", body)
-        log(f"【Y5】{nm}{x['R']}R " + ' / '.join(c for c, _, _ in P))
+    nar_y5.judge(DDIR, nm, x['R'], f"{close:%H:%M}", f"{x['post']:%H:%M}", rec, strat_e.notify, log)
 
 
 def g_nar(x, rec):
@@ -262,7 +227,21 @@ def main():
     for x in morning: x['pubd'].add('朝一')
     rs = [x for x in rs if x['post'] > now() + datetime.timedelta(seconds=150)]
     log(f'開催 {len(babas)}場 / これから {len(rs)}レース（公開用 {len(PR)}レース・朝一 {len(morning)}）')
-    while time.time() - T0 < RUN_MIN * 60 and (rs or PR):
+    BC = {v: k for k, v in BABA.items()}; last_settle = [0.0]; y5_done = [False]
+    def y5_tick():
+        if time.time() - last_settle[0] < 60:
+            return
+        last_settle[0] = time.time()
+        try:
+            ok = nar_y5.settle(DDIR, get, BC, DS, log)
+            if ok and not rs and not PR:
+                nar_y5.summary(DDIR, HD, log); y5_done[0] = True
+        except Exception as e:
+            log('戦略Y5 結果NG ' + repr(e)); y5_done[0] = y5_done[0] or (not rs and not PR and now().hour >= 22)
+    while time.time() - T0 < RUN_MIN * 60 and (rs or PR or not y5_done[0]):
+        y5_tick()
+        if not rs and not PR and (y5_done[0] or now().hour >= 23):
+            break
         if morning:
             pub(morning.pop(0), '朝一')
         for x in list(PR):
