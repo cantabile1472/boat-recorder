@@ -104,6 +104,10 @@ def snap(x):
             log('出馬表NG ' + repr(e)); x['cards'] = x.get('cards') or {}
     if x['snap'] == 3:
         try:
+            y5(x, rec)
+        except Exception as e:
+            log('戦略Y5 NG ' + repr(e))
+        try:
             g_nar(x, rec)
         except Exception as e:
             log('戦略G(地方) NG ' + repr(e))
@@ -137,6 +141,48 @@ GN_RULES = [
     ('N8 大本命・前走4人気以下・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['p1_pop'] >= 4),
     ('N9 大本命・水沢/佐賀・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['place'] in ('水沢', '佐賀')),
 ]
+
+
+def y5_pick(rec, lo=10, hi=50, ev_lo=1.0, ev_hi=1.2, nmax=3):
+    """戦略Y5（地方版Y）：3連単オッズから出した3連複の確率 × 3連複オッズ = EV。条件に合う組が nmax 点以下なら買い目"""
+    t3 = [(c, strat_e.num(o)) for c, o, *_ in rec.get('tri3') or [] if '-' in c and strat_e.num(o) > 0]
+    tr = {}
+    for c, o, *_ in rec.get('tri') or []:
+        if '-' in c and strat_e.num(o) > 0:
+            tr['-'.join(sorted(c.split('-'), key=int))] = strat_e.num(o)
+    if not t3 or not tr:
+        return []
+    s = sum(1 / o for _, o in t3); qt = {}
+    for c, o in t3:
+        k = '-'.join(sorted(c.split('-'), key=int)); qt[k] = qt.get(k, 0) + (1 / o) / s
+    P = [(c, o, qt.get(c, 0) * o) for c, o in tr.items() if lo < o <= hi and ev_lo <= qt.get(c, 0) * o < ev_hi]
+    return sorted(P, key=lambda z: z[1]) if len(P) <= nmax else []
+
+
+def y5(x, rec):
+    """締切1分前に判定して通知。ばんえいも含める。結果は y5_log.csv（10〜100倍も比較用に記録）"""
+    cf = {}
+    try:
+        cf = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json'), encoding='utf-8')).get('strategy_Y5', {})
+    except Exception:
+        pass
+    if not cf.get('on', True):
+        return
+    nm = BABA.get(str(int(x['bc'])), x['bc']); close = x['post'] - datetime.timedelta(minutes=2)
+    P = y5_pick(rec, hi=cf.get('hi', 50), ev_hi=cf.get('ev_hi', 1.2))
+    W = y5_pick(rec, hi=100, ev_hi=1.2)
+    with LOCK:
+        with open(os.path.join(DDIR, 'y5_log.csv'), 'a', encoding='utf-8') as f:
+            if f.tell() == 0:
+                f.write('time,place,R,close,rule,combo,odds,ev\n')
+            for tag, L in (('Y5', P), ('Y5w', W)):
+                for c, o, ev in L:
+                    f.write(f"{now():%H:%M:%S},{nm},{x['R']},{close:%H:%M},{tag},{c},{o},{ev:.3f}\n")
+    if P and cf.get('notify', True):
+        st = int(cf.get('stake', 100))
+        body = '\n'.join(f"3連複 {c}　今{o:.1f}倍　{st}円" for c, o, _ in P)
+        strat_e.notify(f"確定（戦略Y5・地方）{nm} {x['R']}R 締切{close:%H:%M}頃（発走{x['post']:%H:%M}）", body)
+        log(f"【Y5】{nm}{x['R']}R " + ' / '.join(c for c, _, _ in P))
 
 
 def g_nar(x, rec):
