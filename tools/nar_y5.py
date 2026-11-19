@@ -1,4 +1,4 @@
-# 戦略Y5（地方競馬版の戦略Y）：買い目の判定・賭け金（ハーフケリー）・資金・結果・Bluesky（地方用の別アカウント）
+# 戦略Z1（地方競馬版の戦略Y。11/19にY5から改名。ファイル名・設定名は y5 のまま）：買い目の判定・賭け金（ハーフケリー）・資金・結果・Bluesky（地方用の別アカウント）
 #  判定：締切1分前の3連単オッズから3連複の確率を出し、3連複オッズと掛けたEVが 1.0〜1.2・10〜50倍・1レース3点まで
 #  賭け金：資金×ハーフケリー（100円単位で切り捨て、最低100円）。資金は10万円から結果で増減（data/y5_bank.json）
 #  Bluesky：BSKY_NAR_HANDLE / BSKY_NAR_APP_PASSWORD があり、config の strategy_Y5.bsky が true のときだけ投稿
@@ -130,16 +130,16 @@ def judge(ddir, place, R, close, post_t, rec, notify, log):
         return
     P = pick(rec, hi=c.get('hi', 50), ev_hi=c.get('ev_hi', 1.2))
     W = pick(rec, hi=100, ev_hi=1.2)
-    append(ddir, 'y5_log.csv', 'time,place,R,close,rule,combo,odds,ev', [[f'{now():%H:%M:%S}', place, R, close, t, cb, o, f'{ev:.3f}'] for t, L in (('Y5', P), ('Y5w', W)) for cb, o, q, ev in L])
+    append(ddir, 'y5_log.csv', 'time,place,R,close,rule,combo,odds,ev', [[f'{now():%H:%M:%S}', place, R, close, t, cb, o, f'{ev:.3f}'] for t, L in (('Z1', P), ('Z1w', W)) for cb, o, q, ev in L])
     if not P:
         return
     bk = bank()
     B = [(cb, stake(q, o, bk), o) for cb, o, q, ev in P]
     append(ddir, 'y5_bets.csv', 'time,place,R,close,post,combo,stake,odds,bank', [[f'{now():%H:%M:%S}', place, R, close, post_t, cb, st, o, bk] for cb, st, o in B])
-    log(f"【Y5】{place}{R}R " + ' / '.join(f'{cb} {st}円' for cb, st, _ in B))
+    log(f"【Z1】{place}{R}R " + ' / '.join(f'{cb} {st}円' for cb, st, _ in B))
     if c.get('notify', True):
         notify(f"地方 {place}{R}R 3連複 " + ' / '.join(f'{cb} {st:,}円' for cb, st, _ in B),
-               f"確定（戦略Y5・1分前）締切{close}\n" + '\n'.join(f"{cb}　{st:,}円　今{o:.1f}倍" for cb, st, o in B) + f"\n資金 {bk:,}円")
+               f"確定（戦略Z1・1分前）締切{close}\n" + '\n'.join(f"{cb}　{st:,}円　今{o:.1f}倍" for cb, st, o in B) + f"\n資金 {bk:,}円")
     if bsky_on():
         r = post(f"{place}競馬 {R}R\n3連複 " + ' / '.join(f'{cb} {st:,}円' for cb, st, _ in B) + f"\n#地方競馬 #{place}競馬")
         if r and r[0]:
@@ -188,7 +188,7 @@ def settle(ddir, get, babacode, ds, log):   # y5_result.csv の pay＝そのレ�
         ret = st * tr[1] // 100 if hit else (0 if tr else inv)
         append(ddir, 'y5_result.csv', 'place,R,n,trio,pay,hit,inv,ret', [[pl, R, len(rs), tr[0] if tr else '返還', tr[1] if tr else 0, int(bool(hit)), inv, ret]])
         bank(ret - inv, f'{pl}{R}R')
-        log(f"【Y5結果】{pl}{R}R {tr[0] if tr else '返還'} 購入{inv}円 払戻{ret}円 資金{bank():,}円")
+        log(f"【Z1結果】{pl}{R}R {tr[0] if tr else '返還'} 購入{inv}円 払戻{ret}円 資金{bank():,}円")
         if hit and bsky_on():
             ref = [r for r in rows(ddir, 'y5_bsky_ref.csv') if r['place'] == pl and r['R'] == R]
             img = None
@@ -198,7 +198,7 @@ def settle(ddir, get, babacode, ds, log):   # y5_result.csv の pay＝そのレ�
                 img = os.path.join(ddir, 'bsky_img', f'y5hit_{pl}_{R}.png')
                 bsky_images.hit_card(f'{pl}競馬', R, tr[0], ret, out=img, stake=st, horse=True, foot='@' + ID)
             except Exception as e:
-                log('Y5的中画像NG ' + repr(e)); img = None
+                log('Z1的中画像NG ' + repr(e)); img = None
             post(f"🎯的中🎯 {pl}競馬 {R}R\n3連複 {tr[0]}\n💰{st:,}円 → {ret:,}円\n#地方競馬 #{pl}競馬", (ref[0]['uri'], ref[0]['cid']) if ref else None,
                  image=img, alt=f'的中 {pl}競馬{R}R 3連複{tr[0]} {st:,}円→{ret:,}円')
     return all((r['place'], r['R']) in {(x['place'], x['R']) for x in rows(ddir, 'y5_result.csv')} for r in rows(ddir, 'y5_bets.csv'))
@@ -234,5 +234,5 @@ def summary(ddir, today, log):
         img = os.path.join(ddir, 'bsky_img', 'y5_summary.png')
         bsky_images.summary_card(lab, days, (n1, h1, round(r1 / i1 * 100)), (n2, h2, round(r2 / i2 * 100)), img, base=(ib / 100, rb), foot='@' + ID)
     except Exception as e:
-        log('Y5成績画像NG ' + repr(e)); img = None
+        log('Z1成績画像NG ' + repr(e)); img = None
     post(txt, image=img, alt=txt.replace('\n', ' ')); open(flag, 'w').write(txt)
