@@ -1,0 +1,20 @@
+name: 競輪の結果（払戻）
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '日付（スペース区切り、例 20261101 20261102）'
+        required: true
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/keirin_results.py ${{ github.event.inputs.days }}
+      - run: |
+          git config user.name bot; git config user.email bot@example.com
+          git add data/keirin_results; git commit -qm "競輪の結果 ${{ github.event.inputs.days }}" || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
