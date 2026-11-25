@@ -636,13 +636,15 @@ def p3_of(inv, act):
 
 
 def kyotei_main():
+    if not cfg().get('kyotei_on', True):
+        log('競艇: 記録は止めている（11/25：公式サイトの拒否が続いたため。config の kyotei_on）'); return
     prm = CFG['kyotei_A']
     w = Web()
     told = False
     while True:   # 開催場の一覧が取れないときは取り直す（11/18：公式サイトに拒否され、0場と判定して監視が止まったため）
         st, idx = w.req(KB + 'index?hd=' + HD)
         jcds = sorted(set(re.findall(r'jcd=(\d\d)', idx or '')))
-        if jcds or now().hour >= 21 or time.time() - T0 > RUN_MIN * 60 - 300:
+        if jcds or now().hour >= 21 or time.time() - T0 > RUN_MIN * 60 - 300 or not cfg().get('kyotei_on', True):
             break
         wait_ = max(60, KBLOCK[0] - time.time() + 5) if st == 403 else 60
         log(f'競艇: 開催場の一覧が取れない（{st}）→ {int(wait_)}秒後に取り直し')

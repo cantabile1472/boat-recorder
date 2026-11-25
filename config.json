@@ -197,5 +197,6 @@
   "bsky": true,
   "bsky_start": "20261118",
   "bank0": 100000
- }
+ },
+ "kyotei_on": false
 }
