@@ -3,6 +3,7 @@
 import sys, os, re, io, gzip, json, time, urllib.request, glob
 from concurrent.futures import ThreadPoolExecutor
 import csv
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 BABA = {'帯広ば': '3', '盛岡': '10', '水沢': '11', '浦和': '18', '船橋': '19', '大井': '20', '川崎': '21', '金沢': '22', '笠松': '23', '名古屋': '24', '園田': '27', '姫路': '28', '高知': '31', '佐賀': '32', '門別': '36'}
 B = 'https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/'
 
@@ -107,6 +108,13 @@ def one(args):
     if '馬番' not in hm:
         return []
     race, horses = parse_mark(hm)
+    try:   # 単勝の払戻（2025年のページは単勝オッズの欄が空なので、払戻から回収率を出せるように残す）
+        import nar_payouts
+        tp = {int(c): p for k, c, p in nar_payouts.all_pays(hm) if k == '単勝' and c.isdigit()}
+        for hn in horses:
+            horses[hn]['tan_pay'] = tp.get(hn, 0)
+    except Exception:
+        pass
     deba = parse_deba(hd_) if hd_ else {}
     rows = []
     for hn, v in horses.items():
