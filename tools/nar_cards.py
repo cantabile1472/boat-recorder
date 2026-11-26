@@ -132,6 +132,15 @@ if __name__ == '__main__':
                 except Exception:
                     pass
         races = sorted(races)
+    if not races:   # どちらも無い月（2025年など）は、日ごとの各場のレース一覧ページから作る（1ページずつ0.7秒あける）
+        import calendar
+        for dd in range(1, calendar.monthrange(Y, M)[1] + 1):
+            for bc in sorted(set(BABA.values()), key=int):
+                h = get(f'{B}RaceList?k_raceDate={Y}%2F{M:02d}%2F{dd:02d}&k_babaCode={bc}')
+                for r in sorted({int(x) for x in re.findall(r'k_raceNo=(\d+)', h)}):
+                    races.append((f'{Y}{M:02d}{dd:02d}', bc, r))
+                time.sleep(0.7)
+        races = sorted(set(races))
     print(Y, M, len(races), 'レース', flush=True)
     out = []
     with ThreadPoolExecutor(6) as ex:
