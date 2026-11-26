@@ -103,7 +103,13 @@ def snap(x):
             x['title'] = (re.search(r'発走\s*(.*?)(?:ダート|芝|サラブレッド)', t) or [None, ''])[1]
         except Exception as e:
             log('出馬表NG ' + repr(e)); x['cards'] = x.get('cards') or {}
+    if x['snap'] == 1:
+        x['tf1'] = rec['tf']
     if x['snap'] == 3:
+        try:
+            z2(x, rec)
+        except Exception as e:
+            log('戦略Z2 NG ' + repr(e))
         try:
             y5(x, rec)
         except Exception as e:
@@ -142,6 +148,32 @@ GN_RULES = [
     ('N8 大本命・前走4人気以下・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['p1_pop'] >= 4),
     ('N9 大本命・水沢/佐賀・換算70%以上', lambda h: h['rank'] == 1 and h['pw'] >= 0.7 and h['place'] in ('水沢', '佐賀')),
 ]
+
+
+def z2(x, rec):
+    """戦略Z2（記録のみ・通知なし）：締切1分前の単勝6〜60倍で、4分前から単勝オッズが26%以上下がった馬（log比 ≤ -0.3）"""
+    import math, csv
+    tf1 = x.get('tf1')
+    if not tf1:   # 途中で再起動したときは、記録済みの4分前オッズを読む
+        try:
+            for l in open(os.path.join(DDIR, 'nar_odds.jsonl'), encoding='utf-8'):
+                d = json.loads(l)
+                if d.get('snap') == 1 and d['bc'] == x['bc'] and d['R'] == x['R']: tf1 = d['tf']
+        except Exception:
+            pass
+    if not tf1: return
+    f = lambda v: float(v) if re.fullmatch(r'\d+(\.\d+)?', str(v)) else 0.0
+    o1 = {r[0]: f(r[1]) for r in tf1}
+    nm = BABA.get(str(int(x['bc'])), x['bc']); close = x['post'] - datetime.timedelta(minutes=2)
+    p = os.path.join(DDIR, 'z2_log.csv'); new = not os.path.exists(p)
+    with LOCK, open(p, 'a', encoding='utf-8', newline='') as fh:
+        w = csv.writer(fh)
+        if new: w.writerow(['day', 'place', 'bc', 'R', 'close', 'post', 'num', 'odds4m', 'odds1m', 'logratio'])
+        for r in rec['tf']:
+            a, b = o1.get(r[0], 0.0), f(r[1])
+            if a > 0 and 6 <= b <= 60 and math.log(b / a) <= -0.3:
+                w.writerow([HD, nm, x['bc'], x['R'], f"{close:%H:%M}", f"{x['post']:%H:%M}", r[0], a, b, round(math.log(b / a), 3)])
+                log(f"【Z2記録】{nm}{x['R']}R {r[0]}番 {a}→{b}倍")
 
 
 def y5(x, rec):
