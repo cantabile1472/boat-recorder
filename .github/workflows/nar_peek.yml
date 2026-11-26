@@ -1,0 +1,24 @@
+name: 地方 ページ確認
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: '確認するページ（keiba.go.jp）'
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          U: ${{ github.event.inputs.url }}
+        run: |
+          python - <<'PY'
+          import os, re, urllib.request
+          u = os.environ['U']; assert u.startswith('https://www.keiba.go.jp/')
+          h = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0'}), timeout=20).read().decode('utf-8', 'replace')
+          print('長さ', len(h))
+          t = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'<script.*?</script>|<style.*?</style>', '', h, flags=re.S)))
+          i = max(t.find('単勝'), 0); print(t[i:i+1500])
+          print('---tBorder行の例'); m = re.findall(r'<tr class="tBorder">(.*?)</tr>', h, re.S); print(len(m)); print(re.sub(r'\s+',' ',m[0])[:1500] if m else '')
+          PY
