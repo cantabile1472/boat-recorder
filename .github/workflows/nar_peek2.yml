@@ -1,0 +1,36 @@
+name: 地方 ページ確認2（リンクと文字）
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: '確認するページ（keiba.go.jp）'
+        required: true
+      words:
+        description: '前後を表示する言葉（スペース区切り）'
+        required: false
+        default: '父 母 能力 検査'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          U: ${{ github.event.inputs.url }}
+          W: ${{ github.event.inputs.words }}
+        run: |
+          python - <<'PY'
+          import os, re, urllib.request, collections
+          u = os.environ['U']; assert u.startswith('https://www.keiba.go.jp/')
+          h = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0'}), timeout=20).read().decode('utf-8', 'replace')
+          print('長さ', len(h))
+          L = re.findall(r'href="([^"]+)"', h); c = collections.OrderedDict()
+          for l in L:
+              k = re.sub(r'=[^&]*', '=', l)
+              if k not in c: c[k] = l
+          print('---リンクの種類', len(c))
+          for k, l in c.items(): print(l[:200])
+          t = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', re.sub(r'<script.*?</script>|<style.*?</style>', '', h, flags=re.S)))
+          print('---本文の先頭'); print(t[:2500])
+          for w in os.environ.get('W', '').split():
+              for m in list(re.finditer(re.escape(w), t))[:3]: print(f'---[{w}]', t[max(0, m.start()-150):m.start()+250])
+          PY
