@@ -35,9 +35,17 @@ def get(u):
 
 def day(d):
     f = os.path.join(ROOT, 'data', d, 'nar_odds.jsonl')
-    if not os.path.exists(f):
+    cf = os.path.join(ROOT, 'data', 'nar', f'cards_{d[:6]}.jsonl.gz')
+    if os.path.exists(f):
+        races = {(str(int(x['bc'])), int(x['R'])) for x in map(json.loads, open(f, encoding='utf-8'))}
+    elif os.path.exists(cf):   # 記録が無い過去の日は、出馬表データのレース一覧を使う
+        import gzip
+        races = {(str(int(x['bc'])), int(x['R'])) for x in map(json.loads, gzip.open(cf, 'rt', encoding='utf-8')) if x.get('day') == d}
+    else:
         print(d, '記録なし'); return
-    races = sorted({(str(int(x['bc'])), int(x['R'])) for x in map(json.loads, open(f, encoding='utf-8'))}, key=lambda z: (int(z[0]), z[1]))
+    if not races:
+        print(d, 'レースなし'); return
+    races = sorted(races, key=lambda z: (int(z[0]), z[1]))
     os.makedirs(os.path.join(ROOT, 'data', 'nar_payouts'), exist_ok=True)
     out = os.path.join(ROOT, 'data', 'nar_payouts', d + '.csv'); ok = 0
     with open(out, 'w', encoding='utf-8') as w:
