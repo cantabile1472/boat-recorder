@@ -33,4 +33,6 @@ jobs:
           print('---本文の先頭'); print(t[:2500])
           for w in os.environ.get('W', '').split():
               for m in list(re.finditer(re.escape(w), t))[:3]: print(f'---[{w}]', t[max(0, m.start()-150):m.start()+250])
+          i = h.find('class="horseNum"')
+          if os.environ.get('W','').startswith('RAW') and i >= 0: print('---生HTML'); print(h[i:i+int(os.environ['W'].split()[1])])
           PY
