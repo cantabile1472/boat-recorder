@@ -1,0 +1,24 @@
+name: 地方競馬 血統
+on:
+  workflow_dispatch:
+    inputs:
+      races:
+        description: 'レース一覧のCSV（day,bc,R）'
+        required: true
+        default: 'data/nar/pedigree_races.csv'
+      limit:
+        description: '最大レース数（空なら全部）'
+        required: false
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/nar_pedigree.py ${{ github.event.inputs.races }} ${{ github.event.inputs.limit }}
+      - run: |
+          git config user.name bot; git config user.email bot@example.com
+          git add data/nar/pedigree.csv; git commit -qm "地方の血統" || true
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
