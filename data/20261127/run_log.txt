@@ -7,3 +7,4 @@
 [10:55:39] 競艇: 記録は止めている（11/25：公式サイトの拒否が続いたため。config の kyotei_on）
 [10:55:49] オート: 開催 伊勢崎・飯塚 / これから締切 20レース
 [14:57:20] 戦略G(オート) NG TypeError: can only concatenate list (not "str") to list
+[16:25:42] オート: 監視おわり
