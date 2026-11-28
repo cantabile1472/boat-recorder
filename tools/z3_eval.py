@@ -54,4 +54,4 @@ if __name__ == '__main__':
                 w.writerow([day, bc, R, num, o, dch, t, pay])
                 if pay != '': n += 1; ret += pay; h += pay > 0
         days += 1
-    print(f'Z3（{start}〜）: {n}点 的中{h} 回収率{ret / n * 100:.1f}%' if n else f'Z3（{start}〜）: まだなし', '／ 出馬表か記録が無い日:', ' '.join(miss) or 'なし')
+    print(f'Z3（{start}〜）: {n}点 的中{h} 回収率{ret / n:.1f}%' if n else f'Z3（{start}〜）: まだなし', '／ 出馬表か記録が無い日:', ' '.join(miss) or 'なし')
