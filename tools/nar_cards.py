@@ -126,7 +126,9 @@ def one(args):
 
 if __name__ == '__main__':
     Y, M = int(sys.argv[1]), int(sys.argv[2])
+    DAY = sys.argv[3] if len(sys.argv) > 3 else None   # 日を指定すると、その日のレースだけ data/nar/daily/ に保存
     pf = f'data/nar/prob_{Y}{M:02d}.csv.gz'
+    if DAY: pf = ''
     if os.path.exists(pf) and os.path.getsize(pf) > 100:
         with gzip.open(pf, 'rt', encoding='utf-8') as f:
             races = sorted({(str(r['日']), BABA.get(r['場']), int(r['R'])) for r in csv.DictReader(f) if BABA.get(r['場'])})
@@ -140,9 +142,10 @@ if __name__ == '__main__':
                 except Exception:
                     pass
         races = sorted(races)
+    if DAY: races = [r for r in races if r[0] == DAY]
     if not races:   # どちらも無い月（2025年など）は、日ごとの各場のレース一覧ページから作る（1ページずつ0.7秒あける）
         import calendar
-        for dd in range(1, calendar.monthrange(Y, M)[1] + 1):
+        for dd in ([int(DAY[6:])] if DAY else range(1, calendar.monthrange(Y, M)[1] + 1)):
             for bc in sorted(set(BABA.values()), key=int):
                 h = get(f'{B}RaceList?k_raceDate={Y}%2F{M:02d}%2F{dd:02d}&k_babaCode={bc}')
                 for r in sorted({int(x) for x in re.findall(r'k_raceNo=(\d+)', h)}):
@@ -156,7 +159,10 @@ if __name__ == '__main__':
             out += rows
             if k % 200 == 0:
                 print(k, len(out), flush=True)
-    with gzip.open(f'data/nar/cards_{Y}{M:02d}.jsonl.gz', 'wt', encoding='utf-8') as f:
+    outp = f'data/nar/cards_{Y}{M:02d}.jsonl.gz'
+    if DAY:
+        os.makedirs('data/nar/daily', exist_ok=True); outp = f'data/nar/daily/cards_{DAY}.jsonl.gz'
+    with gzip.open(outp, 'wt', encoding='utf-8') as f:
         for r in out:
             f.write(json.dumps(r, ensure_ascii=False) + '\n')
     print('保存', len(out), '頭', flush=True)
